@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+	<RootNamespace>TWJ.TWJApp.TWJService.MessageBroker</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Protos\Server\test-send-data.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.45.0" />
+    <PackageReference Include="GrpcToolkit" Version="6.0.1" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TWJ.TWJApp.TWJService.Application\TWJ.TWJApp.TWJService.Application.csproj" />
+    <ProjectReference Include="..\TWJ.TWJApp.TWJService.Common\TWJ.TWJApp.TWJService.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\Client\TestService\test-get-data.proto" GrpcServices="Client" AdditionalImportDirs="$(PkgGrpcToolkit)/content/BaseProto" />
+    <Protobuf Include="Protos\Server\test-send-data.proto" GrpcServices="Server" AdditionalImportDirs="$(PkgGrpcToolkit)/content/BaseProto" />
+  </ItemGroup>
+
+</Project>

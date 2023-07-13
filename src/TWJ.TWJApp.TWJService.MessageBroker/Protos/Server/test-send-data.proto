@@ -1,0 +1,16 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "TWJ.TWJApp.TWJService.MessageBroker.Protos.Server";
+import "Proto/responseResult.proto";
+
+service SendTestService {
+  rpc SendTest (SendDataRequest) returns (SendDataResponse) {}
+}
+
+message SendDataRequest {
+}
+
+message SendDataResponse {
+	ResponseResult Value = 1;
+}
+

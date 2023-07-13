@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>TWJ.TWJApp.TWJService.Api</RootNamespace>
+	<ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
+    <PackageReference Include="MapperSegregatorCoreDependencyInjection" Version="6.1.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="6.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TWJ.TWJApp.TWJService.Common\TWJ.TWJApp.TWJService.Common.csproj" />
+    <ProjectReference Include="..\TWJ.TWJApp.TWJService.MessageBroker\TWJ.TWJApp.TWJService.MessageBroker.csproj" />
+    <ProjectReference Include="..\TWJ.TWJApp.TWJService.Persistence\TWJ.TWJApp.TWJService.Persistence.csproj" />
+  </ItemGroup>
+
+
+
+</Project>
