@@ -7,6 +7,8 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TWJ.TWJApp.TWJService.Persistence.Configurations;
+using TWJ.TWJApp.TWJService.Domain.Entities;
 
 namespace TWJ.TWJApp.TWJService.Persistence
 {
@@ -23,10 +25,13 @@ namespace TWJ.TWJApp.TWJService.Persistence
 
             return base.SaveChangesAsync(cancellationToken);
         }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
 
             modelBuilder.Model.GetEntityTypes().ForEach(entityType =>
             {

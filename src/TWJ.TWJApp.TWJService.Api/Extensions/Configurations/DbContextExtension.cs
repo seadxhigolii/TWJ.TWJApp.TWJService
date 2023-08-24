@@ -10,7 +10,7 @@ namespace TWJ.TWJApp.TWJService.Api.Extensions.Configurations
         {
             services.AddScoped<ITWJAppDbContext, TWJAppDbContext>();
 
-            services.AddDbContext<TWJAppDbContext>(x => x.UseNpgsql(configuration.GetConnectionString("db"), option =>
+            services.AddDbContext<TWJAppDbContext>(x => x.UseNpgsql(configuration.GetConnectionString("DefaultConnection"), option =>
             {
                 option.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             }));

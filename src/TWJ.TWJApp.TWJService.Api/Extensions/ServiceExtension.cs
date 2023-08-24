@@ -3,6 +3,10 @@ using TWJ.TWJApp.TWJService.Api.Filters;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
 using GrpcToolkit.Extensions;
 using MapperSegregator.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace TWJ.TWJApp.TWJService.Api.Extensions
 {
@@ -21,7 +25,23 @@ namespace TWJ.TWJApp.TWJService.Api.Extensions
             services.RegisterSignalR();
             services.RegisterGrpcToolkit();
             services.RegisterMapperServices(typeof(ITWJAppDbContext).Assembly);
-
+            var key = Encoding.ASCII.GetBytes("G%__Q8f(r%.c|up_?~PloAxVi^Tb`H*@Nt}w0Rt*f([r;`[,mT/Ks**-dIt~0tx");
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
             return services;
         }
 
@@ -42,7 +62,7 @@ namespace TWJ.TWJApp.TWJService.Api.Extensions
             app.UseHttpsRedirection();
             app.UseRegisteredSwagger();
             app.UseAuthentication();
-            //app.UseAuthorization();
+            app.UseAuthorization();
             app.UseRegisteredHelpers();
             app.UseMapperServices();
             return app;
