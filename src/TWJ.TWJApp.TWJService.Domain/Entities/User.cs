@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Domain.Entities.Base;
-using Microsoft.AspNetCore.Identity;
-
-
 
 namespace TWJ.TWJApp.TWJService.Domain.Entities
 {
     public class User: BaseEntity<Guid>
     {
+        #region Properties
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string UserName { get; set; }
@@ -22,6 +17,16 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         public DateTime DateOfBirth { get; set; }
         public string City { get; set; }
         public string Country { get; set; }
-        public string Role { get; set; }
+        #endregion
+
+        #region Entity Models
+        public ICollection<BlogPost> BlogPosts { get; set; }
+        public ICollection<CommentLike> CommentLikes { get; set; }
+        public ICollection<CommentDislike> CommentDislikes { get; set; }
+        public ICollection<CommentReply> CommentReplies { get; set; }
+        public ICollection<UserRole> UserRoles { get; set; }
+
+        #endregion
+
     }
 }

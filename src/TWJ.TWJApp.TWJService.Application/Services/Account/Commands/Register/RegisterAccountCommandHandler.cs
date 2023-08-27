@@ -58,7 +58,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Register
 
                 throw e;
             }
-           
         }
 
         private async Task<bool> IsEmailOrUsernameTaken(string email, string username)

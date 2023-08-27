@@ -9,24 +9,28 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/account")]
     [ApiController]
-    public class AccountController : BaseController
+    public class AuthController : BaseController
     {
+        #region Login
+        [HttpPost("Login")]
         [AllowAnonymous]
-        [HttpPost(":login")]
         public async Task<IActionResult> Login([FromBody] LoginAccountCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
 
             return Ok(result);
         }
+        #endregion
 
+        #region Register
+        [HttpPost("Register")]
         [AllowAnonymous]
-        [HttpPost(":register")]
         public async Task<IActionResult> Register([FromBody] RegisterAccountCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
 
             return Ok(result);
         }
+        #endregion
     }
 }
