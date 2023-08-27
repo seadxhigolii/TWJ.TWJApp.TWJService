@@ -24,6 +24,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
 
         #region Entity Models
         public ICollection<BlogPost> BlogPosts { get; set; }
+        public Category Category { get; set; }     
 
         #endregion
     }

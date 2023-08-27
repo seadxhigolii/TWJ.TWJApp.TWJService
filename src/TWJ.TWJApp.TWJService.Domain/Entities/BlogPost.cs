@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TWJ.TWJApp.TWJService.Domain.Entities.Base;
 
 namespace TWJ.TWJApp.TWJService.Domain.Entities
@@ -24,6 +25,8 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         public Product Product { get; set; }
         public Category Category { get; set; }
         public User User { get; set; }
+        public ICollection<BlogPostTags> BlogPostTags { get; set; }
+
         #endregion
 
     }

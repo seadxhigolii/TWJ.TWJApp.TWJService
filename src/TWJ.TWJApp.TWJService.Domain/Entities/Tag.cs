@@ -4,17 +4,15 @@ using TWJ.TWJApp.TWJService.Domain.Entities.Base;
 
 namespace TWJ.TWJApp.TWJService.Domain.Entities
 {
-    public class Category : BaseEntity<Guid>
+    public class Tag : BaseEntity<Guid>
     {
-        #region Properites
+        #region Properties
         public string Name { get; set; }
-        public string Description { get; set; }
         #endregion
 
         #region Entity Models
-        public ICollection<BlogPost> BlogPosts { get; set; }
-        public ICollection<Product> Products { get; set; }
-
+        public ICollection<BlogPostTags> BlogPostTags { get; set; }
         #endregion
+
     }
 }
