@@ -9,11 +9,9 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
 {
     public class InstagramPost : BaseEntity<Guid>
     {
-        public Guid BlogPostId { get; set; }
-        public Byte[] ImageUrl { get; set; }
-
-        public BlogPost BlogPost { get; set; }
-        public ICollection<MidJourneyImage> MidJourneyImages { get; set; }
+        #region Properties
+        public Byte[] Image { get; set; }
+        #endregion
     }
 
 }

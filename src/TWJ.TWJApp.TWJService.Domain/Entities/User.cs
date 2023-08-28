@@ -21,6 +21,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
 
         #region Entity Models
         public ICollection<BlogPost> BlogPosts { get; set; }
+        public ICollection<Comment> Comments { get; set; }
         public ICollection<CommentLike> CommentLikes { get; set; }
         public ICollection<CommentDislike> CommentDislikes { get; set; }
         public ICollection<CommentReply> CommentReplies { get; set; }

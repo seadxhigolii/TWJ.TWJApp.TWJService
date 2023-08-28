@@ -9,10 +9,10 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
 {
     public class MidJourneyImage : BaseEntity<Guid>
     {
-        public Guid PinterestPinId { get; set; }
-        public Byte[] ImageUrl { get; set; }
+        #region Properties
+        public Byte[] Image { get; set; }
+        #endregion
 
-        public PinterestPin PinterestPin { get; set; }
     }
 
 }

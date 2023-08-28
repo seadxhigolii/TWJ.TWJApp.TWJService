@@ -86,7 +86,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login
             {
                 new Claim(UserClaimEnum.UserId, user.Id.ToString() ?? string.Empty),
                 new Claim(UserClaimEnum.UserName, user.UserName ?? string.Empty),
-                new Claim(ClaimTypes.Role, user.Role),
                 new Claim(UserClaimEnum.Email, user.Email ?? string.Empty),
                 new Claim(UserClaimEnum.FirstName, user.FirstName ?? string.Empty),
                 new Claim(UserClaimEnum.LastName, user.LastName ?? string.Empty)

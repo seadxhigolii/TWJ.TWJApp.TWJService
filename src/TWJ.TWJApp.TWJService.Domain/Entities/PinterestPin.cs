@@ -9,12 +9,14 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
 {
     public class PinterestPin : BaseEntity<Guid>
     {
-        public Guid BlogPostId { get; set; }
+        #region Properties
         public Byte[] Image { get; set; }
+        #endregion
 
-        public BlogPost BlogPost { get; set; }
-        public ICollection<MidJourneyImage> MidJourneyImages { get; set; }
+        #region Entity Models
         public ICollection<PinterestPinKeywords> PinterestPinKeywords { get; set; }
+
+        #endregion
     }
 
 }

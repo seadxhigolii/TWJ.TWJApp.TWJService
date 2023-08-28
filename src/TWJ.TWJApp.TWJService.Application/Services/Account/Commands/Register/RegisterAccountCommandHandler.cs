@@ -43,8 +43,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Register
                     isActive = true,
                     DateOfBirth = request.DateOfBirth,
                     City = request.City,
-                    Country = request.Country,
-                    Role = "User"
+                    Country = request.Country
                 };
 
                 await _context.Users.AddAsync(newUser);
@@ -55,7 +54,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Register
             }
             catch (Exception e)
             {
-
                 throw e;
             }
         }

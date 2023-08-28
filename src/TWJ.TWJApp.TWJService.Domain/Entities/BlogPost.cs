@@ -16,7 +16,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         public int Views { get; set; }
         public int Likes { get; set; }
         public int Dislikes { get; set; }
-        public int Comments { get; set; }
+        public int NumberOfComments { get; set; }
         public Guid? ProductID { get; set; }
 
         #endregion
@@ -26,6 +26,8 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         public Category Category { get; set; }
         public User User { get; set; }
         public ICollection<BlogPostTags> BlogPostTags { get; set; }
+        public ICollection<Comment> Comments { get; set; }
+        public ICollection<BlogPostSEOKeyword> BlogPostSEOKeywords { get; set; }
 
         #endregion
 
