@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using TWJ.TWJApp.TWJService.Domain.Entities;
+using TWJ.TWJApp.TWJService.Persistence.Configurations.Base;
 
 namespace TWJ.TWJApp.TWJService.Persistence.Configurations
 {
-    public class CommentLikeConfiguration : IEntityTypeConfiguration<CommentLike>
+    public class CommentLikeConfiguration : BaseEntityTypeConfiguration<CommentLike>
     {
         public void Configure(EntityTypeBuilder<CommentLike> builder)
         {

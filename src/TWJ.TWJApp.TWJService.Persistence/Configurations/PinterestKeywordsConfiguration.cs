@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using TWJ.TWJApp.TWJService.Domain.Entities;
+using TWJ.TWJApp.TWJService.Persistence.Configurations.Base;
 
 namespace TWJ.TWJApp.TWJService.Persistence.Configurations
 {
-    public class PinterestKeywordsConfiguration : IEntityTypeConfiguration<PinterestPinKeywords>
+    public class PinterestKeywordsConfiguration : BaseEntityTypeConfiguration<PinterestPinKeywords>
     {
         public void Configure(EntityTypeBuilder<PinterestPinKeywords> builder)
         {

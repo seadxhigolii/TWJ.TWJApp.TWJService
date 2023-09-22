@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using TWJ.TWJApp.TWJService.Domain.Entities;
+using TWJ.TWJApp.TWJService.Persistence.Configurations.Base;
 
 namespace TWJ.TWJApp.TWJService.Persistence.Configurations
 {
-    public class TagConfiguration : IEntityTypeConfiguration<Tag>
+    public class TagConfiguration : BaseEntityTypeConfiguration<Tag>
     {
         public void Configure(EntityTypeBuilder<Tag> builder)
         {

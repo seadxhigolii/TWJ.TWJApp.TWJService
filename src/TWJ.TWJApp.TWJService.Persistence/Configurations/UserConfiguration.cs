@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TWJ.TWJApp.TWJService.Domain.Entities;
+using TWJ.TWJApp.TWJService.Persistence.Configurations.Base;
 
 namespace TWJ.TWJApp.TWJService.Persistence.Configurations
 {
-    public class UserConfiguration : IEntityTypeConfiguration<User>
+    public class UserConfiguration : BaseEntityTypeConfiguration<User>
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {

@@ -6,10 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Domain.Entities;
+using TWJ.TWJApp.TWJService.Persistence.Configurations.Base;
 
 namespace TWJ.TWJApp.TWJService.Persistence.Configurations
 {
-    public class BlogPostSEOKeywordConfiguration : IEntityTypeConfiguration<BlogPostSEOKeyword>
+    public class BlogPostSEOKeywordConfiguration : BaseEntityTypeConfiguration<BlogPostSEOKeyword>
     {
         public void Configure(EntityTypeBuilder<BlogPostSEOKeyword> builder)
         {

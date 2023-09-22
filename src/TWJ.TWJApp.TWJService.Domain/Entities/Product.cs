@@ -4,7 +4,7 @@ using TWJ.TWJApp.TWJService.Domain.Entities.Base;
 
 namespace TWJ.TWJApp.TWJService.Domain.Entities
 {
-    public class Product : BaseEntity<int>
+    public class Product : BaseEntity<Guid>
     {
         #region Properties
         public string ProductName { get; set; }

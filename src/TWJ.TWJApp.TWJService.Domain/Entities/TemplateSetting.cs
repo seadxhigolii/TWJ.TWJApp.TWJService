@@ -7,16 +7,16 @@ using TWJ.TWJApp.TWJService.Domain.Entities.Base;
 
 namespace TWJ.TWJApp.TWJService.Domain.Entities
 {
-    public class BlogPostSEOKeyword : BaseEntity<Guid>
+    public class TemplateSetting : BaseEntity<Guid>
     {
         #region Properties
-        public Guid BlogPostID { get; set; }
-        public Guid SEOKeywordID { get; set; }
+        public string Name { get; set; }
+        public string? Description { get; set; }
+        public int? DependOn { get; set; }
         #endregion
 
         #region Entity Models
-        public BlogPost BlogPost { get; set; }
-        public SEOKeyword SEOKeyword { get; set; }
+        public List<Template> TemplateList { get; set; }
         #endregion
     }
 }

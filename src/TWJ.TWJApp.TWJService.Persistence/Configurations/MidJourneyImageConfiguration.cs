@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using TWJ.TWJApp.TWJService.Domain.Entities;
+using TWJ.TWJApp.TWJService.Persistence.Configurations.Base;
 
 namespace TWJ.TWJApp.TWJService.Persistence.Configurations
 {
-    public class MidJourneyImageConfiguration : IEntityTypeConfiguration<MidJourneyImage>
+    public class MidJourneyImageConfiguration : BaseEntityTypeConfiguration<MidJourneyImage>
     {
         public void Configure(EntityTypeBuilder<MidJourneyImage> builder)
         {

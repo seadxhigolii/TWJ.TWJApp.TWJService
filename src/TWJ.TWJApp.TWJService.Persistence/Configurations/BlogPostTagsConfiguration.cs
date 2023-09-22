@@ -6,10 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Domain.Entities;
+using TWJ.TWJApp.TWJService.Persistence.Configurations.Base;
 
 namespace TWJ.TWJApp.TWJService.Persistence.Configurations
 {
-    public class BlogPostTagsConfiguration : IEntityTypeConfiguration<BlogPostTags>
+    public class BlogPostTagsConfiguration : BaseEntityTypeConfiguration<BlogPostTags>
     {
         public void Configure(EntityTypeBuilder<BlogPostTags> builder)
         {
