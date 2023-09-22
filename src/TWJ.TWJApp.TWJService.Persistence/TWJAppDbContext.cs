@@ -21,7 +21,7 @@ namespace TWJ.TWJApp.TWJService.Persistence
             ChangeTracker.Entries()
                          .Where(x => typeof(IEntityTimeStamp).IsAssignableFrom(x.Entity.GetType()) && x.State == EntityState.Modified)
                          .Select(x => x.Entity)
-                         .ForEach((x) => x.GetType().GetProperty(CommonEntityConfigModel.UpdatedAt).SetValue(x, DateTime.UtcNow));
+                         .ForEach((x) => x.GetType());
 
             return base.SaveChangesAsync(cancellationToken);
         }
@@ -35,8 +35,6 @@ namespace TWJ.TWJApp.TWJService.Persistence
 
             modelBuilder.Model.GetEntityTypes().ForEach(entityType =>
             {
-                modelBuilder.Entity(entityType.ClrType, builder => builder.UseBaseConfigurations(entityType.ClrType));
-
                 if (entityType.GetTableName() is string table && table.StartsWith("AspNet")) entityType.SetTableName(table[6..]);
             });
 
