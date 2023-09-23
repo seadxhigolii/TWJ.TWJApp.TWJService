@@ -9,7 +9,8 @@ namespace TWJ.TWJApp.TWJService.Application.Interfaces
 {
     public interface ITWJAppDbContext
     {
-        DbSet<User> Users { get; set; }
+        DbSet<User> User { get; set; }
+        DbSet<Template> Template { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

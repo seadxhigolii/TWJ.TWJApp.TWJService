@@ -1,10 +1,7 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -18,8 +15,6 @@ using TWJ.TWJApp.TWJService.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using TWJ.TWJApp.TWJService.Domain.Enums;
-using BCrypt.Net;
 
 
 namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login
@@ -98,9 +93,9 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login
         {
             User user;
             if (new Regex(ValidatorRegex.Email).IsMatch(request.EmailOrUsername))
-                user = await _context.Users.FirstOrDefaultAsync(x => x.Email.ToLower() == request.EmailOrUsername.ToLower());
+                user = await _context.User.FirstOrDefaultAsync(x => x.Email.ToLower() == request.EmailOrUsername.ToLower());
             else
-                user = await _context.Users.FirstOrDefaultAsync(x => x.UserName.ToLower() == request.EmailOrUsername.ToLower());
+                user = await _context.User.FirstOrDefaultAsync(x => x.UserName.ToLower() == request.EmailOrUsername.ToLower());
             if(user == null)
                 throw new ArgumentNullException(nameof(user));
 

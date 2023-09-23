@@ -46,7 +46,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Register
                     Country = request.Country
                 };
 
-                await _context.Users.AddAsync(newUser);
+                await _context.User.AddAsync(newUser);
                 await _context.SaveChangesAsync(cancellationToken);
 
                 return Unit.Value;
@@ -60,8 +60,8 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Register
 
         private async Task<bool> IsEmailOrUsernameTaken(string email, string username)
         {
-            var emailExists = await _context.Users.AnyAsync(u => u.Email == email);
-            var usernameExists = await _context.Users.AnyAsync(u => u.UserName == username);
+            var emailExists = await _context.User.AnyAsync(u => u.Email == email);
+            var usernameExists = await _context.User.AnyAsync(u => u.UserName == username);
             return emailExists || usernameExists;
         }
     }

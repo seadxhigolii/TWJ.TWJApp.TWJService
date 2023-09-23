@@ -28,8 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\Account\Commands\ForgetPassword\" />
-    <Folder Include="Services\Account\Commands\ResetPassword\" />
+    <Folder Include="Services\Template\Commands\" />
     <Folder Include="Services\User\Commands\" />
     <Folder Include="Services\User\Queries\" />
   </ItemGroup>

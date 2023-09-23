@@ -25,7 +25,8 @@ namespace TWJ.TWJApp.TWJService.Persistence
 
             return base.SaveChangesAsync(cancellationToken);
         }
-        public DbSet<User> Users { get; set; }
+        public DbSet<User> User { get; set; }
+        public DbSet<Template> Template { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
