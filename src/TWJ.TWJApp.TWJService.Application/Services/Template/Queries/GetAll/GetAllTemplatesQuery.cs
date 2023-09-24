@@ -10,7 +10,7 @@ using TWJ.TWJApp.TWJService.Domain.Entities;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.Template.Queries.GetAll
 {
-    public class GetAllTemplatesQuery : FilterRequest, IRequest<FilterResponse<GetAllTemplatesModel>>
+    public class GetAllTemplatesQuery : IRequest<IList<GetAllTemplatesModel>>
     {
     }
 }

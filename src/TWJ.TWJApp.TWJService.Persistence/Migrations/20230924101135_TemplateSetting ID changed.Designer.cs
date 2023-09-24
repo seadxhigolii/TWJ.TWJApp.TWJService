@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TWJ.TWJApp.TWJService.Persistence;
@@ -11,9 +12,10 @@ using TWJ.TWJApp.TWJService.Persistence;
 namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 {
     [DbContext(typeof(TWJAppDbContext))]
-    partial class TWJAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230924101135_TemplateSetting ID changed")]
+    partial class TemplateSettingIDchanged
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -751,11 +753,8 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.Property<bool>("IsDefault")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid?>("ParentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("ParentTemplateId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("TemplateSettingId")
                         .HasColumnType("uuid");
@@ -765,8 +764,6 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                         .HasColumnName("UpdatedAt");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ParentTemplateId");
 
                     b.HasIndex("TemplateSettingId");
 
@@ -1069,17 +1066,11 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Template", b =>
                 {
-                    b.HasOne("TWJ.TWJApp.TWJService.Domain.Entities.Template", "ParentTemplate")
-                        .WithMany("TemplateList")
-                        .HasForeignKey("ParentTemplateId");
-
                     b.HasOne("TWJ.TWJApp.TWJService.Domain.Entities.TemplateSetting", "TemplateSetting")
                         .WithMany("TemplateList")
                         .HasForeignKey("TemplateSettingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ParentTemplate");
 
                     b.Navigation("TemplateSetting");
                 });
@@ -1151,11 +1142,6 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Tag", b =>
                 {
                     b.Navigation("BlogPostTags");
-                });
-
-            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Template", b =>
-                {
-                    b.Navigation("TemplateList");
                 });
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.TemplateSetting", b =>

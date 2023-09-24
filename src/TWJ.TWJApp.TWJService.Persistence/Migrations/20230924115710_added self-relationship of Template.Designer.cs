@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TWJ.TWJApp.TWJService.Persistence;
@@ -11,9 +12,10 @@ using TWJ.TWJApp.TWJService.Persistence;
 namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 {
     [DbContext(typeof(TWJAppDbContext))]
-    partial class TWJAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230924115710_added self-relationship of Template")]
+    partial class addedselfrelationshipofTemplate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

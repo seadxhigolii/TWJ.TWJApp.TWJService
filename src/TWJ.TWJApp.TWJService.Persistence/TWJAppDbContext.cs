@@ -27,6 +27,8 @@ namespace TWJ.TWJApp.TWJService.Persistence
         }
         public DbSet<User> User { get; set; }
         public DbSet<Template> Template { get; set; }
+        public DbSet<BaseModel> Base { get; set; }
+        public DbSet<TemplateSetting> TemplateSetting { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

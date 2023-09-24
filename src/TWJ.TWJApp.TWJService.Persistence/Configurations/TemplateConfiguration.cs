@@ -28,6 +28,11 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
                    .HasForeignKey(x => x.TemplateSettingId)
                    .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne(x => x.ParentTemplate)
+                  .WithMany(x => x.TemplateList)
+                  .HasForeignKey(x => x.ParentId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
             #endregion Relations
 
             #region Table

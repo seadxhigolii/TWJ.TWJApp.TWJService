@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Domain.Entities.Base;
 
 namespace TWJ.TWJApp.TWJService.Domain.Entities
@@ -12,7 +9,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         #region Properties
         public string Name { get; set; }
         public string? Description { get; set; }
-        public int? DependOn { get; set; }
+        public Guid? DependOn { get; set; }
         #endregion
 
         #region Entity Models

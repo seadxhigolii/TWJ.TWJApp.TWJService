@@ -12,6 +12,7 @@
         public static string OnDeleteRestricted(string msg) => $"You cannot delete {msg} because has children!";
         public static string BoolValidation(string msg) => $"{msg} can be only true or false!";
         public static string PropertyNotNull(string msg) => $"{msg} cannot be null!";
+        public static string DefaultExists(string msg) => $"You can not add {msg} because there is a default value for this category already";
 
         public const string IncorrectPassword = "Password Incorrect!";
 

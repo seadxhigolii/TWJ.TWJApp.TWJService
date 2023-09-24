@@ -15,12 +15,14 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         public string? Description { get; set; }
         public bool IsActive { get; set; }
         public bool IsDefault { get; set; }
-        public int? ParentId { get; set; }
+        public Guid? ParentId { get; set; }
         #endregion
 
         #region Entity Models
 
         public TemplateSetting TemplateSetting { get; set; }
+        public Template ParentTemplate { get; set; }
+        public List<Template> TemplateList { get; set; }
 
         #endregion
     }
