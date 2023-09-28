@@ -13,6 +13,7 @@ namespace TWJ.TWJApp.TWJService.Application.Interfaces
         DbSet<User> User { get; set; }
         DbSet<Template> Template { get; set; }
         DbSet<BaseModel> Base { get; set; }
+        DbSet<BlogPost> BlogPost { get; set; }
         DbSet<TemplateSetting> TemplateSetting { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

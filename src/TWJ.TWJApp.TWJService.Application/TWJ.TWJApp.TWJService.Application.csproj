@@ -28,9 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\Base\Queries\GetAll\" />
-    <Folder Include="Services\Base\Queries\GetById\" />
-    <Folder Include="Services\Base\Queries\GetFiltered\" />
     <Folder Include="Services\User\Commands\" />
     <Folder Include="Services\User\Queries\" />
   </ItemGroup>
