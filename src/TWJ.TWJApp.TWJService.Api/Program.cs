@@ -1,5 +1,4 @@
 using TWJ.TWJApp.TWJService.Api.Extensions;
-using TWJ.TWJApp.TWJService.MessageBroker.Services.Server;
 using GrpcToolkit.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +25,5 @@ if (app.Environment.IsDevelopment())
 app.UseServices();
 
 app.MapControllers();
-
-app.MapMessageBrokers(typeof(SendDataMiddleware).Assembly);
 
 app.Run();

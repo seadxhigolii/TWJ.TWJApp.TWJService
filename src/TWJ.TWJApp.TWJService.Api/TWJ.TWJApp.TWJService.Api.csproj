@@ -4,6 +4,9 @@
     <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>TWJ.TWJApp.TWJService.Api</RootNamespace>
 	<ImplicitUsings>enable</ImplicitUsings>
+	<UserSecretsId>4a71a644-0259-4730-8e6c-eb4a3ee1ad74</UserSecretsId>
+	<DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+	<DockerfileContext>..\..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,12 +22,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TWJ.TWJApp.TWJService.Common\TWJ.TWJApp.TWJService.Common.csproj" />
-    <ProjectReference Include="..\TWJ.TWJApp.TWJService.MessageBroker\TWJ.TWJApp.TWJService.MessageBroker.csproj" />
     <ProjectReference Include="..\TWJ.TWJApp.TWJService.Persistence\TWJ.TWJApp.TWJService.Persistence.csproj" />
   </ItemGroup>
 
