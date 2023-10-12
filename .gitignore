@@ -29,6 +29,8 @@ bld/
 msbuild.log
 msbuild.err
 msbuild.wrn
-appsettings.development.json
-appsettings.json
 .vs/
+
+# Appsettings
+appsettings.json
+appsettings.Development.json
