@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "TWJ.TWJApp.TWJService.Application": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:57829;http://localhost:57832"
+    }
+  }
+}

@@ -29,13 +29,9 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Template.Queries.GetAll
         {
             try
             {
-                //if (request.Page <= 0) request.Page = 1;
-
                 var templates = await _context.Template
                                     .AsNoTracking()
                                     .OrderByDescending(x => x.DisplayText)
-                                    //.Skip((request.Page - 1) * request.PageSize)
-                                    //.Take(request.PageSize)
                                     .ToListAsync(cancellationToken);
 
                 var mappedTemplates = templates.Select(t => new GetAllTemplatesModel
@@ -51,16 +47,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Template.Queries.GetAll
                     UpdatedAt = t.UpdatedAt,
                     CreatedBy = t.CreatedBy
                 }).ToList();
-
-                //var totalItems = await _context.Template.CountAsync(cancellationToken);
-                //var totalPages = (int)Math.Ceiling(totalItems / (double)request.PageSize);
-
-                //return new FilterResponse<GetAllTemplatesModel>
-                //{
-                //    Data = mappedTemplates,
-                //    TotalPages = totalPages,
-                //    TotalItems = totalItems
-                //};
                 return mappedTemplates;
             }
             catch (Exception e)

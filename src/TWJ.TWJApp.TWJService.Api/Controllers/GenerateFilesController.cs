@@ -49,7 +49,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
                 }
             }
 
-            // Queries structure
             var queryActions = new[]
             {
                 new { Name = "GetAll", Classes = new[] { "Model", "Query", "QueryHandler" } },
@@ -83,9 +82,7 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
                 if (action == "Add")
                 {
                     className = $"{action}{entityName}{kind}";
-                    content = $@"
-using MediatR;
-using TWJ.TWJApp.TWJService.Domain.Entities;
+                    content = $@"using MediatR;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Add
 {{
@@ -106,8 +103,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Add
                 else if (action == "Delete")
                 {
                     className = $"{action}{entityName}{kind}";
-                    content = $@"
-using MediatR;
+                    content = $@"using MediatR;
 using System;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Delete
@@ -121,8 +117,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Delet
                 else if (action == "Update")
                 {
                     className = $"{action}{entityName}{kind}";
-                    content = $@"
-using MediatR;
+                    content = $@"using MediatR;
 using System;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Update
@@ -146,8 +141,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Updat
                 className = $"{action}{entityName}CommandHandler";
                 if (action == "Add")
                 {
-                    content = $@"
-using MediatR;
+                    content = $@"using MediatR;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -176,8 +170,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Add
                 else if(action == "Delete")
                 {
                     className = $"{action}{entityName}{kind}";
-                    content = $@"
-using MediatR;
+                    content = $@"using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading;
@@ -215,8 +208,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Delet
                 else if (action == "Update")
                 {
                     className = $"{action}{entityName}{kind}";
-                    content = $@"
-using MediatR;
+                    content = $@"using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading;
@@ -253,8 +245,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Updat
                 if (action == "Add")
                 {
                     className = $"{action}{entityName}CommandValidator";
-                    content = $@"
-using FluentValidation;
+                    content = $@"using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using System;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
@@ -288,8 +279,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Add
                 else if (action == "Update")
                 {
                     className = $"{action}{entityName}{kind}";
-                    content = $@"
-using FluentValidation;
+                    content = $@"using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -337,11 +327,9 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Updat
                 if (action == "GetAll")
                 {
                     className = $"{action}{entityName}{kind}";
-                    content = $@"
-using MapperSegregator.Interfaces;
+                    content = $@"using MapperSegregator.Interfaces;
 using System;
 using System.Threading.Tasks;
-using TWJ.TWJApp.TWJService.Domain.Entities;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetAll
 {{
@@ -368,12 +356,10 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetAll
                 else if (action == "GetById")
                 {
                     className = $"Get{entityName}ByIdModel";
-                    content = $@"
-using MapperSegregator.Interfaces;
+                    content = $@"using MapperSegregator.Interfaces;
 using System;
 using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetAll;
-using TWJ.TWJApp.TWJService.Domain.Entities;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetById
 {{
@@ -400,11 +386,9 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetByI
                 else if (action == "GetFiltered")
                 {
                     className = $"GetFiltered{entityName}Model";
-                    content = $@"
-using MapperSegregator.Interfaces;
+                    content = $@"using MapperSegregator.Interfaces;
 using System;
 using System.Threading.Tasks;
-using TWJ.TWJApp.TWJService.Domain.Entities.{entityName};
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetFiltered
 {{
@@ -434,8 +418,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetFil
                 if (action == "GetAll")
                 {
                     className = $"{action}{entityName}{kind}";
-                    content = $@"
-using MediatR;
+                    content = $@"using MediatR;
 using System.Collections.Generic;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetAll
@@ -448,8 +431,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetAll
                 else if (action == "GetById")
                 {
                     className = $"Get{entityName}ByIdQuery";
-                    content = $@"
-using MediatR;
+                    content = $@"using MediatR;
 using System;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetById
@@ -463,8 +445,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetByI
                 else if (action == "GetFiltered")
                 {
                     className = $"GetFiltered{entityName}Query";
-                    content = $@"
-using MediatR;
+                    content = $@"using MediatR;
 using TWJ.TWJApp.TWJService.Application.Dto.Commands.Base;
 using TWJ.TWJApp.TWJService.Application.Dto.Models.Base;
 
@@ -482,8 +463,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetFil
                 if (action == "GetAll")
                 {
                     className = $"{action}{entityName}{kind}";
-                    content = $@"
-using MediatR;
+                    content = $@"using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -530,8 +510,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetAll
                 else if (action == "GetById")
                 {
                     className = $"Get{entityName}ByIdQueryHandler";
-                    content = $@"
-using MapperSegregator.Interfaces;
+                    content = $@"using MapperSegregator.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -540,7 +519,6 @@ using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
 using TWJ.TWJApp.TWJService.Common.Constants;
 using TWJ.TWJApp.TWJService.Common.Exceptions;
-using TWJ.TWJApp.TWJService.Domain.Entities.{entityName};
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetById
 {{
@@ -561,7 +539,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetByI
 
             if (data == null) throw new BadRequestException(ValidatorMessages.NotFound(""Record""));
 
-            return await _mapper.MapAsync<{entityName}Model, Get{entityName}ByIdModel>(data);
+            return await _mapper.MapAsync<{entityName}, Get{entityName}ByIdModel>(data);
         }}
     }}
 }}";
@@ -569,8 +547,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetByI
                 else if (action == "GetFiltered")
                 {
                     className = $"GetFiltered{entityName}QueryHandler";
-                    content = $@"
-using Asp.Nappox.School.Common.Extensions;
+                    content = $@"using Asp.Nappox.School.Common.Extensions;
 using MapperSegregator.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -578,7 +555,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TWJ.TWJApp.TWJService.Application.Dto.Models.{entityName};
+using TWJ.TWJApp.TWJService.Application.Dto.Models.Base;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetFiltered
@@ -603,7 +580,7 @@ public class {className} : IRequestHandler<GetFiltered{entityName}Query, FilterR
                         .OrderByDescending(x => x.Property)
                         .SkipAndTake(request.Page, request.PageSize, out int pages, out int items)
                         .OrderByDescending(x => x.Property)
-                        .MapToListAsync<{entityName}Model, GetFiltered{entityName}Model>(),
+                        .MapToListAsync<TWJ.TWJApp.TWJService.Domain.Entities.{entityName}, GetFiltered{entityName}Model>(),
                 TotalPages = pages,
                 TotalItems = items
             }};

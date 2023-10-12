@@ -1,7 +1,6 @@
 ﻿using TWJ.TWJApp.TWJService.Api.Extensions.Configurations;
 using TWJ.TWJApp.TWJService.Api.Filters;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
-using GrpcToolkit.Extensions;
 using MapperSegregator.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -20,10 +19,8 @@ namespace TWJ.TWJApp.TWJService.Api.Extensions
             //services.RegisterJwtAuth(configuration);
             services.AddRegisteredSwagger();
             services.RegisterMediator();
-            services.AddGrpc();
             services.RegisterOwnService();
             services.RegisterSignalR();
-            services.RegisterGrpcToolkit();
             services.RegisterMapperServices(typeof(ITWJAppDbContext).Assembly);
             var key = Encoding.ASCII.GetBytes("G%__Q8f(r%.c|up_?~PloAxVi^Tb`H*@Nt}w0Rt*f([r;`[,mT/Ks**-dIt~0tx");
             services.AddAuthentication(options =>

@@ -1,5 +1,4 @@
 using TWJ.TWJApp.TWJService.Api.Extensions;
-using GrpcToolkit.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
