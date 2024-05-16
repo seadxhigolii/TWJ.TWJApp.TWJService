@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using TWJ.TWJApp.TWJService.Persistence;
+using TWJ.TWJApp.TWJService.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace TWJ.TWJApp.TWJService.Api.Extensions.Configurations
 {
@@ -39,9 +42,9 @@ namespace TWJ.TWJApp.TWJService.Api.Extensions.Configurations
 
         public static void RegisterJwtAuth(this IServiceCollection services, IConfiguration configuration)
         {
-            //services.AddIdentity<User, Role>()
-            // .AddEntityFrameworkStores<OTWDbContext>()
-            // .AddDefaultTokenProviders();
+            services.AddIdentity<User, Role>()
+            .AddEntityFrameworkStores<TWJAppDbContext>()
+            .AddDefaultTokenProviders();
 
             services.AddAuthentication(options =>
             {
@@ -56,7 +59,8 @@ namespace TWJ.TWJApp.TWJService.Api.Extensions.Configurations
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration.GetSection("AppSettings:Token").Value)),
                     ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
                 };
                 options.Events = new JwtBearerEvents
                 {
@@ -64,13 +68,11 @@ namespace TWJ.TWJApp.TWJService.Api.Extensions.Configurations
                     {
                         var accessToken = context.Request.Query["access_token"];
 
-                        // If the request is for our hub...
                         var path = context.HttpContext.Request.Path;
 
                         if (!string.IsNullOrEmpty(accessToken) &&
                             (path.StartsWithSegments("/hubs")))
                         {
-                            // Read the token out of the query string
                             context.Token = accessToken;
                         }
                         return Task.CompletedTask;

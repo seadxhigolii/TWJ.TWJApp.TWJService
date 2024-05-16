@@ -4,13 +4,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
+using TWJ.TWJApp.TWJService.Api.Controllers.Base;
 using TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login;
 
 namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GenerateFilesController : ControllerBase
+    public class GenerateFilesController : BaseController
     {
         #region Login
         [HttpPost("Generate/{entityName}")]
@@ -90,9 +91,9 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Add
     {{
         public string Property {{ get; set; }}
 
-        public TWJ.TWJApp.TWJService.Domain.Entities.{entityName} Add{entityName}()
+        public Domain.Entities.{entityName} Add{entityName}()
         {{
-            return new TWJ.TWJApp.TWJService.Domain.Entities.{entityName}
+            return new Domain.Entities.{entityName}
             {{
                 Property = Property
             }};
@@ -127,7 +128,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Updat
         public Guid Id {{ get; set; }}
         public string Property {{ get; set; }}
 
-        public TWJ.TWJApp.TWJService.Domain.Entities.{entityName} Update(TWJ.TWJApp.TWJService.Domain.Entities.{entityName} {entityName.ToLower()})
+        public Domain.Entities.{entityName} Update(Domain.Entities.{entityName} {entityName.ToLower()})
         {{
             {entityName.ToLower()}.Property = Property;
             return {entityName.ToLower()};
@@ -146,23 +147,36 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
+using TWJ.TWJApp.TWJService.Application.Helpers.Interfaces;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Add
 {{
     public class {className} : IRequestHandler<Add{entityName}Command, Unit>
     {{
         private readonly ITWJAppDbContext _context;
+        private readonly IGlobalHelperService _globalHelper;
+        private readonly string currentClassName = """";
 
-        public {className}(ITWJAppDbContext context)
+        public {className}(ITWJAppDbContext context, IGlobalHelperService globalHelper)
         {{
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _globalHelper = globalHelper ?? throw new ArgumentNullException(nameof(globalHelper));
+            currentClassName = GetType().Name;
         }}
 
         public async Task<Unit> Handle(Add{entityName}Command request, CancellationToken cancellationToken)
         {{
-            await _context.{entityName}.AddAsync(request.Add{entityName}(), cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
-            return Unit.Value;
+            try
+            {{
+                await _context.{entityName}.AddAsync(request.Add{entityName}(), cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+                return Unit.Value;
+            }}
+            catch (Exception ex)
+            {{
+                await _globalHelper.Log(ex, currentClassName);
+                throw new Exception(""An error occurred while processing the request."", ex);
+            }}
         }}
     }}
 }}";
@@ -178,29 +192,42 @@ using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
 using TWJ.TWJApp.TWJService.Common.Constants;
 using TWJ.TWJApp.TWJService.Common.Exceptions;
+using TWJ.TWJApp.TWJService.Application.Helpers.Interfaces;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Delete
 {{
     public class {className} : IRequestHandler<Delete{entityName}Command, Unit>
     {{
         private readonly ITWJAppDbContext _context;
+        private readonly IGlobalHelperService _globalHelper;
+        private readonly string currentClassName = """";
 
-        public {className}(ITWJAppDbContext context)
+        public {className}(ITWJAppDbContext context, IGlobalHelperService globalHelper)
         {{
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _globalHelper = globalHelper ?? throw new ArgumentNullException(nameof(globalHelper));
+            currentClassName = GetType().Name;
         }}
 
         public async Task<Unit> Handle(Delete{entityName}Command request, CancellationToken cancellationToken)
         {{
-            var data = await _context.{entityName}.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            try
+            {{
+                var data = await _context.{entityName}.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
-            if (data == null) throw new BadRequestException(ValidatorMessages.NotFound(""Record""));
+                if (data == null) throw new BadRequestException(ValidatorMessages.NotFound(""Record""));
 
-            _context.{entityName}.Remove(data);
+                _context.{entityName}.Remove(data);
 
-            await _context.SaveChangesAsync(cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
 
-            return Unit.Value;
+                return Unit.Value;
+            }}
+            catch (Exception ex)
+            {{
+                await _globalHelper.Log(ex, currentClassName);
+                throw new Exception(""An error occurred while processing the request."", ex);
+            }}
         }}
     }}
 }}";
@@ -214,27 +241,40 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
+using TWJ.TWJApp.TWJService.Application.Helpers.Interfaces;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Update
 {{
     public class {className} : IRequestHandler<Update{entityName}Command, Unit>
     {{
         private readonly ITWJAppDbContext _context;
+        private readonly IGlobalHelperService _globalHelper;
+        private readonly string currentClassName = """";
 
-        public {className}(ITWJAppDbContext context)
+        public {className}(ITWJAppDbContext context, IGlobalHelperService globalHelper)
         {{
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _globalHelper = globalHelper ?? throw new ArgumentNullException(nameof(globalHelper));
+            currentClassName = GetType().Name;
         }}
 
         public async Task<Unit> Handle(Update{entityName}Command request, CancellationToken cancellationToken)
         {{
-            var data = await _context.{entityName}.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            try
+            {{
+                var data = await _context.{entityName}.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
-            _context.{entityName}.Update(request.Update(data));
+                _context.{entityName}.Update(request.Update(data));
 
-            await _context.SaveChangesAsync(cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
 
-            return Unit.Value;
+                return Unit.Value;
+            }}
+            catch (Exception ex)
+            {{
+                await _globalHelper.Log(ex, currentClassName);
+                throw new Exception(""An error occurred while processing the request."", ex);
+            }}
         }}
     }}
 }}";
@@ -270,7 +310,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Add
                 RuleFor(x => x.Property).MustAsync(async (name, cancellation) =>
                 {{
                     return !await _context.{entityName}.AsNoTracking().AnyAsync(x => x.Property.ToLower() == name.ToLower(), cancellation);
-                }}).WithMessage(x => ValidatorMessages.AlreadyExists($""Art with name {{x.Property}}""));
+                }}).WithMessage(x => ValidatorMessages.AlreadyExists($""{entityName} with name {{x.Property}}""));
             }});
         }}
     }}
@@ -340,7 +380,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetAll
 
         public async Task MapData(IProfileMapper profileMapper)
         {{
-            profileMapper.Build<TWJ.TWJApp.TWJService.Domain.Entities.{entityName}, {className}>(
+            profileMapper.Build<Domain.Entities.{entityName}, {className}>(
                 (src, options) =>
                 {{
                     return new {className}
@@ -370,10 +410,10 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetByI
 
         public async Task MapData(IProfileMapper profileMapper)
         {{
-            profileMapper.Build<TWJ.TWJApp.TWJService.Domain.Entities.{entityName}, GetAll{entityName}>(
+            profileMapper.Build<Domain.Entities.{entityName}, {className}>(
                 (src, options) =>
                 {{
-                    return new GetAll{entityName}
+                    return new {className}
                     {{
                         Id = src.Id,
                         Property = src.Property,
@@ -399,7 +439,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetFil
 
         public async Task MapData(IProfileMapper profileMapper)
         {{
-            profileMapper.Build<TWJ.TWJApp.TWJService.Domain.Entities.{entityName}, {className}>(
+            profileMapper.Build<Domain.Entities.{entityName}, {className}>(
                 (src, options) =>
                 {{
                     return new {className}
@@ -471,16 +511,21 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
+using TWJ.TWJApp.TWJService.Application.Helpers.Interfaces;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetAll
 {{
     public class {className} : IRequestHandler<GetAll{entityName}Query, IList<GetAll{entityName}Model>>
     {{
         private readonly ITWJAppDbContext _context;
+        private readonly IGlobalHelperService _globalHelper;
+        private readonly string currentClassName = """";
 
-        public {className}(ITWJAppDbContext context)
+        public {className}(ITWJAppDbContext context, IGlobalHelperService globalHelper)
         {{
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _globalHelper = globalHelper ?? throw new ArgumentNullException(nameof(globalHelper));
+            currentClassName = GetType().Name;
         }}
 
         public async Task<IList<GetAll{entityName}Model>> Handle(GetAll{entityName}Query request, CancellationToken cancellationToken)
@@ -499,9 +544,10 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetAll
                 }}).ToList();
                 return mappedData;
             }}
-            catch (Exception e)
+            catch (Exception ex)
             {{
-                throw e;
+                await _globalHelper.Log(ex, currentClassName);
+                throw new Exception(""An error occurred while processing the request."", ex);
             }}
         }}
     }}
@@ -519,6 +565,7 @@ using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
 using TWJ.TWJApp.TWJService.Common.Constants;
 using TWJ.TWJApp.TWJService.Common.Exceptions;
+using TWJ.TWJApp.TWJService.Application.Helpers.Interfaces;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetById
 {{
@@ -526,20 +573,32 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetByI
     {{
         private readonly ITWJAppDbContext _context;
         private readonly IMapperSegregator _mapper;
+        private readonly IGlobalHelperService _globalHelper;
+        private readonly string currentClassName = """";
         
-        public {className}(ITWJAppDbContext context, IMapperSegregator mapper)
+        public {className}(ITWJAppDbContext context, IMapperSegregator mapper, IGlobalHelperService globalHelper)
         {{
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _globalHelper = globalHelper ?? throw new ArgumentNullException(nameof(globalHelper));
+            currentClassName = GetType().Name;
         }}
 
         public async Task<Get{entityName}ByIdModel> Handle(Get{entityName}ByIdQuery request, CancellationToken cancellationToken)
         {{
-            var data = await _context.{entityName}.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            try
+            {{
+                var data = await _context.{entityName}.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
-            if (data == null) throw new BadRequestException(ValidatorMessages.NotFound(""Record""));
+                if (data == null) throw new BadRequestException(ValidatorMessages.NotFound(""{entityName}""));
 
-            return await _mapper.MapAsync<{entityName}, Get{entityName}ByIdModel>(data);
+                return await _mapper.MapAsync<Domain.Entities.{entityName}, Get{entityName}ByIdModel>(data);
+            }}
+            catch (Exception ex)
+            {{
+                await _globalHelper.Log(ex, currentClassName);
+                throw new Exception(""An error occurred while processing the request."", ex);
+            }}
         }}
     }}
 }}";
@@ -557,40 +616,59 @@ using System.Threading;
 using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Application.Dto.Models.Base;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
+using TWJ.TWJApp.TWJService.Application.Helpers.Interfaces;
+using TWJ.TWJApp.TWJService.Application.Dto.Commands.Base;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetFiltered
 {{
-public class {className} : IRequestHandler<GetFiltered{entityName}Query, FilterResponse<GetFiltered{entityName}Model>>
-{{
-    private readonly ITWJAppDbContext _context;
+    public class {className} : IRequestHandler<GetFiltered{entityName}Query, FilterResponse<GetFiltered{entityName}Model>>
+    {{
+        private readonly ITWJAppDbContext _context;
+        private readonly IGlobalHelperService _globalHelper;
+        private readonly string currentClassName = """";
         
-    public {className}(ITWJAppDbContext context)
-    {{
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-    }}
+        public {className}(ITWJAppDbContext context, IGlobalHelperService globalHelper)
+        {{
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _globalHelper = globalHelper ?? throw new ArgumentNullException(nameof(globalHelper));
+            currentClassName = GetType().Name;
+        }}
 
-    public async Task<FilterResponse<GetFiltered{entityName}Model>> Handle(GetFiltered{entityName}Query request, CancellationToken cancellationToken)
-    {{
-        try
+        public async Task<FilterResponse<GetFiltered{entityName}Model>> Handle(GetFiltered{entityName}Query request, CancellationToken cancellationToken)
         {{
-            return new FilterResponse<GetFiltered{entityName}Model>
+            try
             {{
-                Data = await _context.{entityName}
-                        .AsNoTracking()
-                        .OrderByDescending(x => x.Property)
-                        .SkipAndTake(request.Page, request.PageSize, out int pages, out int items)
-                        .OrderByDescending(x => x.Property)
-                        .MapToListAsync<TWJ.TWJApp.TWJService.Domain.Entities.{entityName}, GetFiltered{entityName}Model>(),
-                TotalPages = pages,
-                TotalItems = items
-            }};
-        }}
-        catch (Exception e)
-        {{
-            throw e;
+                IQueryable<Domain.Entities.{entityName}> query = _context.{entityName}.AsQueryable();
+                
+                query = query.ApplySorting(request.SortBy, request.SortDirection, topRecords: request.TopRecords);
+                
+                if (!request.TopRecords.HasValue)
+                {{
+                    query = query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize);
+                }}
+
+                var totalItems = await _context.{entityName}.CountAsync(cancellationToken);
+
+                var mappedData = await query.Select(src => new GetFiltered{entityName}Model
+                {{
+                    Id = src.Id
+                }}).ToListAsync(cancellationToken);
+
+                return new FilterResponse<GetFiltered{entityName}Model>
+                {{
+                    Data = mappedData,
+                    TotalPages = (int)Math.Ceiling((double)totalItems / request.PageSize),
+                    TotalItems = totalItems
+                }};        
+
+            }}
+            catch (Exception ex)
+            {{
+                await _globalHelper.Log(ex, currentClassName);
+                throw new Exception(""An error occurred while processing the request."", ex);
+            }}
         }}
     }}
-}}
 }}";
                 }
             }

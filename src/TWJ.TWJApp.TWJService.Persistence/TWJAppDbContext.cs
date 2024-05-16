@@ -26,11 +26,21 @@ namespace TWJ.TWJApp.TWJService.Persistence
             return base.SaveChangesAsync(cancellationToken);
         }
         public DbSet<User> User { get; set; }
-        public DbSet<Template> Template { get; set; }
+        public DbSet<Template> Templates { get; set; }
         public DbSet<BaseModel> Base { get; set; }
-        public DbSet<TemplateSetting> TemplateSetting { get; set; }
-        public DbSet<BlogPost> BlogPost { get; set; }
-
+        public DbSet<TemplateSetting> TemplateSettings { get; set; }
+        public DbSet<BlogPost> BlogPosts { get; set; }
+        public DbSet<Category> ProductCategories { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<BlogPostSEOKeyword> BlogPostSEOKeywords { get; set; }
+        public DbSet<SEOKeyword> SEOKeywords { get; set; }
+        public DbSet<Log> Logs { get; set; }
+        public DbSet<News> News { get; set; }
+        public DbSet<BlogPostCategory> BlogPostCategories { get; set; }
+        public DbSet<Tag> Tag { get; set; }
+        public DbSet<BlogPostTags> BlogPostTags { get; set; }
+        public DbSet<NewsLetterSubscriber> NewsLetterSubscribers { get; set; }
+        public DbSet<AdClick> AdClicks { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

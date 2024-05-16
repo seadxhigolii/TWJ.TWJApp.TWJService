@@ -11,10 +11,20 @@ namespace TWJ.TWJApp.TWJService.Application.Interfaces
     public interface ITWJAppDbContext
     {
         DbSet<User> User { get; set; }
-        DbSet<Template> Template { get; set; }
+        DbSet<Template> Templates { get; set; }
         DbSet<BaseModel> Base { get; set; }
-        DbSet<BlogPost> BlogPost { get; set; }
-        DbSet<TemplateSetting> TemplateSetting { get; set; }
+        DbSet<BlogPost> BlogPosts { get; set; }
+        DbSet<BlogPostCategory> BlogPostCategories { get; set; }
+        DbSet<TemplateSetting> TemplateSettings { get; set; }
+        DbSet<Category> ProductCategories { get; set; }
+        DbSet<Product> Products { get; set; }
+        DbSet<BlogPostSEOKeyword> BlogPostSEOKeywords { get; set; }
+        DbSet<SEOKeyword> SEOKeywords { get; set; }
+        DbSet<Log> Logs { get; set; }
+        DbSet<News> News { get; set; }
+        DbSet<Tag> Tag { get; set; }
+        DbSet<BlogPostTags> BlogPostTags { get; set; }
+        DbSet<NewsLetterSubscriber> NewsLetterSubscribers { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

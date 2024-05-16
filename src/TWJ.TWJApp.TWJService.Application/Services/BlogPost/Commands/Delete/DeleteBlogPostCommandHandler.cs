@@ -23,11 +23,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.Delete
         {
             try
             {
-                var data = await _context.BlogPost.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+                var data = await _context.BlogPosts.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
                 if (data == null) throw new BadRequestException(ValidatorMessages.NotFound("Record"));
 
-                _context.BlogPost.Remove(data);
+                _context.BlogPosts.Remove(data);
 
                 await _context.SaveChangesAsync(cancellationToken);
 

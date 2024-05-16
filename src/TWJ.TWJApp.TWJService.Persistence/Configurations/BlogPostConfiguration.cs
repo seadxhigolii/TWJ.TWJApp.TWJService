@@ -14,15 +14,20 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
 
             builder.Property(post => post.Title).HasColumnName("Title").IsRequired();
             builder.Property(post => post.Content).HasColumnName("Content").IsRequired();
-            builder.Property(post => post.UserId).HasColumnName("UserId").IsRequired();
-            builder.Property(post => post.CategoryId).HasColumnName("CategoryId").IsRequired();
+            builder.Property(post => post.SEOKeywords).HasColumnName("SEOKeywords");
+            builder.Property(post => post.UserId).HasColumnName("UserId");
+            builder.Property(post => post.ProductCategoryId).HasColumnName("ProductCategoryId").IsRequired();
+            builder.Property(post => post.BlogPostCategoryId).HasColumnName("BlogPostCategoryId");
             builder.Property(post => post.Tags).HasColumnName("Tags");
-            builder.Property(post => post.Image).HasColumnName("Image");
-            builder.Property(post => post.Views).HasColumnName("Views").IsRequired();
-            builder.Property(post => post.Likes).HasColumnName("Likes").IsRequired();
-            builder.Property(post => post.Dislikes).HasColumnName("Dislikes").IsRequired();
-            builder.Property(post => post.NumberOfComments).HasColumnName("NumberOfComments").IsRequired();
+            builder.Property(post => post.Image).HasColumnName("Image").HasColumnType("nvarchar(max)");
+            builder.Property(post => post.Views).HasColumnName("Views");
+            builder.Property(post => post.Likes).HasColumnName("Likes");
+            builder.Property(post => post.Dislikes).HasColumnName("Dislikes");
+            builder.Property(post => post.NumberOfComments).HasColumnName("NumberOfComments");
             builder.Property(post => post.ProductID).HasColumnName("ProductID");
+            builder.Property(post => post.BackLinkKeywords).HasColumnName("BackLinkKeywords");
+            builder.Property(post => post.URL).HasColumnName("URL");
+            builder.Property(post => post.Published).HasColumnName("Published");
 
             builder.HasOne(post => post.Product)
                 .WithOne()
@@ -31,7 +36,7 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
 
             builder.HasOne(post => post.Category)
                 .WithMany(category => category.BlogPosts)
-                .HasForeignKey(post => post.CategoryId)
+                .HasForeignKey(post => post.ProductCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(post => post.User)

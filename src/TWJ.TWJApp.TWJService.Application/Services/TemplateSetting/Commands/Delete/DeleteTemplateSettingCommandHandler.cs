@@ -19,11 +19,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Base.Commands.Delete
 
         public async Task<Unit> Handle(DeleteTemplateSettingCommand request, CancellationToken cancellationToken)
         {
-            var templateSetting = await _context.TemplateSetting.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var templateSetting = await _context.TemplateSettings.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (templateSetting == null) throw new BadRequestException(ValidatorMessages.NotFound("TemplateSetting"));
 
-            _context.TemplateSetting.Remove(templateSetting);
+            _context.TemplateSettings.Remove(templateSetting);
 
             await _context.SaveChangesAsync(cancellationToken);
 

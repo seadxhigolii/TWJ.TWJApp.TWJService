@@ -16,6 +16,7 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
             builder.Property(u => u.FirstName).HasColumnName("FirstName").IsRequired();
             builder.Property(u => u.LastName).HasColumnName("LastName").IsRequired();
             builder.Property(u => u.UserName).HasColumnName("UserName").IsRequired();
+            builder.Property(u => u.Image).HasColumnName("Image").IsRequired();
             builder.Property(u => u.Password).HasColumnName("Password").IsRequired();
             builder.Property(u => u.Email).HasColumnName("Email").IsRequired();
             builder.Property(u => u.EmailConfirmed).HasColumnName("EmailConfirmed").IsRequired();

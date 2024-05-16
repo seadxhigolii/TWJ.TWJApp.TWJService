@@ -19,8 +19,9 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
 
             builder.Property(category => category.Name).HasColumnName("Name").IsRequired();
             builder.Property(category => category.Description).HasColumnName("Description");
+            builder.Property(category => category.Active).HasColumnName("Active");
 
-            builder.ToTable("Categories");
+            builder.ToTable("ProductCategories");
         }
     }
 }

@@ -8,6 +8,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
     {
         #region Properties
         public string Name { get; set; }
+        public int PostCount { get; set; }
         #endregion
 
         #region Entity Models

@@ -22,7 +22,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Base.Commands.Add
             {
                 RuleFor(x => x.Name).MustAsync(async (name, cancellation) =>
                 {
-                    return !await _context.TemplateSetting.AsNoTracking().AnyAsync(x => x.Name.ToLower() == name.ToLower(), cancellation);
+                    return !await _context.TemplateSettings.AsNoTracking().AnyAsync(x => x.Name.ToLower() == name.ToLower(), cancellation);
                 }).WithMessage(x => ValidatorMessages.AlreadyExists($"Template Setting with name {x.Name}"));
             });
         }

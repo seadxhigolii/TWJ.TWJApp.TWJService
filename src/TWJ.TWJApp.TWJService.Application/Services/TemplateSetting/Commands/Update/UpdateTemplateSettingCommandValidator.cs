@@ -26,12 +26,12 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Base.Commands.Update
             {
                 RuleFor(x => x.Name).MustAsync(async (id, cancellation) =>
                 {
-                    return await _context.TemplateSetting.AsNoTracking().AnyAsync(x => x.Name == id, cancellation);
+                    return await _context.TemplateSettings.AsNoTracking().AnyAsync(x => x.Name == id, cancellation);
                 }).WithMessage(ValidatorMessages.NotFound("TemplateSetting")).DependentRules(() =>
                 {
                     RuleFor(x => x.Name).MustAsync(async (args, id, cancellation) =>
                     {
-                        return !await _context.TemplateSetting.AsNoTracking().Where(x => x.Name != id).AnyAsync(x => x.Name == args.Name, cancellation);
+                        return !await _context.TemplateSettings.AsNoTracking().Where(x => x.Name != id).AnyAsync(x => x.Name == args.Name, cancellation);
                     }).WithMessage(x => ValidatorMessages.AlreadyExists($"Template Setting with Name {x.Name}"));
                 });
             });

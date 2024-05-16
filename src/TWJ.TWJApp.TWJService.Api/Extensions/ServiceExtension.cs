@@ -22,7 +22,7 @@ namespace TWJ.TWJApp.TWJService.Api.Extensions
             services.RegisterOwnService();
             services.RegisterSignalR();
             services.RegisterMapperServices(typeof(ITWJAppDbContext).Assembly);
-            var key = Encoding.ASCII.GetBytes("G%__Q8f(r%.c|up_?~PloAxVi^Tb`H*@Nt}w0Rt*f([r;`[,mT/Ks**-dIt~0tx");
+            var key = Encoding.ASCII.GetBytes(configuration["AppSettings:Token"]);
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

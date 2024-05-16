@@ -28,7 +28,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Template.Commands.Update
                 {
                     RuleFor(x => x.DisplayText).MustAsync(async (name, cancellation) =>
                     {
-                        bool exists = await _context.Template.AsNoTracking().AnyAsync(x => x.DisplayText == name, cancellation);
+                        bool exists = await _context.Templates.AsNoTracking().AnyAsync(x => x.DisplayText == name, cancellation);
                         return !exists;
                     }).WithMessage(x => ValidatorMessages.AlreadyExists($"Template with name {x.DisplayText}"));
                 });
@@ -38,7 +38,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Template.Commands.Update
                 {
                     if (isDefault)
                     {
-                        bool isDefaultAlreadyExists = await _context.Template.AsNoTracking().AnyAsync(t => t.IsDefault && t.TemplateSettingId == template.TemplateSettingId, cancellation);
+                        bool isDefaultAlreadyExists = await _context.Templates.AsNoTracking().AnyAsync(t => t.IsDefault && t.TemplateSettingId == template.TemplateSettingId, cancellation);
                         return !isDefaultAlreadyExists;
                     }
                     return true;
@@ -49,7 +49,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Template.Commands.Update
                  {
                      if (parentId.HasValue)  // Check if ParentId is not null
                      {
-                         bool parentIdExists = await _context.Template.AsNoTracking().AnyAsync(t => t.Id == parentId.Value, cancellation);
+                         bool parentIdExists = await _context.Templates.AsNoTracking().AnyAsync(t => t.Id == parentId.Value, cancellation);
                          return parentIdExists;
                      }
                      return true;

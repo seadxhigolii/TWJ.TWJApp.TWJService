@@ -17,6 +17,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         public DateTime DateOfBirth { get; set; }
         public string City { get; set; }
         public string Country { get; set; }
+        public string Image { get; set; }
         #endregion
 
         #region Entity Models

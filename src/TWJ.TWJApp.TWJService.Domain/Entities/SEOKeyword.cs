@@ -14,10 +14,19 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         public int SearchVolume { get; set; }
         public int CompetitionLevel { get; set; }
         public int ClickThroughRate { get; set; }
+        public Guid CategoryId { get; set; }
+        public KeywordType Type { get; set; }
         #endregion
 
         #region Entity Models
+        public Category Category { get; set; }
         public ICollection<BlogPostSEOKeyword> BlogPostSEOKeywords { get; set; }
         #endregion
+    }
+    public enum KeywordType
+    {
+        Primary = 1,
+        Secondary = 2,
+        LongTail = 3
     }
 }

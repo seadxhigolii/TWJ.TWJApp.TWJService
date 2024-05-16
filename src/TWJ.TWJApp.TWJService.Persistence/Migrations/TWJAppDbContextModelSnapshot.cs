@@ -22,6 +22,53 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.AdClick", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<Guid>("BlogPostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ClickTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Converted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAt");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("CreatedBy");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("UpdatedAt");
+
+                    b.Property<string>("UserSessionId")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogPostId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("AdClicks");
+                });
+
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Base.BaseModel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -55,7 +102,13 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
 
-                    b.Property<Guid>("CategoryId")
+                    b.Property<string>("BackLinkKeywords")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("BlogPostCategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CategoryId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Content")
@@ -76,8 +129,8 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.Property<int>("Dislikes")
                         .HasColumnType("integer");
 
-                    b.Property<byte[]>("Image")
-                        .HasColumnType("bytea");
+                    b.Property<string>("Image")
+                        .HasColumnType("text");
 
                     b.Property<int>("Likes")
                         .HasColumnType("integer");
@@ -85,13 +138,25 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.Property<int>("NumberOfComments")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("ProductCategoryId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("ProductID")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("Published")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SEOKeywords")
+                        .HasColumnType("text");
 
                     b.Property<string>("Tags")
                         .HasColumnType("text");
 
                     b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.Property<string>("URL")
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -106,13 +171,52 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BlogPostCategoryId");
+
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("ProductID");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("BlogPost");
+                    b.ToTable("BlogPosts");
+                });
+
+            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.BlogPostCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAt");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("CreatedBy");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("URL")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("UpdatedAt");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BlogPostCategories");
                 });
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.BlogPostSEOKeyword", b =>
@@ -140,6 +244,9 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.Property<Guid>("SEOKeywordID")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Score")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("UpdatedAt");
@@ -150,7 +257,7 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 
                     b.HasIndex("SEOKeywordID");
 
-                    b.ToTable("BlogPostSEOKeyword");
+                    b.ToTable("BlogPostSEOKeywords");
                 });
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.BlogPostTags", b =>
@@ -198,6 +305,9 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
 
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("CreatedAt");
@@ -222,7 +332,7 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category");
+                    b.ToTable("ProductCategories");
                 });
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Comment", b =>
@@ -414,6 +524,43 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.ToTable("InstagramPost");
                 });
 
+            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Log", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<string>("Class")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAt");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("CreatedBy");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Method")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("UpdatedAt");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Logs");
+                });
+
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.MidJourneyImage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -443,6 +590,95 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("MidJourneyImage");
+                });
+
+            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.News", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAt");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("CreatedBy");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("NoOfPosts")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ReleaseDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Tags")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.Property<string>("URL")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("UpdatedAt");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("News");
+                });
+
+            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.NewsLetterSubscriber", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAt");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("CreatedBy");
+
+                    b.Property<DateTime?>("DateUnsubscribed")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("Subscribed")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("UpdatedAt");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NewsLetterSubscribers");
                 });
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.PinterestPin", b =>
@@ -519,6 +755,9 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
 
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("AffiliateLink")
                         .HasColumnType("text");
 
@@ -546,8 +785,8 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<byte[]>("Image")
-                        .HasColumnType("bytea");
+                    b.Property<string>("Image")
+                        .HasColumnType("text");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
@@ -575,7 +814,7 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Product");
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Role", b =>
@@ -616,6 +855,9 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("Id");
 
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("ClickThroughRate")
                         .HasColumnType("integer");
 
@@ -640,13 +882,18 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.Property<int>("SearchVolume")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("UpdatedAt");
 
                     b.HasKey("Id");
 
-                    b.ToTable("SEOKeyword");
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("SEOKeywords");
                 });
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.SqlTableCache", b =>
@@ -711,6 +958,9 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
+                    b.Property<int>("PostCount")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("UpdatedAt");
@@ -770,7 +1020,7 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 
                     b.HasIndex("TemplateSettingId");
 
-                    b.ToTable("Template");
+                    b.ToTable("Templates");
                 });
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.TemplateSetting", b =>
@@ -807,7 +1057,7 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TemplateSetting");
+                    b.ToTable("TemplateSettings");
                 });
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.User", b =>
@@ -845,6 +1095,9 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("FirstName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Image")
                         .HasColumnType("text");
 
                     b.Property<string>("LastName")
@@ -906,13 +1159,36 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.ToTable("UserRole");
                 });
 
-            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.BlogPost", b =>
+            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.AdClick", b =>
                 {
-                    b.HasOne("TWJ.TWJApp.TWJService.Domain.Entities.Category", "Category")
-                        .WithMany("BlogPosts")
-                        .HasForeignKey("CategoryId")
+                    b.HasOne("TWJ.TWJApp.TWJService.Domain.Entities.BlogPost", "BlogPost")
+                        .WithMany("AdClicks")
+                        .HasForeignKey("BlogPostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("TWJ.TWJApp.TWJService.Domain.Entities.Product", "Product")
+                        .WithMany("AdClicks")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BlogPost");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.BlogPost", b =>
+                {
+                    b.HasOne("TWJ.TWJApp.TWJService.Domain.Entities.BlogPostCategory", "BlogPostCategory")
+                        .WithMany("BlogPosts")
+                        .HasForeignKey("BlogPostCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TWJ.TWJApp.TWJService.Domain.Entities.Category", "Category")
+                        .WithMany("BlogPosts")
+                        .HasForeignKey("CategoryId");
 
                     b.HasOne("TWJ.TWJApp.TWJService.Domain.Entities.Product", "Product")
                         .WithMany("BlogPosts")
@@ -923,6 +1199,8 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("BlogPostCategory");
 
                     b.Navigation("Category");
 
@@ -1067,6 +1345,17 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.SEOKeyword", b =>
+                {
+                    b.HasOne("TWJ.TWJApp.TWJService.Domain.Entities.Category", "Category")
+                        .WithMany("SEOKeywords")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Template", b =>
                 {
                     b.HasOne("TWJ.TWJApp.TWJService.Domain.Entities.Template", "ParentTemplate")
@@ -1105,6 +1394,8 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.BlogPost", b =>
                 {
+                    b.Navigation("AdClicks");
+
                     b.Navigation("BlogPostSEOKeywords");
 
                     b.Navigation("BlogPostTags");
@@ -1112,11 +1403,18 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.Navigation("Comments");
                 });
 
+            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.BlogPostCategory", b =>
+                {
+                    b.Navigation("BlogPosts");
+                });
+
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Category", b =>
                 {
                     b.Navigation("BlogPosts");
 
                     b.Navigation("Products");
+
+                    b.Navigation("SEOKeywords");
                 });
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Comment", b =>
@@ -1135,6 +1433,8 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Product", b =>
                 {
+                    b.Navigation("AdClicks");
+
                     b.Navigation("BlogPosts");
                 });
 

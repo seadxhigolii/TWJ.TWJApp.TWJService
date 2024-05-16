@@ -1,8 +1,10 @@
 using TWJ.TWJApp.TWJService.Api.Extensions;
+using TWJ.TWJApp.TWJService.Application.Services.OpenAI;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddHttpClient<OpenAiService>();
 
 builder.Services.AddServices(builder.Configuration)
                 .AddMvc()

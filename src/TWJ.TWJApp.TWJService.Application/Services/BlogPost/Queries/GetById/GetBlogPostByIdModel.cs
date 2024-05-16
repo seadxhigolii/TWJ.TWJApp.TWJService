@@ -12,9 +12,10 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetById
         public string Title { get; set; }
         public string Content { get; set; }
         public Guid UserId { get; set; }
-        public Guid CategoryId { get; set; }
+        public Guid ProductCategoryId { get; set; }
+        public Guid BlogPostCategoryId { get; set; }
         public string Tags { get; set; }
-        public Byte[] Image { get; set; }
+        public string Image { get; set; }
         public int Views { get; set; }
         public int Likes { get; set; }
         public int Dislikes { get; set; }
@@ -32,7 +33,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetById
                         Title = src.Title,
                         Content = src.Content,
                         UserId = src.UserId,
-                        CategoryId = src.CategoryId,
+                        ProductCategoryId = src.ProductCategoryId,
                         Tags = src.Tags,
                         Image = src.Image,
                         Views = src.Views,

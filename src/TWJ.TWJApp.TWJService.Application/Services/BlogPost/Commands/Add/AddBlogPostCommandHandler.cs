@@ -19,7 +19,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.Add
         {
             try
             {
-                await _context.BlogPost.AddAsync(request.AddBlogPost(), cancellationToken);
+                await _context.BlogPosts.AddAsync(request.AddBlogPost(), cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
                 return Unit.Value;
             }

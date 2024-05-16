@@ -30,15 +30,14 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.Add
             RuleFor(x => x.UserId)
                 .NotEqual(default(Guid)).WithMessage("UserId is required.");
 
-            RuleFor(x => x.CategoryId)
+            RuleFor(x => x.ProductCategoryId)
                 .NotEqual(default(Guid)).WithMessage("CategoryId is required.");
+            
+            RuleFor(x => x.BlogPostCategoryId)
+                .NotEqual(default(Guid)).WithMessage("BlogPostCategoryId is required.");
 
             RuleFor(x => x.Tags)
                 .MaximumLength(500).WithMessage("Tags should be at most 500 characters.");
-
-            RuleFor(x => x.Image)
-                .Must(BeAValidSize).WithMessage("Image must be less than 5 MB.")
-                .When(x => x.Image != null);
 
             RuleFor(x => x.Views)
                 .GreaterThanOrEqualTo(0).WithMessage("Views cannot be negative.");
@@ -54,10 +53,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.Add
 
             RuleFor(x => x.ProductID)
                 .NotEqual(default(Guid?)).When(x => x.ProductID.HasValue);
-        }
-        private bool BeAValidSize(byte[] image)
-        {
-            return image.Length <= 5 * 1024 * 1024;
         }
     }
 }

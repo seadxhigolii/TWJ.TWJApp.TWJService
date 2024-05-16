@@ -26,7 +26,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetById
         {
             try
             {
-                var data = await _context.BlogPost.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+                var data = await _context.BlogPosts.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
                 if (data == null) throw new BadRequestException(ValidatorMessages.NotFound("Record"));
 

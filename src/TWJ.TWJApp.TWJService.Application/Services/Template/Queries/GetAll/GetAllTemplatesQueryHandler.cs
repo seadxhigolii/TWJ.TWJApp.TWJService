@@ -29,7 +29,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Template.Queries.GetAll
         {
             try
             {
-                var templates = await _context.Template
+                var templates = await _context.Templates
                                     .AsNoTracking()
                                     .OrderByDescending(x => x.DisplayText)
                                     .ToListAsync(cancellationToken);

@@ -18,17 +18,18 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
             builder.Property(p => p.Id).HasColumnName("Id").IsRequired();
 
             builder.Property(p => p.ProductName).HasColumnName("ProductName").IsRequired();
-            builder.Property(p => p.Description).HasColumnName("Description").IsRequired();
-            builder.Property(p => p.VendorName).HasColumnName("VendorName").IsRequired();
+            builder.Property(p => p.Description).HasColumnName("Description");
+            builder.Property(p => p.VendorName).HasColumnName("VendorName");
             builder.Property(p => p.CategoryId).HasColumnName("CategoryId").IsRequired();
             builder.Property(p => p.AvgRating).HasColumnName("AvgRating");
             builder.Property(p => p.TotalRatings).HasColumnName("TotalRatings");
-            builder.Property(p => p.Price).HasColumnName("Price").IsRequired();
+            builder.Property(p => p.Price).HasColumnName("Price");
             builder.Property(p => p.Currency).HasColumnName("Currency");
-            builder.Property(p => p.AffiliateLink).HasColumnName("AffiliateLink").IsRequired();
-            builder.Property(p => p.Image).HasColumnName("Image").IsRequired();
-            builder.Property(p => p.PromotionStart).HasColumnName("PromotionStart").IsRequired();
-            builder.Property(p => p.PromotionEnd).HasColumnName("PromotionEnd").IsRequired();
+            builder.Property(p => p.AffiliateLink).HasColumnName("AffiliateLink");
+            builder.Property(p => p.Image).HasColumnName("Image");
+            builder.Property(p => p.PromotionStart).HasColumnName("PromotionStart");
+            builder.Property(p => p.PromotionEnd).HasColumnName("PromotionEnd");
+            builder.Property(p => p.Active).HasColumnName("Active");
 
             builder.HasOne(p => p.Category).WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId).OnDelete(DeleteBehavior.Restrict);

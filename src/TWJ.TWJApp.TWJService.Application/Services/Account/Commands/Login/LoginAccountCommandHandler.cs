@@ -15,6 +15,7 @@ using TWJ.TWJApp.TWJService.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 
 
 namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login

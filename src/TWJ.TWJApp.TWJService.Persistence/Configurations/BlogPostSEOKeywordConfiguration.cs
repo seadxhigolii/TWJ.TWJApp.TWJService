@@ -23,6 +23,10 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
             builder.Property(postKeyword => postKeyword.SEOKeywordID)
                 .HasColumnName("SEOKeywordID")
                 .IsRequired();
+            
+            builder.Property(postKeyword => postKeyword.SEOKeywordID)
+                .HasColumnName("Score")
+                .IsRequired();
 
             builder.HasOne(postKeyword => postKeyword.BlogPost)
                 .WithMany(post => post.BlogPostSEOKeywords)

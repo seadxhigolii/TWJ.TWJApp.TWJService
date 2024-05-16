@@ -16,14 +16,16 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         public decimal Price { get; set; }
         public string Currency { get; set; }
         public string AffiliateLink { get; set; }
-        public Byte[] Image { get; set; }
+        public string Image { get; set; }
         public DateTime PromotionStart { get; set; }
         public DateTime PromotionEnd { get; set; }
+        public bool Active { get; set; } = true;
 
         #endregion
 
         #region Entity Models
         public ICollection<BlogPost> BlogPosts { get; set; }
+        public ICollection<AdClick> AdClicks { get; set; }
         public Category Category { get; set; }     
 
         #endregion

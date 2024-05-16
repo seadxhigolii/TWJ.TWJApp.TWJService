@@ -18,6 +18,9 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
             builder.Property(t => t.Name)
                 .HasColumnName("Name")
                 .IsRequired();
+
+            builder.Property(t => t.PostCount)
+                .HasColumnName("PostCount");
             #endregion
 
             #region Configure Table Name

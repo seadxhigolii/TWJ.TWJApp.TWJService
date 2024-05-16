@@ -27,7 +27,7 @@ public class GetFilteredBlogPostQueryHandler : IRequestHandler<GetFilteredBlogPo
         {
             return new FilterResponse<GetFilteredBlogPostModel>
             {
-                Data = await _context.BlogPost
+                Data = await _context.BlogPosts
                         .AsNoTracking()
                         .OrderByDescending(x => x.CreatedAt)
                         .SkipAndTake(request.Page, request.PageSize, out int pages, out int items)

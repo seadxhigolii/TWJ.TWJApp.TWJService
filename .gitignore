@@ -34,3 +34,4 @@ msbuild.wrn
 # Appsettings
 appsettings.json
 appsettings.Development.json
+appsettings.Staging.json

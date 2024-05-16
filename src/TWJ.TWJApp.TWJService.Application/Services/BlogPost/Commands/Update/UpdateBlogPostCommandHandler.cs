@@ -21,9 +21,9 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.Update
         {
             try
             {
-                var data = await _context.BlogPost.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+                var data = await _context.BlogPosts.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
-                _context.BlogPost.Update(request.Update(data));
+                _context.BlogPosts.Update(request.Update(data));
 
                 await _context.SaveChangesAsync(cancellationToken);
 

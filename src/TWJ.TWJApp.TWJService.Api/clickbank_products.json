@@ -1,0 +1,722 @@
+[
+    {
+        "ProductName": "Puravive",
+        "VendorName": "PURACLICK",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 695.2,
+        "Price": 131.46,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=PURACLICK"
+    },
+    {
+        "ProductName": "Sugar Defender",
+        "VendorName": "SUGARDEF",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 525.33,
+        "Price": 136.58,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=SUGARDEF"
+    },
+    {
+        "ProductName": "Liv Pure",
+        "VendorName": "LIVPURE",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 283.04,
+        "Price": 158.6,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=LIVPURE"
+    },
+    {
+        "ProductName": "Sumatra Slim Belly Tonic",
+        "VendorName": "SUMATONIC",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 309.64,
+        "Price": 135.07,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=SUMATONIC"
+    },
+    {
+        "ProductName": "ProDentim",
+        "VendorName": "PRODENTIM",
+        "CategoryId": "fae2258c-6d9d-4866-8a16-4bfc111435c8",
+        "AvgRating": 283.06,
+        "Price": 125.13,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=PRODENTIM"
+    },
+    {
+        "ProductName": "Java Burn",
+        "VendorName": "JAVABURN",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 205.72,
+        "Price": 147.81,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=JAVABURN"
+    },
+    {
+        "ProductName": "Cortexi",
+        "VendorName": "CORTEXI",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 208.26,
+        "Price": 119.88,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=CORTEXI"
+    },
+    {
+        "ProductName": "Red Boost",
+        "VendorName": "HWTONIC",
+        "CategoryId": "63aa4bdc-d5c0-492d-b90f-b76b9561f235",
+        "AvgRating": 144.03,
+        "Price": 122.58,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=HWTONIC"
+    },
+    {
+        "ProductName": "Alpha Tonic",
+        "VendorName": "ALPHATONIC",
+        "CategoryId": "63aa4bdc-d5c0-492d-b90f-b76b9561f235",
+        "AvgRating": 124.64,
+        "Price": 126.02,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=ALPHATONIC"
+    },
+    {
+        "ProductName": "FlowForce Max",
+        "VendorName": "FLOWFORCE",
+        "CategoryId": "63aa4bdc-d5c0-492d-b90f-b76b9561f235",
+        "AvgRating": 131.91,
+        "Price": 125.75,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=FLOWFORCE"
+    },
+    {
+        "ProductName": "Joint Genesis",
+        "VendorName": "JOINTGEN",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 159.58,
+        "Price": 153.25,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=JOINTGEN"
+    },
+    {
+        "ProductName": "Neotonics",
+        "VendorName": "NEOTONICS",
+        "CategoryId": "9325ff22-2818-40ec-96e8-df1e406dcf91",
+        "AvgRating": 120.39,
+        "Price": 129.81,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=NEOTONICS"
+    },
+    {
+        "ProductName": "Prostadine",
+        "VendorName": "PROSTADINE",
+        "CategoryId": "63aa4bdc-d5c0-492d-b90f-b76b9561f235",
+        "AvgRating": 115.9,
+        "Price": 127.22,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=PROSTADINE"
+    },
+    {
+        "ProductName": "Ikaria Juice",
+        "VendorName": "LBJUICE",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 159.18,
+        "Price": 139.33,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=LBJUICE"
+    },
+    {
+        "ProductName": "Quietum Plus",
+        "VendorName": "QUIETPLUS",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 103.34,
+        "Price": 124.71,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=QUIETPLUS"
+    },
+    {
+        "ProductName": "Neuro",
+        "VendorName": "NEUROTHRIV",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 107.16,
+        "Price": 152.38,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=NEUROTHRIV"
+    },
+    {
+        "ProductName": "TedsWoodworking",
+        "VendorName": "TEDSPLANS",
+        "CategoryId": "de7f639a-bac8-4d3e-ba1d-eeca69e0c816",
+        "AvgRating": 126.83,
+        "Price": 56.13,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=TEDSPLANS"
+    },
+    {
+        "ProductName": "Pelvic Floor Strong",
+        "VendorName": "ALEXPFS",
+        "CategoryId": "c553f589-46eb-4e48-926e-ad70d0e250aa",
+        "AvgRating": 62.07,
+        "Price": 68.27,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=ALEXPFS"
+    },
+    {
+        "ProductName": "ProNail Complex",
+        "VendorName": "PRONAILCOM",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 76.73,
+        "Price": 131.17,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=PRONAILCOM"
+    },
+    {
+        "ProductName": "Live Chat Jobs",
+        "VendorName": "SOCIALSREP",
+        "CategoryId": "6b7ca271-db7c-41a3-93ef-a4d873e8fd53",
+        "AvgRating": 180.85,
+        "Price": 44.02,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=SOCIALSREP"
+    },
+    {
+        "ProductName": "Nagano Tonic",
+        "VendorName": "LBTONIC",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 103.82,
+        "Price": 144.11,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=LBTONIC"
+    },
+    {
+        "ProductName": "SeroLean",
+        "VendorName": "SEROLEAN",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 104.78,
+        "Price": 119.95,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=SEROLEAN"
+    },
+    {
+        "ProductName": "Denticore",
+        "VendorName": "DENTICORE",
+        "CategoryId": "fae2258c-6d9d-4866-8a16-4bfc111435c8",
+        "AvgRating": 98.39,
+        "Price": 124.1,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=DENTICORE"
+    },
+    {
+        "ProductName": "Ageless Knees",
+        "VendorName": "DANNYG",
+        "CategoryId": "a8e3844a-317e-4ad8-8288-5095b8f84f8c",
+        "AvgRating": 86.76,
+        "Price": 56.42,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=DANNYG"
+    },
+    {
+        "ProductName": "LeanBiome",
+        "VendorName": "LEANBIOME",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 99.02,
+        "Price": 137.45,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=LEANBIOME"
+    },
+    {
+        "ProductName": "Get Paid To Use Facebook",
+        "VendorName": "SOCIALPAID",
+        "CategoryId": "6b7ca271-db7c-41a3-93ef-a4d873e8fd53",
+        "AvgRating": 134.61,
+        "Price": 19.61,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=SOCIALPAID"
+    },
+    {
+        "ProductName": "Alpilean",
+        "VendorName": "ALPILEAN",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 82.69,
+        "Price": 135.06,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=ALPILEAN"
+    },
+    {
+        "ProductName": "RENEW",
+        "VendorName": "RENEW",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 58.43,
+        "Price": 151.13,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=RENEW"
+    },
+    {
+        "ProductName": "Kerassentials",
+        "VendorName": "KERASSENT",
+        "CategoryId": "9325ff22-2818-40ec-96e8-df1e406dcf91",
+        "AvgRating": 82.51,
+        "Price": 117.53,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=KERASSENT"
+    },
+    {
+        "ProductName": "All Day Slimming Tea NEW FREE",
+        "VendorName": "SO50SUPP",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 46.39,
+        "Price": 20.56,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=SO50SUPP"
+    },
+    {
+        "ProductName": "Claritox Pro",
+        "VendorName": "CLARITOX",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 82.23,
+        "Price": 112.01,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=CLARITOX"
+    },
+    {
+        "ProductName": "Neuro",
+        "VendorName": "CRITICALB",
+        "CategoryId": "652eff06-cba7-481f-9ea5-ead3572458db",
+        "AvgRating": 64.4,
+        "Price": 45.31,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=CRITICALB"
+    },
+    {
+        "ProductName": "GlucoBerry",
+        "VendorName": "GLUCOBERRY",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 91.76,
+        "Price": 148.35,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=GLUCOBERRY"
+    },
+    {
+        "ProductName": "His Secret Obsession",
+        "VendorName": "HISSECRET",
+        "CategoryId": "8828f56a-c735-4c34-8dcd-9cdb615c9ac3",
+        "AvgRating": 117.04,
+        "Price": 62.97,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=HISSECRET"
+    },
+    {
+        "ProductName": "Zeneara",
+        "VendorName": "ZENEARA",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 72.79,
+        "Price": 115.16,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=ZENEARA"
+    },
+    {
+        "ProductName": "The Smoothie Diet",
+        "VendorName": "SMOOTHDIET",
+        "CategoryId": "37159d28-d1b6-4e94-ba8b-11b9dbf06267",
+        "AvgRating": 136.53,
+        "Price": 21.64,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=SMOOTHDIET"
+    },
+    {
+        "ProductName": "Back to Life",
+        "VendorName": "BTLIFE",
+        "CategoryId": "652eff06-cba7-481f-9ea5-ead3572458db",
+        "AvgRating": 46.24,
+        "Price": 54.87,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=BTLIFE"
+    },
+    {
+        "ProductName": "Easy Power Plan",
+        "VendorName": "EASYPP",
+        "CategoryId": "6c4e443a-8995-4de1-83b1-d285e2d81d35",
+        "AvgRating": 35.83,
+        "Price": 62.15,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=EASYPP"
+    },
+    {
+        "ProductName": "GlucoTrust",
+        "VendorName": "GLUCOTRUST",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 80.47,
+        "Price": 147.88,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=GLUCOTRUST"
+    },
+    {
+        "ProductName": "Tea Burn",
+        "VendorName": "TEABURN",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 59.8,
+        "Price": 143.99,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=TEABURN"
+    },
+    {
+        "ProductName": "All Day Slimming Tea",
+        "VendorName": "ALLSLIMTEA",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 65.8,
+        "Price": 114.47,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=ALLSLIMTEA"
+    },
+    {
+        "ProductName": "NEUROZOOM",
+        "VendorName": "NEUROZOOM",
+        "CategoryId": "3d105342-94cd-4636-a0e3-bf94a0ce23ec",
+        "AvgRating": 67.31,
+        "Price": 148.58,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=NEUROZOOM"
+    },
+    {
+        "ProductName": "ErecPrime",
+        "VendorName": "ERECPRIME",
+        "CategoryId": "63aa4bdc-d5c0-492d-b90f-b76b9561f235",
+        "AvgRating": 70.88,
+        "Price": 124.75,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=ERECPRIME"
+    },
+    {
+        "ProductName": "Fast Lean Pro",
+        "VendorName": "FASTLEANPR",
+        "CategoryId": "37159d28-d1b6-4e94-ba8b-11b9dbf06267",
+        "AvgRating": 59.88,
+        "Price": 138.65,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=FASTLEANPR"
+    },
+    {
+        "ProductName": "Metanail Complex",
+        "VendorName": "METACMPLX",
+        "CategoryId": "9325ff22-2818-40ec-96e8-df1e406dcf91",
+        "AvgRating": 63.71,
+        "Price": 132.76,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=METACMPLX"
+    },
+    {
+        "ProductName": "New Offer Q1 2024",
+        "VendorName": "FINALCLLPS",
+        "CategoryId": "cea46112-e2a8-4276-ab73-7557c8b5c2d7",
+        "AvgRating": 26.99,
+        "Price": 38.61,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=FINALCLLPS"
+    },
+    {
+        "ProductName": "Writeappreviews",
+        "VendorName": "WRITEAPPS",
+        "CategoryId": "df41a927-0fce-468e-aade-f90fdddf5839",
+        "AvgRating": 86.15,
+        "Price": 25.34,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=WRITEAPPS"
+    },
+    {
+        "ProductName": "IlluDerma",
+        "VendorName": "ILLUDERMA",
+        "CategoryId": "9325ff22-2818-40ec-96e8-df1e406dcf91",
+        "AvgRating": 52.56,
+        "Price": 125.26,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=ILLUDERMA"
+    },
+    {
+        "ProductName": "BioVanish",
+        "VendorName": "BIOVANISH",
+        "CategoryId": "c553f589-46eb-4e48-926e-ad70d0e250aa",
+        "AvgRating": 59.11,
+        "Price": 127.77,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=BIOVANISH"
+    },
+    {
+        "ProductName": "MenoRescue",
+        "VendorName": "MENORESCUE",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 48.84,
+        "Price": 155.48,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=MENORESCUE"
+    },
+    {
+        "ProductName": "Hyperbolic Stretching 3",
+        "VendorName": "HYPSTRETCH",
+        "CategoryId": "652eff06-cba7-481f-9ea5-ead3572458db",
+        "AvgRating": 53.01,
+        "Price": 20.72,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=HYPSTRETCH"
+    },
+    {
+        "ProductName": "New Gut and Poop Winner",
+        "VendorName": "SYNOGUT",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 50.52,
+        "Price": 117.53,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=SYNOGUT"
+    },
+    {
+        "ProductName": "Paid Online Writing Jobs",
+        "VendorName": "EASYWRITER",
+        "CategoryId": "93a7f8b8-867c-4b29-ae20-8be394925e4d",
+        "AvgRating": 90.92,
+        "Price": 74.31,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=EASYWRITER"
+    },
+    {
+        "ProductName": "Balmorex",
+        "VendorName": "BALMOREX",
+        "CategoryId": "652eff06-cba7-481f-9ea5-ead3572458db",
+        "AvgRating": 38.38,
+        "Price": 127.55,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=BALMOREX"
+    },
+    {
+        "ProductName": "Christian Prepper",
+        "VendorName": "CHPREPPER",
+        "CategoryId": "cea46112-e2a8-4276-ab73-7557c8b5c2d7",
+        "AvgRating": 14.82,
+        "Price": 39.95,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=CHPREPPER"
+    },
+    {
+        "ProductName": "The Ex Factor 2",
+        "VendorName": "BRBROWNING",
+        "CategoryId": "8828f56a-c735-4c34-8dcd-9cdb615c9ac3",
+        "AvgRating": 46.78,
+        "Price": 47.15,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=BRBROWNING"
+    },
+    {
+        "ProductName": "The Lost SuperFoods",
+        "VendorName": "LOSTREC",
+        "CategoryId": "cea46112-e2a8-4276-ab73-7557c8b5c2d7",
+        "AvgRating": 32.55,
+        "Price": 39.84,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=LOSTREC"
+    },
+    {
+        "ProductName": "The Most Lucrative Constipation Offer On Clickbank",
+        "VendorName": "PEAKBIOME",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 44.73,
+        "Price": 86.06,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=PEAKBIOME"
+    },
+    {
+        "ProductName": "The Lost Book of Remedies",
+        "VendorName": "BOOKOFREM",
+        "CategoryId": "a8e3844a-317e-4ad8-8288-5095b8f84f8c",
+        "AvgRating": 27.75,
+        "Price": 35.82,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=BOOKOFREM"
+    },
+    {
+        "ProductName": "Cacao Bliss",
+        "VendorName": "DMSUPPS",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 39.52,
+        "Price": 68.92,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=DMSUPPS"
+    },
+    {
+        "ProductName": "UltraK9 Pro",
+        "VendorName": "ULTRAK9PRO",
+        "CategoryId": "68bd303d-5618-4364-a340-a396c14454ea",
+        "AvgRating": 27.43,
+        "Price": 165.22,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=ULTRAK9PRO"
+    },
+    {
+        "ProductName": "Emperor",
+        "VendorName": "VIGORTONIC",
+        "CategoryId": "63aa4bdc-d5c0-492d-b90f-b76b9561f235",
+        "AvgRating": 48.96,
+        "Price": 108.36,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=VIGORTONIC"
+    },
+    {
+        "ProductName": "Pure Neuro",
+        "VendorName": "ALPHASUPPS",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 27.93,
+        "Price": 138.52,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=ALPHASUPPS"
+    },
+    {
+        "ProductName": "Bazopril",
+        "VendorName": "BZPRL",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 41.38,
+        "Price": 134.49,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=BZPRL"
+    },
+    {
+        "ProductName": "Pianoforall",
+        "VendorName": "PIANO4ALL",
+        "CategoryId": "d4ba8c17-e7d9-442d-8e00-73110276a962",
+        "AvgRating": 56.07,
+        "Price": 27.46,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=PIANO4ALL"
+    },
+    {
+        "ProductName": "4 Offers",
+        "VendorName": "MIKEGEARY1",
+        "CategoryId": "f24cf652-0024-44ef-8414-db24ee248e55",
+        "AvgRating": 31.17,
+        "Price": 18.95,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=MIKEGEARY1"
+    },
+    {
+        "ProductName": "Diabetes Freedom",
+        "VendorName": "D2FREE",
+        "CategoryId": "a8e3844a-317e-4ad8-8288-5095b8f84f8c",
+        "AvgRating": 32.84,
+        "Price": 77.39,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=D2FREE"
+    },
+    {
+        "ProductName": "EndoPeak",
+        "VendorName": "ENDOPEAK",
+        "CategoryId": "63aa4bdc-d5c0-492d-b90f-b76b9561f235",
+        "AvgRating": 43.38,
+        "Price": 120.42,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=ENDOPEAK"
+    },
+    {
+        "ProductName": "Resurge",
+        "VendorName": "RESURGE",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 28.62,
+        "Price": 111.21,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=RESURGE"
+    },
+    {
+        "ProductName": "Cardio Shield",
+        "VendorName": "CARDIOSHIE",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 36.61,
+        "Price": 125.22,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=CARDIOSHIE"
+    },
+    {
+        "ProductName": "High Blood Pressure",
+        "VendorName": "BLOODPRESS",
+        "CategoryId": "a8e3844a-317e-4ad8-8288-5095b8f84f8c",
+        "AvgRating": 45.67,
+        "Price": 42.06,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=BLOODPRESS"
+    },
+    {
+        "ProductName": "My Shed Plans",
+        "VendorName": "SHEDPLANS",
+        "CategoryId": "fd0ea9e3-5221-464d-8d9b-b2b4a6acb211",
+        "AvgRating": 43.45,
+        "Price": 28.89,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=SHEDPLANS"
+    },
+    {
+        "ProductName": "Ejaculation_By_Command",
+        "VendorName": "EJCOMMAND",
+        "CategoryId": "63aa4bdc-d5c0-492d-b90f-b76b9561f235",
+        "AvgRating": 23.5,
+        "Price": 26.18,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=EJCOMMAND"
+    },
+    {
+        "ProductName": "NEW Unlock Your Hip Flexors VSL with Therapy Tool",
+        "VendorName": "PAINFIX",
+        "CategoryId": "652eff06-cba7-481f-9ea5-ead3572458db",
+        "AvgRating": 35.98,
+        "Price": 202.89,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=PAINFIX"
+    },
+    {
+        "ProductName": "Medicinal Garden Kit",
+        "VendorName": "BOOKOFREN",
+        "CategoryId": "a8e3844a-317e-4ad8-8288-5095b8f84f8c",
+        "AvgRating": 30.94,
+        "Price": 48.89,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=BOOKOFREN"
+    },
+    {
+        "ProductName": "Feel Good Knees for Fast Pain Relief",
+        "VendorName": "T1KUSLIK",
+        "CategoryId": "652eff06-cba7-481f-9ea5-ead3572458db",
+        "AvgRating": 32.82,
+        "Price": 43.79,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=T1KUSLIK"
+    },
+    {
+        "ProductName": "Slim Guard",
+        "VendorName": "SLIMGUARD",
+        "CategoryId": "37159d28-d1b6-4e94-ba8b-11b9dbf06267",
+        "AvgRating": 26.05,
+        "Price": 97.47,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=SLIMGUARD"
+    },
+    {
+        "ProductName": "EAT STOP EAT And More Brad Pilon Bestsellers",
+        "VendorName": "EATSTOPEAT",
+        "CategoryId": "37159d28-d1b6-4e94-ba8b-11b9dbf06267",
+        "AvgRating": 18.27,
+        "Price": 7.31,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=EATSTOPEAT"
+    },
+    {
+        "ProductName": "New Offer",
+        "VendorName": "DROUGHTUSA",
+        "CategoryId": "cea46112-e2a8-4276-ab73-7557c8b5c2d7",
+        "AvgRating": 30.44,
+        "Price": 41.14,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=DROUGHTUSA"
+    },
+    {
+        "ProductName": "BiOptimizers Magnesium Breakthrough",
+        "VendorName": "BIOPTIMIZE",
+        "CategoryId": "66a10c17-79de-44f5-b680-6e2e78079f1e",
+        "AvgRating": 31.63,
+        "Price": 84.13,
+        "Currency": "$",
+        "AffiliateLink": "https://hop.clickbank.net/?affiliate=zzzzz&vendor=BIOPTIMIZE"
+    }
+]

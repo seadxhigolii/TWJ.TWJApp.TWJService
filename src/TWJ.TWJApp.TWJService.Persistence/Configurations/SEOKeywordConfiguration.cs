@@ -20,16 +20,25 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
                 .IsRequired();
 
             builder.Property(k => k.SearchVolume)
-                .HasColumnName("SearchVolume")
-                .IsRequired();
+                .HasColumnName("SearchVolume");
 
             builder.Property(k => k.CompetitionLevel)
-                .HasColumnName("CompetitionLevel")
-                .IsRequired();
+                .HasColumnName("CompetitionLevel");
 
             builder.Property(k => k.ClickThroughRate)
-                .HasColumnName("ClickThroughRate")
-                .IsRequired();
+                .HasColumnName("ClickThroughRate");
+
+            builder.Property(k => k.CategoryId)
+                .IsRequired(false);
+
+            builder.Property(k => k.Type)
+                .HasColumnName("KeywordType")
+                .HasConversion<string>();
+
+            builder.HasOne(post => post.Category)
+                .WithOne()
+                .HasForeignKey<SEOKeyword>(post => post.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
             #endregion
 
             #region Configure Table Name

@@ -20,7 +20,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Base.Commands.Add
 
         public async Task<Unit> Handle(AddTemplateSettingCommand request, CancellationToken cancellationToken)
         {
-            await _context.TemplateSetting.AddAsync(request.AddTemplateSetting(), cancellationToken);
+            await _context.TemplateSettings.AddAsync(request.AddTemplateSetting(), cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
             return Unit.Value;
         }

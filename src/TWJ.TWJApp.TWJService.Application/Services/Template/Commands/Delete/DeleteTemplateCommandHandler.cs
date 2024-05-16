@@ -23,11 +23,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Template.Commands.Delete
 
         public async Task<Unit> Handle(DeleteTemplateCommand request, CancellationToken cancellationToken)
         {
-            var data = await _context.Template.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var data = await _context.Templates.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (data == null) throw new BadRequestException(ValidatorMessages.NotFound("Art"));
 
-            _context.Template.Remove(data);
+            _context.Templates.Remove(data);
 
             await _context.SaveChangesAsync(cancellationToken);
 
