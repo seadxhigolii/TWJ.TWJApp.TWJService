@@ -25,6 +25,8 @@ namespace TWJ.TWJApp.TWJService.Application.Interfaces
         DbSet<Tag> Tag { get; set; }
         DbSet<BlogPostTags> BlogPostTags { get; set; }
         DbSet<NewsLetterSubscriber> NewsLetterSubscribers { get; set; }
+        DbSet<Banner> Banners { get; set; }
+        DbSet<BlogPostBanner> BlogPostBanners { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

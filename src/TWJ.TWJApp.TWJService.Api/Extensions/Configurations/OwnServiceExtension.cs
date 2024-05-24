@@ -25,8 +25,21 @@ namespace TWJ.TWJApp.TWJService.Api.Extensions.Configurations
         public static void RegisterOwnService(this IServiceCollection services)
         {
             services.AddHttpClient<OpenAiService>();
-            services.AddTransient<IMedicalXpressScrapperService, MedicalXpressScrapperService>();
-            services.AddTransient<IMedicalXpressService, MedicalXpressService>();
+
+            #region Scrappers
+
+            //Beginning of Scrappers
+            services.AddTransient<WebScraper.Interfaces.IMedicalXpressScrapperService, WebScraper.Services.MedicalXpressScrapperService>();
+            services.AddTransient<WebScraper.Interfaces.IVeryWellHealthScrapperService, WebScraper.Services.VeryWellHealthScrapperService>();
+            services.AddTransient<WebScraper.Interfaces.IScienceDailyScrapperService, WebScraper.Services.ScienceDailyScrapperService>();
+
+            services.AddTransient<Application.Interfaces.IMedicalXpressService, Application.Services.MedicalXpress.MedicalXpressService>();
+            services.AddTransient<Application.Interfaces.IVeryWellHealthScrapperService, Application.Services.VeryWellHealth.VeryWellHealthScrapperService>();
+            services.AddTransient<Application.Interfaces.IScienceDailyScrapperService, Application.Services.ScienceDaily.ScienceDailyScrapperService>();
+            //End of Scrappers
+
+            #endregion
+
             services.AddScoped<IOpenAiService, OpenAiService>();
             services.AddScoped<IPreplexityService, PreplexityService>();
             services.AddScoped<IGlobalHelperService, GlobalHelperService>();

@@ -40,6 +40,8 @@ namespace TWJ.TWJApp.TWJService.Persistence
         public DbSet<Tag> Tag { get; set; }
         public DbSet<BlogPostTags> BlogPostTags { get; set; }
         public DbSet<NewsLetterSubscriber> NewsLetterSubscribers { get; set; }
+        public DbSet<Banner> Banners { get; set; }
+        public DbSet<BlogPostBanner> BlogPostBanners { get; set; }
         public DbSet<AdClick> AdClicks { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

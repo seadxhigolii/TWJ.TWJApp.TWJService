@@ -35,6 +35,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         public ICollection<Comment> Comments { get; set; }
         public ICollection<BlogPostSEOKeyword> BlogPostSEOKeywords { get; set; }
         public ICollection<AdClick> AdClicks { get; set; }
+        public ICollection<BlogPostBanner> BlogPostBanners { get; set; }
 
         #endregion
 

@@ -19,17 +19,25 @@ namespace TWJ.TWJApp.TWJService.Application.Services.News.Commands.Generate
         private readonly IGlobalHelperService _globalHelper;
         private readonly IPreplexityService _preplexityService;
         private readonly IMedicalXpressService _medicalXpressSerivce;
+        private readonly IVeryWellHealthScrapperService _veryWellHealthScrapperService;
+        private readonly IScienceDailyScrapperService _scienceDailyScrapperService;
         private readonly string currentClassName = "";
         string medicalXpressURL;
+        string veryWellHealthURL;
+        string scienceDailyURL;
 
-        public GenerateNewsCommandHandler(ITWJAppDbContext context, IGlobalHelperService globalHelper, IPreplexityService preplexityService, IConfiguration configuration, IMedicalXpressService medicalXpressSerivce)
+        public GenerateNewsCommandHandler(ITWJAppDbContext context, IGlobalHelperService globalHelper, IPreplexityService preplexityService, IConfiguration configuration, IMedicalXpressService medicalXpressSerivce, IVeryWellHealthScrapperService veryWellHealthScrapperService, IScienceDailyScrapperService scienceDailyScrapperService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _globalHelper = globalHelper ?? throw new ArgumentNullException(nameof(globalHelper));
             currentClassName = GetType().Name;
             _preplexityService = preplexityService;
             medicalXpressURL = configuration["News:Health:MedicalXpress"];
+            veryWellHealthURL = configuration["News:Health:VeryWellHealth"];
+            scienceDailyURL = configuration["News:Health:ScienceDaily"];
             _medicalXpressSerivce = medicalXpressSerivce;
+            _veryWellHealthScrapperService = veryWellHealthScrapperService;
+            _scienceDailyScrapperService = scienceDailyScrapperService;
         }
 
         public async Task<Unit> Handle(GenerateNewsCommand request, CancellationToken cancellationToken)
@@ -37,7 +45,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.News.Commands.Generate
             try
             {
                 //var newsTitleList = await _preplexityService.GenerateTitleAsync($"Give me 10 news titles (give titles only) from this URL \"{medicalXpressURL}\".");
-                var newsList = await _medicalXpressSerivce.PerformWebScrapAsync(medicalXpressURL);
+                var newsList = await _scienceDailyScrapperService.PerformWebScrapAsync(scienceDailyURL);
 
                 foreach (var newsTitle in newsList)
                 {

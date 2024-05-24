@@ -168,7 +168,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Add
         {{
             try
             {{
-                await _context.{entityName}.AddAsync(request.Add{entityName}(), cancellationToken);
+                await _context.{entityName}s.AddAsync(request.Add{entityName}(), cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
                 return Unit.Value;
             }}
@@ -213,11 +213,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Delet
         {{
             try
             {{
-                var data = await _context.{entityName}.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+                var data = await _context.{entityName}s.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
                 if (data == null) throw new BadRequestException(ValidatorMessages.NotFound(""Record""));
 
-                _context.{entityName}.Remove(data);
+                _context.{entityName}s.Remove(data);
 
                 await _context.SaveChangesAsync(cancellationToken);
 
@@ -262,9 +262,9 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Updat
         {{
             try
             {{
-                var data = await _context.{entityName}.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+                var data = await _context.{entityName}s.AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
-                _context.{entityName}.Update(request.Update(data));
+                _context.{entityName}s.Update(request.Update(data));
 
                 await _context.SaveChangesAsync(cancellationToken);
 
@@ -309,7 +309,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Add
             {{
                 RuleFor(x => x.Property).MustAsync(async (name, cancellation) =>
                 {{
-                    return !await _context.{entityName}.AsNoTracking().AnyAsync(x => x.Property.ToLower() == name.ToLower(), cancellation);
+                    return !await _context.{entityName}s.AsNoTracking().AnyAsync(x => x.Property.ToLower() == name.ToLower(), cancellation);
                 }}).WithMessage(x => ValidatorMessages.AlreadyExists($""{entityName} with name {{x.Property}}""));
             }});
         }}
@@ -345,12 +345,12 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Commands.Updat
             {{
                 RuleFor(x => x.Property).MustAsync(async (id, cancellation) =>
                 {{
-                    return await _context.{entityName}.AsNoTracking().AnyAsync(x => x.Property == id, cancellation);
+                    return await _context.{entityName}s.AsNoTracking().AnyAsync(x => x.Property == id, cancellation);
                 }}).WithMessage(ValidatorMessages.NotFound(""{entityName}"")).DependentRules(() =>
                 {{
                     RuleFor(x => x.Property).MustAsync(async (args, id, cancellation) =>
                     {{
-                        return !await _context.{entityName}.AsNoTracking().Where(x => x.Property != id).AnyAsync(x => x.Property == args.Property, cancellation);
+                        return !await _context.{entityName}s.AsNoTracking().Where(x => x.Property != id).AnyAsync(x => x.Property == args.Property, cancellation);
                     }}).WithMessage(x => ValidatorMessages.AlreadyExists($""{entityName} with Property {{x.Property}}""));
                 }});
             }});
@@ -532,7 +532,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetAll
         {{
             try
             {{
-                var data = await _context.{entityName}
+                var data = await _context.{entityName}s
                                     .AsNoTracking()
                                     .OrderByDescending(x => x.Property)
                                     .ToListAsync(cancellationToken);
@@ -638,7 +638,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetFil
         {{
             try
             {{
-                IQueryable<Domain.Entities.{entityName}> query = _context.{entityName}.AsQueryable();
+                IQueryable<Domain.Entities.{entityName}> query = _context.{entityName}s.AsQueryable();
                 
                 query = query.ApplySorting(request.SortBy, request.SortDirection, topRecords: request.TopRecords);
                 
@@ -647,7 +647,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.{entityName}.Queries.GetFil
                     query = query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize);
                 }}
 
-                var totalItems = await _context.{entityName}.CountAsync(cancellationToken);
+                var totalItems = await _context.{entityName}s.CountAsync(cancellationToken);
 
                 var mappedData = await query.Select(src => new GetFiltered{entityName}Model
                 {{

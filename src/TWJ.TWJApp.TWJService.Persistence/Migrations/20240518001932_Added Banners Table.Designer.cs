@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TWJ.TWJApp.TWJService.Persistence;
@@ -11,9 +12,10 @@ using TWJ.TWJApp.TWJService.Persistence;
 namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 {
     [DbContext(typeof(TWJAppDbContext))]
-    partial class TWJAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240518001932_Added Banners Table")]
+    partial class AddedBannersTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,9 +105,6 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("DeletedAt");
 
-                    b.Property<string>("DestinationUrl")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -117,9 +116,6 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 
                     b.Property<string>("Position")
                         .HasColumnType("text");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
@@ -135,8 +131,6 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
 
                     b.ToTable("Banners");
                 });
@@ -1286,17 +1280,6 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Banner", b =>
-                {
-                    b.HasOne("TWJ.TWJApp.TWJService.Domain.Entities.Product", "Product")
-                        .WithMany("Banners")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.BlogPost", b =>
                 {
                     b.HasOne("TWJ.TWJApp.TWJService.Domain.Entities.BlogPostCategory", "BlogPostCategory")
@@ -1579,8 +1562,6 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Product", b =>
                 {
                     b.Navigation("AdClicks");
-
-                    b.Navigation("Banners");
 
                     b.Navigation("BlogPosts");
                 });
