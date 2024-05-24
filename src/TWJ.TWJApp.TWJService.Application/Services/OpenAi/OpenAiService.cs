@@ -1,7 +1,4 @@
-﻿using Amazon.S3;
-using Amazon.S3.Model.Internal.MarshallTransformations;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using nQuant;
 using SixLabors.ImageSharp;
@@ -39,14 +36,10 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
         private readonly string _apiKey;
         private readonly string _gptModel;
         private readonly string _affiliate;
-        private readonly string niche1;
-        private readonly string niche2;
         private readonly ITWJAppDbContext _context;
         private readonly IGlobalHelperService _globalHelper;
         private readonly string currentClassName = "";
-        private readonly IPreplexityService _preplexityService;
         private readonly IAmazonS3Service _amazonS3Service;
-        int numberOfAdvertisements = 4;
         public OpenAiService(HttpClient httpClient, IConfiguration configuration, ITWJAppDbContext context, IGlobalHelperService globalHelper, IPreplexityService preplexityService, IAmazonS3Service amazonS3Service)
         {
             _httpClient = httpClient;
@@ -58,9 +51,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
             _context = context;
             _globalHelper = globalHelper;
             currentClassName = GetType().Name;
-            niche1 = configuration["Blogging:Niche1:Name"];
-            niche2 = configuration["Blogging:Niche2:Name"];
-            _preplexityService = preplexityService;
             _amazonS3Service = amazonS3Service;
         }
         #region Public Services
@@ -74,7 +64,18 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
             {
                 string title = await GenerateSectionAsync(settings.TitlePrompt, cancellationToken);
                 blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
+                blogPostContent.AppendLine($"[advertisement]"); 
+                
+                var categoryList = await GetStringedCategoriesAsync(cancellationToken);
+                var category = await GenerateSectionAsync($"Pick one category that is related to this title '{title}' " +
+                    $"Please don't write the number of category, don't write anything else except the category name. " +
+                    $"Pick only one name, that's all. Here is the category list: {categoryList} ");
+
+                var productToPromote = await GetProductToPromoteAsync(category, cancellationToken);
+                if (productToPromote == null) 
+                {
+                    return new BlogPostResponse();
+                }
 
                 string introduction = await GenerateSectionAsync(settings.IntroductionPrompt.Replace("%%TITLE%%", title), cancellationToken);
                 blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
@@ -85,9 +86,10 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                 blogPostContent.AppendLine($"[advertisement]");
 
                 var productList = await GetRandomProductsAsync(settings.NumberOfAdvertisements + 1, cancellationToken);
+
                 string callToAction = await GenerateSectionAsync(settings.CallToActionPrompt
-                    .Replace("%%PRODUCT_NAME%%", productList[0].ProductName)
-                    .Replace("%%PRODUCT_DESCRIPTION%%", productList[0].Description)
+                    .Replace("%%PRODUCT_NAME%%", productToPromote.ProductName)
+                    .Replace("%%PRODUCT_DESCRIPTION%%", productToPromote.Description)
                     .Replace("%%TITLE%%", title),cancellationToken);
                 blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
                 blogPostContent.AppendLine($"[advertisement]");
@@ -98,7 +100,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                 var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
 
                 string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
+                string finalHtmlContent = await FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList, productToPromote);
 
                 var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
 
@@ -109,7 +111,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                     BlogPostCategoryId = settings.CategoryId,
                     BackLinkKeywords = json,
                     URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id,
+                    ProductId = productToPromote.Id,
                     //Image = await GenerateImageAsync(settings.ImagePrompt.Replace("%%IMAGE_CONCEPTS%%", concepts))
                     Image = "https://thewellnessjunctionbucket.s3.eu-north-1.amazonaws.com/6f013177-c7e3-45ae-88c4-f848a5b6de58.jpg"
                 };
@@ -284,1252 +286,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
         }
 
 
-
-        public async Task<BlogPostResponse> GenerateSEOFocusedBlogPostAsync(CancellationToken cancellationToken)
-        {
-            StringBuilder blogPostContent = new StringBuilder();
-            try
-            {
-                var (primaryKeyword, secondaryKeyword, longTailKeyword) = await GetRandomKeywordsAsync(cancellationToken);
-
-                string titlePrompt = $"Generate an engaging and SEO-rich title for a blog post focused on {primaryKeyword}.";
-
-                string introductionPrompt = $"Write a clear and attention-grabbing introduction for a blog post that introduces effective strategies for {primaryKeyword} and {secondaryKeyword}. Use [b] and [/b] for bold text, [i] and [/i] for italic text. Please structure the introduction into short paragraphs.";
-
-                string contentPrompt = $"Provide a detailed guide on the best fitness programs and dietary supplements for {primaryKeyword}, including tips for {secondaryKeyword}. Highlight how {longTailKeyword} can be beneficial. Structure the content with subtitles, each subtitle wrapped inside '[sub]' and '[/sub]'. Use bullet points, use '[b]' and '[/b]' for bold text, and '[i]' and '[/i]' for italic text. (YOU MUST MAKE SURE TO OPEN AND CLOSE THE TAGS PERFECTLY CAREFULLY!!)";
-
-                var productList = await GetRandomProductsAsync(numberOfAdvertisements + 1, cancellationToken);
-                string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
-
-                string callToActionPrompt = $"Encourage readers to explore our recommended supplements and programs for achieving their " +
-                $"goals. Highlight the benefits of integrating quality products into their regimen. Talk about the product called " +
-                $"\"{productList[0].ProductName}\" " +
-                $"and explain why this product is outstanding, focusing solely on the product's features and benefits." +
-                $"Structure the call to action in short paragraphs. " +
-                $"Please avoid personalizing the content to any specific company, do not insert any links or suggest using " +
-                $"a discount code. The focus should be on the generic advantages and qualities of the product.";
-
-                string title = await GenerateSectionAsync(titlePrompt, cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string introduction = await GenerateSectionAsync(introductionPrompt, cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string mainContent = await GenerateSectionAsync(contentPrompt, cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string ctaTitlePrompt = $"Generate a very simple CTA title for an affiliated section on a blog post with the topic on {title}.";
-
-                string callToAction = await GenerateSectionAsync(callToActionPrompt.Replace("%%PRODUCT_NAME%%", productList[0].ProductName), cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string backLinkKeywordsPrompt = $"I'm seeking to enhance my blog's SEO through a targeted backlink strategy" +
-                $". The blog focuses on {niche1} and {niche2}, with the latest post covering {title}. " +
-                $"Here's a brief summary of the post: {introduction}. Based on this, could you generate a list of " +
-                $"5-10 SEO-rich, unique, and potentially high-impact keywords or phrases that other websites and blogs might use to " +
-                $"link back to this post? These keywords should align with the post's content, have a blend of search volume and " +
-                $"specificity to target niche audiences, and be able to attract quality backlinks from reputable sources within " +
-                $"{niche1} and {niche2}.The format of the keywords should be JSON. The key will be called 'keyword' and the value will" +
-                $"be the score (a decimanl number from 0 to 100) for that keyword. " +
-                $"Here is the template you must use: {{\"keyword\", \"score\"}} \r\n.";
-
-                string backLinkKeywordList = await GenerateSectionAsync(backLinkKeywordsPrompt, cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
-
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
-
-                finalHtmlContent = _globalHelper.RemoveTextWithinSquareBrackets(finalHtmlContent);
-
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
-
-                var response = new BlogPostResponse
-                {
-                    Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
-                    BlogPostCategoryId = Guid.Parse("79320ffc-726e-4392-9b3a-ee6c2b64bd3f"),
-                    BackLinkKeywords = json,
-                    URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id
-                };
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-        public async Task<BlogPostResponse> GenerateMythBlogPostAsync(CancellationToken cancellationToken)
-        {
-            StringBuilder blogPostContent = new StringBuilder();
-            try
-            {
-                string titlePrompt = $"Create a captivating blog post title that reveals unexpected insights into everyday health and" +
-                    $" lifestyle topics. The title should uncover a common myth, provide a solution to a frequent concern, or share" +
-                    $" expert advice in a surprising and thought-provoking way. The title should combine a sense of urgency with " +
-                    $"practical advice, and be structured in a way that instantly grabs attention by highlighting little-known facts " +
-                    $"or suggesting transformative benefits.";
-
-                string title = await GenerateSectionAsync(titlePrompt, cancellationToken);
-
-                string introductionPrompt = $"Write a clear and attention-grabbing introduction for a blog post about this topic: '{title}'. Use [b] and [/b] for bold text, [i] and [/i] for italic text. Please structure the introduction into short paragraphs.";
-
-                string contentPrompt = $"Provide detailed and professional information on this topic: {title}. " +
-                    $"Structure the content with subtitles, each subtitle wrapped inside '[sub]' and '[/sub]'." +
-                    $" Use bullet points, use '[b]' and '[/b]' for bold text, and '[i]' and '[/i]' for italic text. " +
-                    $"(YOU MUST MAKE SURE TO OPEN AND CLOSE THE TAGS PERFECTLY CAREFULLY!!)";
-
-                var productList = await GetRandomProductsAsync(numberOfAdvertisements + 1, cancellationToken);
-                string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
-
-                string callToActionPrompt = $"Encourage readers to explore our recommended supplements and programs for achieving their " +
-                $"goals. Highlight the benefits of integrating quality products into their regimen. Talk about the product called " +
-                $"\"{productList[0].ProductName}\" " +
-                $"and explain why this product is outstanding, focusing solely on the product's features and benefits." +
-                $"Structure the call to action in short paragraphs. " +
-                $"Please avoid personalizing the content to any specific company, do not insert any links or suggest using " +
-                $"a discount code. The focus should be on the generic advantages and qualities of the product.";
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string introduction = await GenerateSectionAsync(introductionPrompt, cancellationToken);
-
-                string conceptsForImagePrompt = $"Identify and list the key concepts or topics from the following blog title: '{title}'. Split the concepts by comma.";
-
-                string concepts = await GenerateSectionAsync(conceptsForImagePrompt, cancellationToken);
-
-                string promptForImagePrompt = $"Create a detailed prompt for an illustrative, split-design image that conveys the following key concepts: {concepts}. The left side should depict the absence or negative aspect related to the concepts, and the right side should show the positive outcome or presence of these elements. The style should be colorful, friendly, and clear enough to be understood at a glance.";
-
-                string imagePrompt = await GenerateSectionAsync(promptForImagePrompt, cancellationToken);
-
-                string image = await GenerateImageAsync(imagePrompt);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string mainContent = await GenerateSectionAsync(contentPrompt, cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string callToAction = await GenerateSectionAsync(callToActionPrompt.Replace("%%PRODUCT_NAME%%", productList[0].ProductName), cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string backLinkKeywordsPrompt = $"I'm seeking to enhance my blog's SEO through a targeted backlink strategy" +
-                $". The blog focuses on {niche1} and {niche2}, with the latest post covering {title}. " +
-                $"Here's a brief summary of the post: {introduction}. Based on this, could you generate a list of " +
-                $"5-10 SEO-rich, unique, and potentially high-impact keywords or phrases that other websites and blogs might use to " +
-                $"link back to this post? These keywords should align with the post's content, have a blend of search volume and " +
-                $"specificity to target niche audiences, and be able to attract quality backlinks from reputable sources within " +
-                $"{niche1} and {niche2}.The format of the keywords should be JSON. The key will be called 'keyword' and the value will" +
-                $"be the score (a number from 0 to 100) for that keyword. " +
-                $"Here is the template you must use: {{\"keyword\", \"score\"}} \r\n.";
-
-                string backLinkKeywordList = await GenerateSectionAsync(backLinkKeywordsPrompt, cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
-                
-
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
-
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
-
-                var response = new BlogPostResponse
-                {
-                    Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
-                    BlogPostCategoryId = Guid.Parse("79320ffc-726e-4392-9b3a-ee6c2b64bd3f"),
-                    BackLinkKeywords = json,
-                    URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id,
-                    Image = image
-                };
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-        public async Task<BlogPostResponse> GenerateWeightLossBlogPostAsync(CancellationToken cancellationToken)
-        {
-            StringBuilder blogPostContent = new StringBuilder();
-            try
-            {
-                string titlePrompt = "Generate a dynamic blog post title related to weight loss that captures the reader's attention. " +
-                    "The title could address emerging diet trends, debunk myths about weight loss, offer insights into effective workout routines, " +
-                    "or explore the psychological aspects of losing weight. Aim for variety, ensuring that each title sparks curiosity " +
-                    "and offers a unique take on the weight loss journey.";
-
-                string title = await GenerateSectionAsync(titlePrompt, cancellationToken);
-
-                string introductionPrompt = "Craft a compelling introduction for the blog post titled '" + title + "'. Use [b] and [/b] for bold text, " +
-                    "[i] and [/i] for italic text, to emphasize key points. The introduction should set the stage for an insightful exploration " +
-                    "of the topic, encouraging readers to continue for valuable tips, debunked myths, or novel weight loss strategies.";
-
-                string contentPrompt = "Delve into the details of '" + title + "', providing readers with actionable advice, scientific findings, " +
-                    "or motivational stories. Organize the content with engaging subtitles, formatted as '[sub][/sub]', and utilize bullet points " +
-                    "for clarity. Incorporate bold ([b][/b]) and italic ([i][/i]) text for emphasis, ensuring the article is as informative as it is engaging.";
-
-                var productList = await GetRandomProductsAsync(numberOfAdvertisements + 1, cancellationToken);
-                string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
-
-                string callToActionPrompt = "Inspire readers to take action towards their weight loss goals by highlighting the benefits " +
-                    "of integrating specific products, like '" + productList[0].ProductName + "', into their routines. Discuss the product " +
-                    "in a way that emphasizes its relevance to the blog's theme, focusing on benefits and features without direct promotion. " +
-                    "Maintain an informative tone, structuring the call to action in short, impactful paragraphs.";
-
-                // ADVERTISEMENT
-                blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string introduction = await GenerateSectionAsync(introductionPrompt, cancellationToken);
-
-                string conceptsForImagePrompt = "From the blog title '" + title + "', extract key concepts or themes that can be visually represented. " +
-                    "List these concepts, aiming for a mix that could include dieting tips, exercise routines, motivational elements, or myth debunking, " +
-                    "to guide the creation of a compelling image that aligns with the weight loss theme.";
-
-                string concepts = await GenerateSectionAsync(conceptsForImagePrompt, cancellationToken);
-
-                string promptForImagePrompt = "Based on key concepts: " + concepts + ", create a detailed prompt for an image that juxtaposes common " +
-                    "weight loss myths with truths, showcases before-and-after scenarios, or illustrates a journey of transformation. The image " +
-                    "should be vibrant and engaging, clearly conveying a positive message about weight loss.";
-
-                string imagePrompt = await GenerateSectionAsync(promptForImagePrompt, cancellationToken);
-
-                string image = await GenerateImageAsync(imagePrompt);
-
-                // ADVERTISEMENT
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string mainContent = await GenerateSectionAsync(contentPrompt, cancellationToken);
-
-                // ADVERTISEMENT
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string callToAction = await GenerateSectionAsync(callToActionPrompt.Replace("%%PRODUCT_NAME%%", productList[0].ProductName), cancellationToken);
-
-                // ADVERTISEMENT
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string backLinkKeywordsPrompt = "For enhancing SEO in the weight loss category, generate a list of 5-10 diverse and SEO-rich keywords or phrases, " +
-                    "based on the blog post titled '" + title + "'. These should be unique, aiming for a mix of broad appeal and niche specificity, " +
-                    "to attract high-quality backlinks. Format the keywords in JSON with 'keyword' as the key and a score from 0 to 100 for each." +
-                    "Here is the template you must use: {{\"keyword\", \"score\"}} \r\n.";
-
-                string backLinkKeywordList = await GenerateSectionAsync(backLinkKeywordsPrompt, cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
-
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
-
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
-
-                var response = new BlogPostResponse
-                {
-                    Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
-                    BlogPostCategoryId = Guid.Parse("79320ffc-726e-4392-9b3a-ee6c2b64bd3f"),
-                    BackLinkKeywords = json,
-                    URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id,
-                    Image = image
-                };
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-        public async Task<BlogPostResponse> GenerateBrightsideBlogPostTitleAsync(CancellationToken cancellationToken)
-        {
-            StringBuilder blogPostContent = new StringBuilder();
-            try
-            {
-                string titlePrompt = $"Create a captivating blog post title that offers a straightforward dietary solution to a " +
-                    $"common health concern. The title should hint at an unexpected yet easy change in the reader's morning routine" +
-                    $" that could have a significant positive impact on their health. Incorporate numbers to suggest specific advice" +
-                    $" or benefits, and make sure the title arouses curiosity while promising practical value.";
-
-                string title = await GenerateSectionAsync(titlePrompt, cancellationToken);
-
-                string introductionPrompt = $"Write a compelling introduction for a blog post focusing on {title}. The introduction " +
-                    $"should empathize with the reader's frustrations or " +
-                    "discomforts regarding this issue. Then, hint at a simple yet unexpected dietary change available in their" +
-                    " morning routine that could offer significant benefits. The tone should be friendly and reassuring, promising " +
-                    "that the solution will be easy to incorporate into their daily life and backed by nutritional insights. The goal " +
-                    "is to make the reader feel understood and intrigued about the solution, encouraging them to continue reading for " +
-                    "practical advice.";
-
-
-                string contentPrompt = $"Craft engaging and detailed content for the blog post with a focus on this topic: '{title}'. " +
-                    "Begin by presenting the problem or question in a way that resonates with the reader's experiences. " +
-                    "Then, introduce the solution or key insights, breaking down the information into easily digestible segments. " +
-                    $"Use [sub]subheadings[/sub] to organize the content into clear sections, each offering a specific piece of advice, insight, or information related to '{title}'. " +
-                    "Incorporate bullet points to list out tips, steps, or benefits, making the content skimmable and easy to follow. " +
-                    "Highlight critical information or surprising facts using [b]bold[/b] text and emphasize important concepts or terms with [i]italic[/i] text. " +
-                    "Throughout, maintain a conversational and positive tone, aiming to educate and motivate the reader. " +
-                    "Ensure all formatting tags are used correctly to enhance readability and engagement.";
-
-
-                var productList = await GetRandomProductsAsync(numberOfAdvertisements + 1, cancellationToken);
-                string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
-
-                string callToActionPrompt = $"Encourage readers to explore our recommended supplements and programs for achieving their " +
-                $"goals. Highlight the benefits of integrating quality products into their regimen. Talk about the product called " +
-                $"\"{productList[0].ProductName}\" " +
-                $"and explain why this product is outstanding, focusing solely on the product's features and benefits." +
-                $"Structure the call to action in short paragraphs. " +
-                $"Please avoid personalizing the content to any specific company, do not insert any links or suggest using " +
-                $"a discount code. The focus should be on the generic advantages and qualities of the product.";
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string introduction = await GenerateSectionAsync(introductionPrompt, cancellationToken);
-
-                string conceptsForImagePrompt = $"Identify 1 key concept from this blog title: '{title}'.";
-
-                string concepts = await GenerateSectionAsync(conceptsForImagePrompt, cancellationToken);
-
-                string promptForImagePrompt = $"Based on this identified key concept '{conceptsForImagePrompt}', create a short and simple prompt for an " +
-                "image that represents these nutritional advice themes.";
-
-                string imagePrompt = await GenerateSectionAsync(promptForImagePrompt, cancellationToken);
-
-                string image = await GenerateImageAsync(imagePrompt);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string mainContent = await GenerateSectionAsync(contentPrompt, cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string callToAction = await GenerateSectionAsync(callToActionPrompt.Replace("%%PRODUCT_NAME%%", productList[0].ProductName), cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string backLinkKeywordsPrompt = $"I'm seeking to enhance my blog's SEO through a targeted backlink strategy" +
-                $". The blog focuses on {niche1} and {niche2}, with the latest post covering {title}. " +
-                $"Here's a brief summary of the post: {introduction}. Based on this, could you generate a list of " +
-                $"5-10 SEO-rich, unique, and potentially high-impact keywords or phrases that other websites and blogs might use to " +
-                $"link back to this post? These keywords should align with the post's content, have a blend of search volume and " +
-                $"specificity to target niche audiences, and be able to attract quality backlinks from reputable sources within " +
-                $"{niche1} and {niche2}.The format of the keywords should be JSON. The key will be called 'keyword' and the value will" +
-                $"be the score (a number from 0 to 100) for that keyword. " +
-                $"Here is the template you must use: {{\"keyword\", \"score\"}} \r\n.";
-
-                string backLinkKeywordList = await GenerateSectionAsync(backLinkKeywordsPrompt, cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
-
-
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
-
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
-
-                var response = new BlogPostResponse
-                {
-                    Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
-                    BlogPostCategoryId = Guid.Parse("7f002904-1bb0-4bbb-bd2f-ecb88dc3122e"),
-                    BackLinkKeywords = json,
-                    URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id,
-                    Image = image
-                };
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-        public async Task<BlogPostResponse> GenerateNutritionalAdviceBlogPostAsync(CancellationToken cancellationToken)
-        {
-            StringBuilder blogPostContent = new StringBuilder();
-            try
-            {
-                string titlePrompt = $"Create a compelling blog post title centered around diet and nutritional advice for weight loss. " +
-                    "The title should debunk common dietary myths, highlight the importance of balancing macronutrients, " +
-                    "or offer insights into reading food labels. Aim for a title that combines intrigue with practical guidance, " +
-                    "and motivates readers to discover nutritional truths that can transform their approach to weight loss.";
-
-                string title = await GenerateSectionAsync(titlePrompt, cancellationToken);
-
-                string introductionPrompt = $"Craft a clear and engaging introduction for a blog post on the topic: '{title}'. " +
-                    $"Use [b] and [/b] for bold text, [i] and [/i] for italic text. Structure the introduction to outline the post's"+
-                    $"key points in short paragraphs, setting the stage for an informative deep dive into nutritional advice.";
-
-                string contentPrompt = $"Deliver comprehensive and expertly curated information on the topic: {title}. Organize the content " +
-                "with subtitles, using '[sub]' and '[/sub]' for subtitles. Include bullet points for lists, and use text formatting " +
-                "(bold and italic) to emphasize key points. Ensure all formatting tags are correctly opened and closed.";
-
-                var productList = await GetRandomProductsAsync(numberOfAdvertisements + 1, cancellationToken);
-                string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
-
-                string callToActionPrompt = $"Encourage readers to explore our recommended supplements and programs for achieving their " +
-                $"goals. Highlight the benefits of integrating quality products into their regimen. Talk about the product called " +
-                $"\"{productList[0].ProductName}\" " +
-                $"and explain why this product is outstanding, focusing solely on the product's features and benefits." +
-                $"Structure the call to action in short paragraphs. " +
-                $"Please avoid personalizing the content to any specific company, do not insert any links or suggest using " +
-                $"a discount code. The focus should be on the generic advantages and qualities of the product.";
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string introduction = await GenerateSectionAsync(introductionPrompt, cancellationToken);
-
-                string conceptsForImagePrompt = $"Identify key concepts or topics from the blog title: '{title}'.";
-
-                string concepts = await GenerateSectionAsync(conceptsForImagePrompt, cancellationToken);
-
-                string promptForImagePrompt = "Based on the identified key concepts, create a detailed prompt for an illustrative, " +
-                "image that visually represents these nutritional advice themes. " +
-                "Opt for a style that's colorful, engaging, and informative, making " +
-                "complex concepts accessible at a glance.";
-                string imagePrompt = await GenerateSectionAsync(promptForImagePrompt, cancellationToken);
-
-                string image = await GenerateImageAsync(imagePrompt);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string mainContent = await GenerateSectionAsync(contentPrompt, cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string callToAction = await GenerateSectionAsync(callToActionPrompt.Replace("%%PRODUCT_NAME%%", productList[0].ProductName), cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string backLinkKeywordsPrompt = $"I'm seeking to enhance my blog's SEO through a targeted backlink strategy" +
-                $". The blog focuses on {niche1} and {niche2}, with the latest post covering {title}. " +
-                $"Here's a brief summary of the post: {introduction}. Based on this, could you generate a list of " +
-                $"5-10 SEO-rich, unique, and potentially high-impact keywords or phrases that other websites and blogs might use to " +
-                $"link back to this post? These keywords should align with the post's content, have a blend of search volume and " +
-                $"specificity to target niche audiences, and be able to attract quality backlinks from reputable sources within " +
-                $"{niche1} and {niche2}.The format of the keywords should be JSON. The key will be called 'keyword' and the value will" +
-                $"be the score (a number from 0 to 100) for that keyword. " +
-                $"Here is the template you must use: {{\"keyword\", \"score\"}} \r\n.";
-
-                string backLinkKeywordList = await GenerateSectionAsync(backLinkKeywordsPrompt, cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
-
-
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
-
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
-
-                var response = new BlogPostResponse
-                {
-                    Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
-                    BlogPostCategoryId = Guid.Parse("fe74be57-a371-4a55-99a9-a8493f5b5f82"),
-                    BackLinkKeywords = json,
-                    URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id,
-                    Image = image
-                };
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-        public async Task<BlogPostResponse> GenerateExerciseGuidesBlogPostAsync(CancellationToken cancellationToken)
-        {
-            StringBuilder blogPostContent = new StringBuilder();
-            try
-            {
-                string titlePrompt = "Generate a dynamic and motivating blog post title about exercise guides. " +
-                    "The title should appeal to both beginners and advanced fitness enthusiasts, covering aspects like home workouts, " +
-                    "gym routines, and outdoor exercises. Ensure the title encapsulates the spirit of inclusivity and the benefits of regular exercise.";
-
-                string title = await GenerateSectionAsync(titlePrompt, cancellationToken);
-
-                string introductionPrompt = $"Compose a compelling introduction for a blog post titled '{title}'. " +
-                    "Emphasize the importance of physical activity for all fitness levels and environments. Use [b] and [/b] for bold text, " +
-                    "[i] and [/i] for italic text, and ensure the introduction is broken into short, engaging paragraphs.";
-
-                string contentPrompt = $"Create detailed and informative content for the blog post: {title}. Include workout plans, " +
-                    "exercise routines, and tips suitable for a wide range of individuals, from beginners to advanced. Structure the content " +
-                    "with [sub]subtitles[/sub] for each section, such as home workouts, gym routines, and outdoor exercises. Incorporate bullet points, " +
-                    "and use [b]bold[/b] and [i]italic[/i] text for emphasis. All formatting tags must be correctly opened and closed.";
-
-                var productList = await GetRandomProductsAsync(numberOfAdvertisements + 1, cancellationToken);
-                string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
-
-                string callToActionPrompt = $"Encourage readers to explore our recommended supplements and programs for achieving their " +
-                $"goals. Highlight the benefits of integrating quality products into their regimen. Talk about the product called " +
-                $"\"{productList[0].ProductName}\" " +
-                $"and explain why this product is outstanding, focusing solely on the product's features and benefits." +
-                $"Structure the call to action in short paragraphs. " +
-                $"Please avoid personalizing the content to any specific company, do not insert any links or suggest using " +
-                $"a discount code. The focus should be on the generic advantages and qualities of the product.";
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string introduction = await GenerateSectionAsync(introductionPrompt, cancellationToken);
-
-                string conceptsForImagePrompt = $"Identify key concepts or topics from the blog title: '{title}'.";
-
-                string concepts = await GenerateSectionAsync(conceptsForImagePrompt, cancellationToken);
-
-                string promptForImagePrompt = $"Based on the identified key concepts {conceptsForImagePrompt}, create a detailed prompt for an " +
-                "image that represents these nutritional advice themes.";
-
-                string imagePrompt = await GenerateSectionAsync(promptForImagePrompt, cancellationToken);
-
-                string image = await GenerateImageAsync(imagePrompt);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string mainContent = await GenerateSectionAsync(contentPrompt, cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string callToAction = await GenerateSectionAsync(callToActionPrompt.Replace("%%PRODUCT_NAME%%", productList[0].ProductName), cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string backLinkKeywordsPrompt = $"I'm seeking to enhance my blog's SEO through a targeted backlink strategy" +
-                $". The blog focuses on {niche1} and {niche2}, with the latest post covering {title}. " +
-                $"Here's a brief summary of the post: {introduction}. Based on this, could you generate a list of " +
-                $"5-10 SEO-rich, unique, and potentially high-impact keywords or phrases that other websites and blogs might use to " +
-                $"link back to this post? These keywords should align with the post's content, have a blend of search volume and " +
-                $"specificity to target niche audiences, and be able to attract quality backlinks from reputable sources within " +
-                $"{niche1} and {niche2}.The format of the keywords should be JSON. The key will be called 'keyword' and the value will" +
-                $"be the score (a number from 0 to 100) for that keyword. " +
-                $"Here is the template you must use: {{\"keyword\", \"score\"}} \r\n.";
-
-                string backLinkKeywordList = await GenerateSectionAsync(backLinkKeywordsPrompt, cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
-
-
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
-
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
-
-                var response = new BlogPostResponse
-                {
-                    Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
-                    BlogPostCategoryId = Guid.Parse("a213dda9-e0a8-4869-9d9b-c3e74d2e39a5"),
-                    BackLinkKeywords = json,
-                    URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id,
-                    Image = image
-                };
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-        public async Task<BlogPostResponse> GenerateRecipesAndMealPlansBlogPostAsync(CancellationToken cancellationToken)
-        {
-            StringBuilder blogPostContent = new StringBuilder();
-            try
-            {
-                string titlePrompt = "Craft an enticing blog post title that showcases healthy, low-calorie recipes and meal plans. " +
-                   "The title should communicate the ease of meal prep and the benefits of following these meal plans for weight loss and healthy living. " +
-                   "Aim for a title that is both inviting and informative, encouraging readers to explore simple yet nutritious meal options.";
-
-                string title = await GenerateSectionAsync(titlePrompt, cancellationToken);
-
-                string introductionPrompt = $"Compose an engaging introduction for a blog post with the title '{title}', focusing on healthy eating habits. " +
-                    "Highlight the significance of low-calorie recipes and well-planned meals in achieving weight loss goals. Use [b] and [/b] for bold text, " +
-                    "[i] and [/i] for italic text. Structure the introduction to captivate the reader's interest in discovering delicious and nutritious meal options.";
-
-                string contentPrompt = $"Develop in-depth and appetizing content for the blog post: {title}. Feature healthy, low-calorie recipes " +
-                    "and offer practical weekly meal plans that aid in weight loss. Structure the content with [sub]subtitles[/sub] for each recipe and meal plan, " +
-                    "emphasize the nutritional benefits, and use bullet points for ingredients and steps. Employ [b]bold[/b] and [i]italic[/i] text for emphasis. " +
-                    "Ensure all formatting tags are correctly opened and closed.";
-
-                var productList = await GetRandomProductsAsync(numberOfAdvertisements + 1, cancellationToken);
-                string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
-
-                string callToActionPrompt = $"Encourage readers to explore our recommended supplements and programs for achieving their " +
-                $"goals. Highlight the benefits of integrating quality products into their regimen. Talk about the product called " +
-                $"\"{productList[0].ProductName}\" " +
-                $"and explain why this product is outstanding, focusing solely on the product's features and benefits." +
-                $"Structure the call to action in short paragraphs. " +
-                $"Please avoid personalizing the content to any specific company, do not insert any links or suggest using " +
-                $"a discount code. The focus should be on the generic advantages and qualities of the product.";
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string introduction = await GenerateSectionAsync(introductionPrompt, cancellationToken);
-
-                string conceptsForImagePrompt = $"Identify 1 key concept from this blog title: '{title}'.";
-
-                string concepts = await GenerateSectionAsync(conceptsForImagePrompt, cancellationToken);
-
-                string promptForImagePrompt = $"Based on this identified key concept '{conceptsForImagePrompt}', create a short and simple prompt for an " +
-                "image that represents these nutritional advice themes.";
-
-                string imagePrompt = await GenerateSectionAsync(promptForImagePrompt, cancellationToken);
-
-                string image = await GenerateImageAsync(imagePrompt);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string mainContent = await GenerateSectionAsync(contentPrompt, cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string callToAction = await GenerateSectionAsync(callToActionPrompt.Replace("%%PRODUCT_NAME%%", productList[0].ProductName), cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string backLinkKeywordsPrompt = $"I'm seeking to enhance my blog's SEO through a targeted backlink strategy" +
-                $". The blog focuses on {niche1} and {niche2}, with the latest post covering {title}. " +
-                $"Here's a brief summary of the post: {introduction}. Based on this, could you generate a list of " +
-                $"5-10 SEO-rich, unique, and potentially high-impact keywords or phrases that other websites and blogs might use to " +
-                $"link back to this post? These keywords should align with the post's content, have a blend of search volume and " +
-                $"specificity to target niche audiences, and be able to attract quality backlinks from reputable sources within " +
-                $"{niche1} and {niche2}.The format of the keywords should be JSON. The key will be called 'keyword' and the value will" +
-                $"be the score (a number from 0 to 100) for that keyword. " +
-                $"Here is the template you must use: {{\"keyword\", \"score\"}} \r\n.";
-
-                string backLinkKeywordList = await GenerateSectionAsync(backLinkKeywordsPrompt, cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
-
-
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
-
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
-
-                var response = new BlogPostResponse
-                {
-                    Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
-                    BlogPostCategoryId = Guid.Parse("fe74be57-a371-4a55-99a9-a8493f5b5f82"),
-                    BackLinkKeywords = json,
-                    URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id,
-                    Image = image
-                };
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-        public async Task<BlogPostResponse> GenerateNumberedBlogPostTitleAsync(CancellationToken cancellationToken)
-        {
-            StringBuilder blogPostContent = new StringBuilder();
-            try
-            {
-                string titlePrompt = $"Generate a compelling blog post title in the category of weight loss that includes a number. " +
-                    "The title should promise actionable advice, tips, or insights for readers interested in weight loss, " +
-                    "such as revealing foods that aid in weight loss, simple exercise routines, or myths debunked. " +
-                    "The title must be engaging, informative, and include a list format, e.g., '7 Foods That...', '5 Ways To...', etc.";
-
-                string title = await GenerateSectionAsync(titlePrompt, cancellationToken);
-
-                string introductionPrompt = $"Compose an engaging introduction for a blog post with the title '{title}'. " +
-                    "Use [b] and [/b] for bold text, " +
-                    "[i] and [/i] for italic text.";
-
-                string contentPrompt = $"Develop in-depth content for the blog post: {title}. Feature healthy." +
-                    $"Structure the content with [sub]subtitles[/sub], " +
-                    "Also you can use bullet points. Employ [b]bold[/b] and [i]italic[/i] text for emphasis. " +
-                    "Ensure all formatting tags are correctly opened and closed.";
-
-                var productList = await GetRandomProductsAsync(numberOfAdvertisements + 1, cancellationToken);
-                string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
-
-                string callToActionPrompt = $"Encourage readers to explore our recommended supplements and programs for achieving their " +
-                $"goals. Highlight the benefits of integrating quality products into their regimen. Talk about the product called " +
-                $"\"{productList[0].ProductName}\" " +
-                $"and explain why this product is outstanding, focusing solely on the product's features and benefits." +
-                $"Structure the call to action in short paragraphs. " +
-                $"Please avoid personalizing the content to any specific company, do not insert any links or suggest using " +
-                $"a discount code. The focus should be on the generic advantages and qualities of the product.";
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string introduction = await GenerateSectionAsync(introductionPrompt, cancellationToken);
-
-                string conceptsForImagePrompt = $"Identify 1 key concept from this blog title: '{title}'.";
-
-                string concepts = await GenerateSectionAsync(conceptsForImagePrompt, cancellationToken);
-
-                string promptForImagePrompt = $"Based on this identified key concept '{conceptsForImagePrompt}', create a short and simple prompt for an " +
-                "image that represents these nutritional advice themes.";
-
-                string imagePrompt = await GenerateSectionAsync(promptForImagePrompt, cancellationToken);
-
-                string image = await GenerateImageAsync(imagePrompt);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string mainContent = await GenerateSectionAsync(contentPrompt, cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string callToAction = await GenerateSectionAsync(callToActionPrompt.Replace("%%PRODUCT_NAME%%", productList[0].ProductName), cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string backLinkKeywordsPrompt = $"I'm seeking to enhance my blog's SEO through a targeted backlink strategy" +
-                $". The blog focuses on {niche1} and {niche2}, with the latest post covering {title}. " +
-                $"Here's a brief summary of the post: {introduction}. Based on this, could you generate a list of " +
-                $"5-10 SEO-rich, unique, and potentially high-impact keywords or phrases that other websites and blogs might use to " +
-                $"link back to this post? These keywords should align with the post's content, have a blend of search volume and " +
-                $"specificity to target niche audiences, and be able to attract quality backlinks from reputable sources within " +
-                $"{niche1} and {niche2}.The format of the keywords should be JSON. The key will be called 'keyword' and the value will" +
-                $"be the score (a number from 0 to 100) for that keyword. " +
-                $"Here is the template you must use: {{\"keyword\", \"score\"}} \r\n.";
-
-                string backLinkKeywordList = await GenerateSectionAsync(backLinkKeywordsPrompt, cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
-
-
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
-
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
-
-                var response = new BlogPostResponse
-                {
-                    Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
-                    BlogPostCategoryId = Guid.Parse("79320ffc-726e-4392-9b3a-ee6c2b64bd3f"),
-                    BackLinkKeywords = json,
-                    URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id,
-                    Image = image
-                };
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-        public async Task<BlogPostResponse> GenerateLatestNewsBlogPostAsync(CancellationToken cancellationToken)
-        {
-            StringBuilder blogPostContent = new StringBuilder();
-            try
-            {
-
-                var randomNews = await _context.News
-                    .FromSqlRaw("SELECT * FROM \"News\" ORDER BY RANDOM() LIMIT 1")
-                    .FirstOrDefaultAsync();
-
-
-                string titlePrompt = $"Generate a captivating blog post title about this topic \"{randomNews.Title}\".";
-
-                string title = await GenerateSectionAsync(titlePrompt, cancellationToken);
-
-                string introductionPrompt = $"Begin the blog post on '{title}' with a clear and direct introduction. " +
-                    $"Provide essential insights based on the following details: '{randomNews.Description}'. " +
-                    "Focus on delivering information in a straightforward manner, avoiding any dramatic language. " +
-                    "Incorporate [b]bold[/b] and [i]italic[/i] text for emphasis where it naturally fits, " +
-                    "and structure the introduction into concise paragraphs that engage the reader with facts and thoughtful analysis.";
-
-
-
-                string contentPrompt = $"Craft professional and detailed content for the blog post titled '{title}'." +
-                    $" Organize the content with subtitles, using '[sub]' and '[/sub]' " +
-                    $"for subtitles, " +
-                    "Include bullet points." +
-                    "Maintain a conversational and uplifting tone throughout, and write as much as you can, inform the reader as much as you can." +
-                    "Use [b] and [/b] for bold text, [i] and [/i] for italic text. Please structure the introduction into short paragraphs." +
-                    $"(YOU MUST MAKE SURE TO OPEN AND CLOSE THE TAGS PERFECTLY CAREFULLY!!)"; ;
-
-                var productList = await GetRandomProductsAsync(numberOfAdvertisements + 1, cancellationToken);
-                string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
-
-                string callToActionPrompt = $"Encourage readers to explore our recommended supplements and programs for achieving their " +
-                $"goals. Highlight the benefits of integrating quality products into their regimen. Talk about the product called " +
-                $"\"{productList[0].ProductName}\" " +
-                $"and explain why this product is outstanding, focusing solely on the product's features and benefits." +
-                $"Structure the call to action in short paragraphs. " +
-                $"Please avoid personalizing the content to any specific company, do not insert any links or suggest using " +
-                $"a discount code. The focus should be on the generic advantages and qualities of the product.";
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string introduction = await GenerateSectionAsync(introductionPrompt, cancellationToken);
-
-                string conceptsForImagePrompt = $"Identify 1 key concept from this blog title: '{title}'.";
-
-                string concepts = await GenerateSectionAsync(conceptsForImagePrompt, cancellationToken);
-
-                string promptForImagePrompt = $"Based on this identified key concept '{conceptsForImagePrompt}', create a short and simple prompt for an " +
-                "image that represents these nutritional advice themes.";
-
-                string imagePrompt = await GenerateSectionAsync(promptForImagePrompt, cancellationToken);
-
-                string image = await GenerateImageAsync(imagePrompt);
-
-                //ADVERTISEMENT
-
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string mainContent = await GenerateSectionAsync(contentPrompt, cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string callToAction = await GenerateSectionAsync(callToActionPrompt.Replace("%%PRODUCT_NAME%%", productList[0].ProductName), cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string backLinkKeywordsPrompt = $"I'm seeking to enhance my blog's SEO through a targeted backlink strategy" +
-                $". The blog focuses on {niche1} and {niche2}, with the latest post covering {title}. " +
-                $"Here's a brief summary of the post: {introduction}. Based on this, could you generate a list of " +
-                $"5-10 SEO-rich, unique, and potentially high-impact keywords or phrases that other websites and blogs might use to " +
-                $"link back to this post? These keywords should align with the post's content, have a blend of search volume and " +
-                $"specificity to target niche audiences, and be able to attract quality backlinks from reputable sources within " +
-                $"{niche1} and {niche2}.The format of the keywords should be JSON. The key will be called 'keyword' and the value will" +
-                $"be the score (a number from 0 to 100) for that keyword. " +
-                $"Here is the template you must use: {{\"keyword\", \"score\"}} \r\n.";
-
-                string backLinkKeywordList = await GenerateSectionAsync(backLinkKeywordsPrompt, cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
-
-
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
-
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
-
-
-
-                var response = new BlogPostResponse
-                {
-                    Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
-                    BlogPostCategoryId = Guid.Parse("3ee72486-7a14-474f-a4ac-a45f93eb49e6"),
-                    BackLinkKeywords = json,
-                    URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id,
-                    Image = image
-                };
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-        public async Task<BlogPostResponse> GenerateMindsetAndMotivationBlogPostAsync(CancellationToken cancellationToken)
-        {
-            StringBuilder blogPostContent = new StringBuilder();
-            try
-            {
-                string titlePrompt = "Generate a captivating blog post title about the psychological aspects of losing weight, " +
-                    "such as maintaining motivation, dealing with setbacks, and building healthy habits. The title should be " +
-                    "inspiring and include a number to suggest practical tips or insights.";
-
-                string title = await GenerateSectionAsync(titlePrompt, cancellationToken);
-
-                string introductionPrompt = "Write an engaging introduction for a blog post focusing on 'Mindset and Motivation' " +
-                   "for weight loss. Start by empathizing with the reader's struggles in maintaining motivation and dealing with setbacks. " +
-                   "Hint at offering effective strategies for building healthy habits and sustaining a positive mindset throughout their weight loss journey." +
-                   "Use [b] and [/b] for bold text, [i] and [/i] for italic text. Please structure the introduction into short paragraphs.";
-
-
-                string contentPrompt = $"Craft engaging and detailed content for the blog post titled '{title}', focusing on the psychological " +
-                    "aspects of losing weight. Organize the content with subtitles, using '[sub]' and '[/sub]' for subtitles, covering maintaining motivation, " +
-                    "dealing with setbacks, and building healthy habits. Include bullet points for actionable tips, and highlight key insights " +
-                    "in bold or italic for emphasis. Maintain a conversational and uplifting tone throughout." +
-                    "Use [b] and [/b] for bold text, [i] and [/i] for italic text. Please structure the introduction into short paragraphs." +
-                    $"(YOU MUST MAKE SURE TO OPEN AND CLOSE THE TAGS PERFECTLY CAREFULLY!!)"; ;
-
-                var productList = await GetRandomProductsAsync(numberOfAdvertisements + 1, cancellationToken);
-                string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
-
-                string callToActionPrompt = $"Encourage readers to explore our recommended supplements and programs for achieving their " +
-                $"goals. Highlight the benefits of integrating quality products into their regimen. Talk about the product called " +
-                $"\"{productList[0].ProductName}\" " +
-                $"and explain why this product is outstanding, focusing solely on the product's features and benefits." +
-                $"Structure the call to action in short paragraphs. " +
-                $"Please avoid personalizing the content to any specific company, do not insert any links or suggest using " +
-                $"a discount code. The focus should be on the generic advantages and qualities of the product.";
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string introduction = await GenerateSectionAsync(introductionPrompt, cancellationToken);
-
-                string conceptsForImagePrompt = $"Identify 1 key concept from this blog title: '{title}'.";
-
-                string concepts = await GenerateSectionAsync(conceptsForImagePrompt, cancellationToken);
-
-                string promptForImagePrompt = $"Based on this identified key concept '{conceptsForImagePrompt}', create a short and simple prompt for an " +
-                "image that represents these nutritional advice themes.";
-
-                string imagePrompt = await GenerateSectionAsync(promptForImagePrompt, cancellationToken);
-
-                string image = await GenerateImageAsync(imagePrompt);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string mainContent = await GenerateSectionAsync(contentPrompt, cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string callToAction = await GenerateSectionAsync(callToActionPrompt.Replace("%%PRODUCT_NAME%%", productList[0].ProductName), cancellationToken);
-
-                //ADVERTISEMENT
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string backLinkKeywordsPrompt = $"I'm seeking to enhance my blog's SEO through a targeted backlink strategy" +
-                $". The blog focuses on {niche1} and {niche2}, with the latest post covering {title}. " +
-                $"Here's a brief summary of the post: {introduction}. Based on this, could you generate a list of " +
-                $"5-10 SEO-rich, unique, and potentially high-impact keywords or phrases that other websites and blogs might use to " +
-                $"link back to this post? These keywords should align with the post's content, have a blend of search volume and " +
-                $"specificity to target niche audiences, and be able to attract quality backlinks from reputable sources within " +
-                $"{niche1} and {niche2}.The format of the keywords should be JSON. The key will be called 'keyword' and the value will" +
-                $"be the score (a number from 0 to 100) for that keyword. " +
-                $"Here is the template you must use: {{\"keyword\", \"score\"}} \r\n.";
-
-                string backLinkKeywordList = await GenerateSectionAsync(backLinkKeywordsPrompt, cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
-
-
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
-
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
-
-                var response = new BlogPostResponse
-                {
-                    Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
-                    BlogPostCategoryId = Guid.Parse("ac1641f2-01cd-4d0e-ad1d-5baeceae5c35"),
-                    BackLinkKeywords = json,
-                    URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id,
-                    Image = image
-                };
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-        public async Task<BlogPostResponse> GenerateHealthyLifestyleBlogPostAsync(CancellationToken cancellationToken)
-        {
-            StringBuilder blogPostContent = new StringBuilder();
-            try
-            {
-                string titlePrompt = $"Create a captivating blog post title that offers fresh perspectives on healthy living. " +
-                    "Focus on debunking popular health myths, introducing easy-to-adopt healthy habits, or providing innovative " +
-                    "tips for maintaining a balanced lifestyle. The title should intrigue readers by challenging common beliefs, " +
-                    "highlighting unexpected benefits of simple habits, or revealing expert insights into wellness practices.";
-
-                string title = await GenerateSectionAsync(titlePrompt, cancellationToken);
-
-                string introductionPrompt = $"Begin the blog post on '{title}' with a clear and direct introduction. " +
-                    "Focus on delivering information in a straightforward manner, avoiding any dramatic language. " +
-                    "Incorporate [b]bold[/b] and [i]italic[/i] text for emphasis where it naturally fits, " +
-                    "and structure the introduction into concise paragraphs that engage the reader with facts and thoughtful analysis.";
-
-                string contentPrompt = "Delve into the subject of '" + title + "' with a focus on practical advice, evidence-based practices, " +
-                    "and relatable examples. Organize the content with clear subtitles, each within '[sub]' and '[/sub]'. Include " +
-                    "bullet points for easy reading, and use text formatting ([b], [/b], [i], [/i]) to emphasize key points. " +
-                    "Ensure all formatting tags are correctly opened and closed.";
-
-                var productList = await GetRandomProductsAsync(numberOfAdvertisements + 1, cancellationToken);
-                string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
-
-                string callToActionPrompt = "Encourage readers to embrace the recommended products and strategies for enhancing their " +
-                    "health and wellness routines. Detail the features and benefits of '" + productList[0].ProductName + "', " +
-                    "emphasizing its relevance to the blog's theme without direct promotion or links. Construct the call to action " +
-                    "in concise paragraphs, focusing on the value these recommendations add to a healthy lifestyle.";
-
-                // ADVERTISEMENT
-                blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string introduction = await GenerateSectionAsync(introductionPrompt, cancellationToken);
-
-                string conceptsForImagePrompt = "Extract the core concepts or themes from the blog title: '" + title +
-                    "'. List these concepts, separated by commas, to guide the creation of a visually appealing image that reflects " +
-                    "the blog's content.";
-
-                string concepts = await GenerateSectionAsync(conceptsForImagePrompt, cancellationToken);
-
-                string promptForImagePrompt = "Develop a detailed prompt for a split-design image that visually contrasts the misconceptions " +
-                    "and the truths about healthy living, based on the key concepts: " + concepts + ". The left side should portray common " +
-                    "myths or unhealthy practices, while the right side showcases healthy habits or truths. Design the image to be colorful, " +
-                    "engaging, and easy to understand, effectively communicating the positive shift towards a healthier lifestyle.";
-
-                string imagePrompt = await GenerateSectionAsync(promptForImagePrompt, cancellationToken);
-
-                string image = await GenerateImageAsync(imagePrompt);
-
-                // ADVERTISEMENT
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string mainContent = await GenerateSectionAsync(contentPrompt, cancellationToken);
-
-                // ADVERTISEMENT
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string callToAction = await GenerateSectionAsync(callToActionPrompt.Replace("%%PRODUCT_NAME%%", productList[0].ProductName), cancellationToken);
-
-                // ADVERTISEMENT
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string backLinkKeywordsPrompt = $"In an effort to boost SEO for a blog focused on healthy lifestyles and habits, " +
-                    "and considering the latest post titled '" + title + "', generate a list of 5-10 SEO-rich keywords or phrases. " +
-                    "These should be unique, likely to draw high-quality backlinks, and relevant to the content's focus on wellness. " +
-                    "Present the keywords in JSON format with 'keyword' as the key and a relevance score from 0 to 100 as the value." +
-                    "Here is the template you must use: {{\"keyword\", \"score\"}} \r\n.";
-
-                string backLinkKeywordList = await GenerateSectionAsync(backLinkKeywordsPrompt, cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
-
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
-
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
-
-                var response = new BlogPostResponse
-                {
-                    Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
-                    BlogPostCategoryId = Guid.Parse("294f283a-76a1-4c3e-9e3f-9450570af6af"),
-                    BackLinkKeywords = json,
-                    URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id,
-                    Image = image
-                };
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-        public async Task<BlogPostResponse> GeneratePersonalStoryBlogPostAsync(CancellationToken cancellationToken)
-        {
-            StringBuilder blogPostContent = new StringBuilder();
-            try
-            {
-                string titlePrompt = $"Create a compelling and personal blog post title about 'health or weight loss'. " +
-                            "Think about a journey or personal experience of a person (you must use 'I' for the person)" +
-                            " that can inspire others.";
-
-                string title = "I Lost 50 Pounds and Gained a New Lease on Life: My Journey to Optimal health and happiness";
-
-                string introductionPrompt = $"Write an engaging and personal introduction for the blog post titled '{title}'. " +
-                            $"Discuss the personal connection to the topic, '{title}' (do not write the title in the content) " +
-                            "and set the stage for a story that is both informative and deeply personal." +
-                            "You must use 'I' for the person in the blog post." +
-                            "Incorporate [b]bold[/b] and [i]italic[/i] text for emphasis where it naturally fits, " +
-                            "and structure the introduction into concise paragraphs that engage the reader with facts and thoughtful analysis." +
-                           "Ensure all formatting tags are correctly opened and closed."; ;
-
-                string contentPrompt = $"Develop a heartfelt and detailed narrative for the blog post '{title}'. " +
-                           "Use anecdotes and personal experiences to illustrate key points about health and wellness. " +
-                           "Structure your content with emotional depth, using natural dialogues, reflections, " +
-                           "and lessons learned along the way. Include practical tips that you've found personally beneficial." +
-                           "You must use 'I' for the person in the blog post."+
-                           "Organize the content with clear subtitles, each within '[sub]' and '[/sub]' tags, so make sure to put [sub][/sub] tags.Include " +
-                           "bullet points for easy reading, these are the tags for bullet points [b]bold[/b], and use italic tags for text formatting [i]italic[/i]," +
-                           " to emphasize key points. " +
-                           "Ensure all formatting tags are correctly opened and closed.";
-
-                var productList = await GetRandomProductsAsync(numberOfAdvertisements + 1, cancellationToken);
-                string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
-
-                string callToActionPrompt = "Encourage readers to embrace the recommended products and strategies for enhancing their " +
-                    "health and wellness routines. Detail the features and benefits of '" + productList[0].ProductName + "', " +
-                    "emphasizing its relevance to the blog's theme without direct promotion or links. Construct the call to action " +
-                    "in concise paragraphs, focusing on the value these recommendations add to a healthy lifestyle.";
-
-                // ADVERTISEMENT
-                blogPostContent.AppendLine($"TITLE:\n{title}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string introduction = await GenerateSectionAsync(introductionPrompt, cancellationToken);
-
-                string conceptsForImagePrompt = "Extract the core concepts or themes from the blog title: '" + title +
-                    "'. List these concepts, separated by commas, to guide the creation of a visually appealing image that reflects " +
-                    "the blog's content.";
-
-                //string concepts = await GenerateSectionAsync(conceptsForImagePrompt, cancellationToken);
-
-                //string promptForImagePrompt = $"Based on this identified key concept '{conceptsForImagePrompt}', create a short and simple prompt for an " +
-                                       //"image that represents these nutritional advice themes." +
-                                       //"Make sure to not violate the OPENAI content policy.";
-
-                //string imagePrompt = await GenerateSectionAsync(promptForImagePrompt, cancellationToken);
-
-                //string image = await GenerateImageAsync(imagePrompt);
-
-                string image = "https://thewellnessjunctionbucket.s3.eu-north-1.amazonaws.com/6f013177-c7e3-45ae-88c4-f848a5b6de58.jpg";
-
-                // ADVERTISEMENT
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string mainContent = await GenerateSectionAsync(contentPrompt, cancellationToken);
-
-                // ADVERTISEMENT
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string callToAction = await GenerateSectionAsync(callToActionPrompt.Replace("%%PRODUCT_NAME%%", productList[0].ProductName), cancellationToken);
-
-                // ADVERTISEMENT
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
-                blogPostContent.AppendLine($"[advertisement]");
-
-                string backLinkKeywordsPrompt = "In an effort to boost SEO for a blog focused on healthy lifestyles and habits, " +
-                    "and considering the latest post titled '" + title + "', generate a list of 5-10 SEO-rich keywords or phrases. " +
-                    "These should be unique, likely to draw high-quality backlinks, and relevant to the content's focus on wellness. " +
-                    "Present the keywords in JSON format with 'keyword' as the key and a relevance score from 0 to 100 as the value." +
-                    "Here is the template you must use: {{\"keyword\", \"score\"}}.";
-
-                string backLinkKeywordList = await GenerateSectionAsync(backLinkKeywordsPrompt, cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
-
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList);
-
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
-
-                var response = new BlogPostResponse
-                {
-                    Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
-                    BlogPostCategoryId = Guid.Parse("2c9e1da1-3299-451b-99d4-87418bea9c23"),
-                    BackLinkKeywords = json,
-                    URL = _globalHelper.TitleToUrlSlug(title),
-                    ProductId = productList[0].Id,
-                    Image = image
-                };
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-
-
         #endregion
 
 
         #region Private Methods
-        private async Task<string> GenerateSectionAsync(string prompt, CancellationToken cancellationToken)
+        private async Task<string> GenerateSectionAsync(string prompt, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -1681,12 +442,67 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                 throw ex;
             }
         }
+
+        private async Task<Domain.Entities.Product> GetProductToPromoteAsync(string category, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var productCategory = await _context.ProductCategories
+                    .Where(x => x.Name == category)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (productCategory == null)
+                {
+                    throw new Exception("Category not found");
+                }
+
+                var products = await _context.Products
+                    .Where(x => x.CategoryId == productCategory.Id && x.Active)
+                    .ToListAsync(cancellationToken);
+
+                if (!products.Any())
+                {
+                    throw new Exception("No active products found for the specified category");
+                }
+
+                var random = new Random();
+                int index = random.Next(products.Count);
+                return products[index];
+            }
+            catch (Exception ex)
+            {
+                await _globalHelper.Log(ex, currentClassName);
+                throw;
+            }
+        }
+
+
+        private async Task<string> GetStringedCategoriesAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                string categories = "";
+                var categoryList = await _context.ProductCategories.Where(x=>x.Active == true).ToListAsync();
+                for (int i = 0; i < categoryList.Count; i++)
+                {
+                    categories += $"{i + 1}. {categoryList[i].Name}, ";
+                }
+
+                return categories;
+            }
+            catch (Exception ex)
+            {
+                await _globalHelper.Log(ex, currentClassName);
+                throw ex;
+            }
+        }
+
         private async Task<List<Domain.Entities.Product>> GetRandomProductsAsync(int numberOfProducts, CancellationToken cancellationToken)
         {
             try
             {
                 var productList = await _context.Products
-                                        .Where(k => k.CategoryId == Guid.Parse("66a10c17-79de-44f5-b680-6e2e78079f1e"))
+                                        .Where(k => k.Active == true && k.VendorName.ToLower() != "Amazon".ToLower())
                                         .ToListAsync(cancellationToken);
 
                 if (productList.Count <= numberOfProducts)
@@ -1750,7 +566,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                 throw;
             }
         }
-        private static string FormatBlogPostToHtml(string blogPostText, List<Domain.Entities.Product> productList)
+        private async Task<string> FormatBlogPostToHtml(string blogPostText, List<Domain.Entities.Product> productList)
         {
             int titleMarkerIndex = blogPostText.IndexOf("TITLE:\n");
             if (titleMarkerIndex != -1)
@@ -1798,7 +614,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
 
             for (int i = 0; i < productList.Count; i++)
             {
-                string adHtml = GetAdvertisementHtml(blogPostText, productList[i]);
+                string adHtml = await GetAdvertisementHtml(blogPostText, productList[i]);
 
                 int placeholderIndex = blogPostText.IndexOf("[advertisement]");
 
@@ -1837,24 +653,33 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
 
             return content;
         }
-        private string FormatBlogPostToHtmlAndInsertProductLink(string blogPostContent, List<Domain.Entities.Product> productList)
+        private async Task<string> FormatBlogPostToHtmlAndInsertProductLink(string blogPostContent, List<Domain.Entities.Product> productList, Domain.Entities.Product productToPromote)
         {
-            string encodedProductName = System.Net.WebUtility.HtmlEncode(productList[0].ProductName);
+            string encodedProductName = System.Net.WebUtility.HtmlEncode(productToPromote.ProductName);
 
-            string updatedAffiliateLink = productList[0].AffiliateLink.Replace("zzzzz", _affiliate);
+            string updatedAffiliateLink = productToPromote.AffiliateLink.Replace("zzzzz", _affiliate);
 
-            string linkedProductName = $"<a href='{updatedAffiliateLink}' target='_blank'  style='text-decoration: none; color: #2C20DF !important;'>{encodedProductName}</a>";
-            blogPostContent = blogPostContent.Replace(productList[0].ProductName, linkedProductName);
+            string linkedProductName = $"<a href='{updatedAffiliateLink}' target='_blank' class='acfU3b1AHX' style=''>{encodedProductName}</a>";
+            blogPostContent = blogPostContent.Replace(productToPromote.ProductName, linkedProductName);
 
-            blogPostContent = FormatBlogPostToHtml(blogPostContent, productList);
+            blogPostContent = await FormatBlogPostToHtml(blogPostContent, productList);
 
             return blogPostContent;
         }
-        private static string GetAdvertisementHtml(string content, Domain.Entities.Product product = null)
+        private async Task<string> GetAdvertisementHtml(string content, Domain.Entities.Product product = null)
         {
             var productName = System.Net.WebUtility.HtmlEncode(product.ProductName);
             string updatedAffiliateLink = System.Net.WebUtility.HtmlEncode(product.AffiliateLink.Replace("zzzzz", "medamri"));
-            //iRTWT8nXBC
+
+            string firstBulletPoint = await GenerateSectionAsync($"Write down 1 very short sentence, the most important fact about this product: {product.Description}");
+            string secondBulletPoint = await GenerateSectionAsync($"Write down 1 very short sentence, the 2nd most important fact about this product: {product.Description}");
+            string thirdBulletPoint = await GenerateSectionAsync($"Write down 1 very short sentence, the 3rd most important fact about this product: {product.Description}");
+
+            string bulletPoints = $@"
+                <li class=""z5u6ygxkhb""><span class=""woi1dxuc1l"">•</span>{firstBulletPoint}</li>
+                <li class=""z5u6ygxkhb""><span class=""woi1dxuc1l"">•</span>{secondBulletPoint}</li>
+                <li class=""z5u6ygxkhb""><span class=""woi1dxuc1l"">•</span>{thirdBulletPoint}</li>
+        ";
             return $@"
                     <div class=""yu5kvzao1k"">
                         <div class=""q63fh1n5n6"">
@@ -1868,16 +693,17 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                             </div>
                             <div class=""row"">
                                 <div class=""col-lg-3"">
-                                    <div class=""nWQRd354Je"">
-                                        <img src=""https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/health/wp-content/uploads/2021/12/Nutrisystem-Diabetes.jpeg"" alt=""Product Image"" class=""iRTWT8nXBC img-fluid"">
+                                    <div class=""parent-nWQRd354Je"">
+                                        <div class=""nWQRd354Je"">
+                                            <a href=""{updatedAffiliateLink}"">
+                                                <img src=""{product.Image}"" alt=""Product Image"" class=""iRTWT8nXBC img-fluid"">
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class=""col-lg-9"">
                                     <ul class=""kz1a5bt068"">
-                                        <li class=""z5u6ygxkhb""><span class=""woi1dxuc1l"">•</span>This Product is tailored to meet your unique wellness goals</li>
-                                        <li class=""z5u6ygxkhb""><span class=""woi1dxuc1l"">•</span>Carefully chosen for its efficacy and user feedback</li>
-                                        <li class=""z5u6ygxkhb""><span class=""woi1dxuc1l"">•</span>Designed with the latest scientific research to ensure the best outcomes</li>
-                                        <li class=""z5u6ygxkhb""><span class=""woi1dxuc1l"">•</span>Easy to incorporate into your daily routine for sustained wellness</li>
+                                       {bulletPoints}
                                     </ul>
                                 </div>
                             </div>

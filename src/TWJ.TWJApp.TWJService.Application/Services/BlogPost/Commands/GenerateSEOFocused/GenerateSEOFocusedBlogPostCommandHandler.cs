@@ -36,7 +36,8 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateR
         {
             try
             {
-                var result = await _openAiService.GenerateSEOFocusedBlogPostAsync(cancellationToken);
+                //var result = await _openAiService.GenerateSEOFocusedBlogPostAsync(cancellationToken);
+                var result = new BlogPostResponse();
 
                 var blogPost = new Domain.Entities.BlogPost
                 {

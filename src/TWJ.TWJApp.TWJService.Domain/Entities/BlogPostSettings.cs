@@ -13,7 +13,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         public string IntroductionPrompt { get; set; }
 
         public string ContentPrompt { get; set; }
-        public string CallToActionPrompt { get; set; } = $"Here is info about the product named '%%PRODUCT_NAME%%': %%PRODUCT_INFO%%" +
+        public string CallToActionPrompt { get; set; } = $"Here is the info about the product named '%%PRODUCT_NAME%%': %%PRODUCT_DESCRIPTION%%" +
             $"Create a problem that is related to the product and the title '%%TITLE%%'." +
             $"Provide the solution of that problem by suggesting this product '%%PRODUCT_NAME%%'." +
             $"Encourage readers to embrace the recommended product." +
