@@ -19,7 +19,9 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
             $"Encourage readers to embrace the recommended product." +
             $"Detail the features and benefits of '%%PRODUCT_NAME%%', " +
             $"emphasizing its relevance to the blog's title '%%TITLE%%' without direct promotion or links. " +
-            $"Construct the call to action in concise paragraphs, focusing on the value these recommendations add to a healthy lifestyle.";
+            $"Construct the call to action in concise paragraphs, focusing on the value these recommendations add to a healthy lifestyle."+
+            " Use the Markdown Syntax for italic, bold keywords and external backlinks for keywords. " +
+            "Do not write references or sources at the end. ";
         public string BackLinkKeywordsPrompt { get; set; } = $"In an effort to boost SEO for a blog focused on healthy lifestyles and habits, " +
                             "and considering the latest post titled '%%TITLE%%', generate a list of 5-10 SEO-rich keywords or phrases. " +
                             "These should be unique, likely to draw high-quality backlinks, and relevant to the content's focus on wellness. " +
@@ -41,14 +43,19 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
             IntroductionPrompt += "Please do not write the title of the blog in the beginning of the content. " +
                                   "Please generate content that closely mimics the style and tone of a professional human writer, " +
                                   "focusing on a natural and engaging narrative that seamlessly blends facts with conversational language." +
-                                  " Focus on delivering information in a straightforward manner, avoiding any dramatic language. ";
-                                  //"Use [b] and [/b] for bold text, [i] and [/i] for italic text. " +
-                                  //"Please structure the introduction into short paragraphs. " +
-                                  //"(YOU MUST MAKE SURE TO OPEN AND CLOSE THE TAGS PERFECTLY CAREFULLY!!)";
+                                  " Focus on delivering information in a straightforward manner, avoiding any dramatic language." +
+                                  " Use the Markdown Syntax for italic, bold keywords and external backlinks for keywords. " +
+                                  "Do not write references or sources at the end. ";
+            //"Use [b] and [/b] for bold text, [i] and [/i] for italic text. " +
+            //"Please structure the introduction into short paragraphs. " +
+            //"(YOU MUST MAKE SURE TO OPEN AND CLOSE THE TAGS PERFECTLY CAREFULLY!!)";
 
             ContentPrompt += "Start directly with the main body of the content, skipping any introductory elements. Immediately dive into discussing the key points and facts. " +
-                             "Do not mention the blog post title at the start. Organize the content with distinct subtitles, each enclosed within '[sub]' and '[/sub]'. " +
-                             "Focus on a straightforward delivery of information, avoiding any dramatic language.";
+                             "Do not mention the blog post title at the start. " +
+                             "Focus on a straightforward delivery of information, avoiding any dramatic language." +
+                             " Use the Markdown Syntax to Organize the content with distinct subtitles, italic keywords, " +
+                             "bold keywords and external backlinks for keywords." +
+                             "Write each section with long and informative content.";
             //"Include bullet points for clarity, and use text formatting such as bold ('[b]' and '[/b]') and italic ('[i]' and '[/i]') to emphasize important aspects. " +
             //"Ensure all formatting tags are correctly opened and closed. " +
 

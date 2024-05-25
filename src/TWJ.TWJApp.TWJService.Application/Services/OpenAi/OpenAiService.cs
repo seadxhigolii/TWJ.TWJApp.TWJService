@@ -16,6 +16,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using Markdig;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -78,11 +79,17 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                 }
 
                 string introduction = await GenerateSectionAsync(settings.IntroductionPrompt.Replace("%%TITLE%%", title), cancellationToken);
-                blogPostContent.AppendLine($"INTRODUCTION:\n{introduction}");
+                string introductionHtmlContent = Markdown.ToHtml(introduction);
+                blogPostContent.AppendLine("<div class='sQxpAj1VQF'>");
+                blogPostContent.AppendLine($"{introductionHtmlContent}");
+                blogPostContent.AppendLine("</div>");
                 blogPostContent.AppendLine($"[advertisement]");
 
                 string mainContent = await GenerateSectionAsync(settings.ContentPrompt.Replace("%%TITLE%%", title), cancellationToken);
-                blogPostContent.AppendLine($"MAINCONTENT:\n{mainContent}");
+                string mainContentHtmlContent = Markdown.ToHtml(mainContent);
+                blogPostContent.AppendLine("<div class='nm4JsSMWGj'>");
+                blogPostContent.AppendLine($"{mainContentHtmlContent}");
+                blogPostContent.AppendLine("</div>");
                 blogPostContent.AppendLine($"[advertisement]");
 
                 var productList = await GetRandomProductsAsync(settings.NumberOfAdvertisements + 1, cancellationToken);
@@ -90,8 +97,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                 string callToAction = await GenerateSectionAsync(settings.CallToActionPrompt
                     .Replace("%%PRODUCT_NAME%%", productToPromote.ProductName)
                     .Replace("%%PRODUCT_DESCRIPTION%%", productToPromote.Description)
-                    .Replace("%%TITLE%%", title),cancellationToken);
-                blogPostContent.AppendLine($"CALLTOACTION:\n{callToAction}");
+                    .Replace("%%TITLE%%", title), cancellationToken);
+                string callToActionHtmlContent = Markdown.ToHtml(callToAction);
+                blogPostContent.AppendLine("<div class='pJDcMLp9xo'>");
+                blogPostContent.AppendLine($"{callToActionHtmlContent}");
+                blogPostContent.AppendLine("</div>");
                 blogPostContent.AppendLine($"[advertisement]");
 
                 string concepts = await GenerateSectionAsync(settings.ImageConceptsPrompt, cancellationToken);
@@ -99,21 +109,19 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                 string backLinkKeywordList = await GenerateSectionAsync(settings.BackLinkKeywordsPrompt.Replace("%%TITLE%%", title), cancellationToken);
                 var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
 
-                string correctedContent = AutoCloseFormattingTags(blogPostContent.ToString());
-                string finalHtmlContent = await FormatBlogPostToHtmlAndInsertProductLink(correctedContent, productList, productToPromote);
+                string finalHtmlContent = await FormatBlogPostToHtmlAndInsertProductLink(blogPostContent.ToString(), productList, productToPromote);
 
-                var removedUnnecessaryBrackets = RemoveWordsInBrackets(finalHtmlContent);
 
                 return new BlogPostResponse
                 {
                     Title = title.Replace("'", "").Replace("\"", ""),
-                    HtmlContent = removedUnnecessaryBrackets,
+                    HtmlContent = finalHtmlContent,
                     BlogPostCategoryId = settings.CategoryId,
                     BackLinkKeywords = json,
                     URL = _globalHelper.TitleToUrlSlug(title),
                     ProductId = productToPromote.Id,
-                    //Image = await GenerateImageAsync(settings.ImagePrompt.Replace("%%IMAGE_CONCEPTS%%", concepts))
-                    Image = "https://thewellnessjunctionbucket.s3.eu-north-1.amazonaws.com/6f013177-c7e3-45ae-88c4-f848a5b6de58.jpg"
+                    Image = await GenerateImageAsync(settings.ImagePrompt.Replace("%%IMAGE_CONCEPTS%%", concepts))
+                    //Image = "https://thewellnessjunctionbucket.s3.eu-north-1.amazonaws.com/6f013177-c7e3-45ae-88c4-f848a5b6de58.jpg"
                 };
             }
             catch (Exception ex)
@@ -418,31 +426,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
             }
         }
 
-        private async Task<Domain.Entities.Product> GetRandomProductAsync(CancellationToken cancellationToken)
-        {
-            try
-            {
-                var rnd = new Random();
-                var productList = await _context.Products
-                                        .Where(k => k.CategoryId == Guid.Parse("66a10c17-79de-44f5-b680-6e2e78079f1e"))
-                                        .ToListAsync(cancellationToken);
-
-                if (productList.Any())
-                {
-                    var random = new Random();
-                    var product = productList[random.Next(productList.Count)];
-                    return product;
-                }
-
-                return null;
-            }
-            catch (Exception ex)
-            {
-                await _globalHelper.Log(ex, currentClassName);
-                throw ex;
-            }
-        }
-
         private async Task<Domain.Entities.Product> GetProductToPromoteAsync(string category, CancellationToken cancellationToken = default)
         {
             try
@@ -475,7 +458,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                 throw;
             }
         }
-
 
         private async Task<string> GetStringedCategoriesAsync(CancellationToken cancellationToken = default)
         {
@@ -566,95 +548,20 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                 throw;
             }
         }
-        private async Task<string> FormatBlogPostToHtml(string blogPostText, List<Domain.Entities.Product> productList)
-        {
-            int titleMarkerIndex = blogPostText.IndexOf("TITLE:\n");
-            if (titleMarkerIndex != -1)
-            {
-                int titleStartIndex = titleMarkerIndex + "TITLE:\n".Length;
-                int titleEndIndex = blogPostText.IndexOf("\n", titleStartIndex);
-                titleEndIndex = titleEndIndex == -1 ? blogPostText.Length : titleEndIndex;
 
-                string titleText = blogPostText.Substring(titleStartIndex, titleEndIndex - titleStartIndex).Trim().Trim('"');
-                blogPostText = "<h1 class=\"m7nrultbfc\" style=\"\">" + titleText + "</h1>" + blogPostText.Substring(titleEndIndex + 1);
-            }
-
-            int ctaTitleMarkerIndex = blogPostText.IndexOf("CTATITLE:\n");
-            if (ctaTitleMarkerIndex != -1)
-            {
-                int ctaTitleStartIndex = ctaTitleMarkerIndex + "CTATITLE:\n".Length;
-                int ctaTitleEndIndex = blogPostText.IndexOf("\n", ctaTitleStartIndex);
-                ctaTitleEndIndex = ctaTitleEndIndex == -1 ? blogPostText.Length : ctaTitleEndIndex;
-
-                string ctaTitleText = blogPostText.Substring(ctaTitleStartIndex, ctaTitleEndIndex - ctaTitleStartIndex).Trim().Trim('"');
-                blogPostText = blogPostText.Substring(0, ctaTitleMarkerIndex) + "<h2 class=\"cw5zqvh8ls\" style=\"\">" + ctaTitleText + "</h2>" + blogPostText.Substring(ctaTitleEndIndex);
-            }
-
-            blogPostText = blogPostText.Replace("INTRODUCTION:\n", "<p class=\"m2zfzbb9e2\" style=\"\">")
-                                       .Replace("MAINCONTENT:\n", "<div class=\"shgvcukb4y\" style=\"\">")
-                                       .Replace("CALLTOACTION:\n", "</div><div class='uhtqsa4iyy' style=\"\"><p class=\"m2zfzbb9e2\" style=''>");
-
-            blogPostText = Regex.Replace(blogPostText, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
-
-            blogPostText = blogPostText.Replace("[sub]", "<h2 class=\"fdc026o2fu\">").Replace("[/sub]", "</h2>")
-                                       .Replace("[h3]", "<h3 class=\"fdc026o2fu\">").Replace("[/h3]", "</h3>")
-                                       .Replace("[numtitle]", "<h4 class=\"fdc026o2fu\">").Replace("[/numtitle]", "</h4>")
-                                       .Replace("[b]", "<strong>").Replace("[/b]", "</strong>")
-                                       .Replace("[i]", "<em>").Replace("[/i]", "</em>");
-
-            blogPostText = blogPostText.Replace("[*]", "<ul><li>").Replace("\n[*]", "</li><li>")
-                                       .Replace("[**]", "<strong>").Replace("[/b]", "</strong>");
-                                       //.Replace("[1.]", "<ol><li>").Replace("\n[1.]", "</li><li>");
-
-            blogPostText = blogPostText.Replace("</li><li></ul>", "</li></ul>")
-                                       .Replace("</li><li></ol>", "</li></ol>");
-            blogPostText += "</p></div>";
-
-            blogPostText = ConvertListItemsAndParagraphs(blogPostText);
-
-            for (int i = 0; i < productList.Count; i++)
-            {
-                string adHtml = await GetAdvertisementHtml(blogPostText, productList[i]);
-
-                int placeholderIndex = blogPostText.IndexOf("[advertisement]");
-
-                if (placeholderIndex != -1)
-                {
-                    blogPostText = blogPostText.Remove(placeholderIndex, "[advertisement]".Length).Insert(placeholderIndex, adHtml);
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-
-            return blogPostText;
-        }
-        private static string ConvertListItemsAndParagraphs(string content)
-        {
-            content = content.Replace("[*]", "<ul><li>").Replace("[1.]", "<ol><li>")
-                             .Replace("[**]", "<strong>").Replace("[/b]", "</strong>")
-                             .Replace("\n[*]", "</li><li>").Replace("\n[1.]", "</li><li>")
-                             .Replace("\n", "</p><p class=\"m2zfzbb9e2\">")
-                             .Replace("<p><ul>", "<ul>").Replace("<p><ol>", "<ol>")
-                             .Replace("</ul></p>", "</ul>").Replace("</ol></p>", "</ol>");
-
-            content = content + "</p>";
-            content = content.Replace("<p></li><li>", "<li>").Replace("</li><li></p>", "</li>")
-                             .Replace("<p><h2>", "</p><h2>").Replace("<p><h3>", "</p><h3>")
-                             .Replace("</h2><p>", "</h2>").Replace("</h3><p>", "</h3>");
-
-            if (!content.StartsWith("<ul>") && !content.StartsWith("<ol>") && !content.StartsWith("<h2>") && !content.StartsWith("<h3>"))
-            {
-                content = "<p class=\"m2zfzbb9e2\">" + content;
-            }
-            content = content.Replace("<p><p>", "<p class=\"m2zfzbb9e2\">").Replace("</p></p>", "</p>");
-
-            return content;
-        }
         private async Task<string> FormatBlogPostToHtmlAndInsertProductLink(string blogPostContent, List<Domain.Entities.Product> productList, Domain.Entities.Product productToPromote)
         {
+                int titleMarkerIndex = blogPostContent.IndexOf("TITLE:\n");
+                if (titleMarkerIndex != -1)
+                {
+                    int titleStartIndex = titleMarkerIndex + "TITLE:\n".Length;
+                    int titleEndIndex = blogPostContent.IndexOf("\n", titleStartIndex);
+                    titleEndIndex = titleEndIndex == -1 ? blogPostContent.Length : titleEndIndex;
+
+                    string titleText = blogPostContent.Substring(titleStartIndex, titleEndIndex - titleStartIndex).Trim().Trim('"');
+                    blogPostContent = "<h1 class=\"m7nrultbfc\" style=\"\">" + titleText + "</h1>" + blogPostContent.Substring(titleEndIndex + 1);
+                }
+
             string encodedProductName = System.Net.WebUtility.HtmlEncode(productToPromote.ProductName);
 
             string updatedAffiliateLink = productToPromote.AffiliateLink.Replace("zzzzz", _affiliate);
@@ -662,7 +569,21 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
             string linkedProductName = $"<a href='{updatedAffiliateLink}' target='_blank' class='acfU3b1AHX' style=''>{encodedProductName}</a>";
             blogPostContent = blogPostContent.Replace(productToPromote.ProductName, linkedProductName);
 
-            blogPostContent = await FormatBlogPostToHtml(blogPostContent, productList);
+            for (int i = 0; i < productList.Count; i++)
+            {
+                string adHtml = await GetAdvertisementHtml(blogPostContent, productList[i]);
+
+                int placeholderIndex = blogPostContent.IndexOf("[advertisement]");
+
+                if (placeholderIndex != -1)
+                {
+                    blogPostContent = blogPostContent.Remove(placeholderIndex, "[advertisement]".Length).Insert(placeholderIndex, adHtml);
+                }
+                else
+                {
+                    break;
+                }
+            }
 
             return blogPostContent;
         }
@@ -721,29 +642,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                     </div>
                 ";
         }
-        private static string AutoCloseFormattingTags(string content)
-        {
-            string[] tags = new[] { "b", "i", "sub", "numtitle", "h3", "em" };
 
-            foreach (var tag in tags)
-            {
-                string pattern = $@"\[{tag}\](.*?)(?=(\[{tag}\])|(\[/{tag}\])|[,.?!]\s|$)";
-
-                content = Regex.Replace(content, pattern, match =>
-                {
-                    if (!match.Value.EndsWith($"[/{tag}]"))
-                    {
-                        return $"[{tag}]{match.Groups[1].Value}[/{tag}]";
-                    }
-                    return match.Value;
-                }, RegexOptions.Singleline);
-            }
-            return content;
-        }
-        public static string RemoveWordsInBrackets(string input)
-        {
-            return Regex.Replace(input, @"\[[^\]]*\]", "");
-        }
         private async Task<string> ConvertBackLinkKeywordsToJSONAsync(string backLinkKeywordList)
         {
             try
@@ -787,9 +686,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
 
             return json;
         }
-
-
-
 
         public async Task<string> GenerateTagsAsync(string content, Guid blogPostId, CancellationToken cancellationToken)
         {
@@ -903,284 +799,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
         }
 
         #endregion
-
-
-
-
-
-
-        //public async Task<string> GenerateBlogPostAsync(GenerateBlogPostCommand command, CancellationToken cancellationToken)
-        //{
-        //    try
-        //    {
-        //        var chatCompletionRequest = await CreateRequestBody(command);
-        //        var responseString = await PostOpenAiRequestAsync(chatCompletionRequest, cancellationToken);
-        //        var generatedText = await ExtractGeneratedText(responseString);
-        //        return await ConvertToHtml(generatedText, command.ProductName, command.AffiliateLink);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await _globalHelper.Log(ex, currentClassName);
-        //        throw new Exception("An error occurred while processing the request.", ex);
-        //    }
-        //}
-
-        //#region Private
-        //private async Task<ChatCompletionRequest> CreateRequestBody(GenerateBlogPostCommand command)
-        //{
-        //    try
-        //    {
-        //        var promptBuilder = new StringBuilder();
-
-        //var primaryKeywords = await _context.BlogPostSEOKeyword
-        //                    .Where(k => k.SEOKeyword.Type == KeywordType.Primary)
-        //                    .Select(k => k.SEOKeyword.Keyword)
-        //                    .ToListAsync();
-
-        //var secondaryKeywords = await _context.BlogPostSEOKeyword
-        //                    .Where(k => k.SEOKeyword.Type == KeywordType.Secondary)
-        //                    .Select(k => k.SEOKeyword.Keyword)
-        //                    .ToListAsync();
-
-        //var longTailKeywords = await _context.BlogPostSEOKeyword
-        //                    .Where(k => k.SEOKeyword.Type == KeywordType.LongTail)
-        //                    .Select(k => k.SEOKeyword.Keyword)
-        //                    .ToListAsync();
-
-        //        promptBuilder.AppendLine("Please generate a blog post with the following structure:");
-        //        promptBuilder.AppendLine("TITLE: Insert the title here.");
-        //        promptBuilder.AppendLine("BODY: Insert the body content here, including paragraphs.");
-        //        promptBuilder.AppendLine("AFFILIATE_LINK: Insert an affiliate link here.");
-
-        //        if (!string.IsNullOrEmpty(command.Topic))
-        //        {
-        //            promptBuilder.AppendLine($"The blog post is about {command.Topic}.");
-        //        }
-        //        else
-        //        {
-        //            promptBuilder.AppendLine($"The blog post is anything related to {niche1} or {niche2}.");
-        //        }
-
-        //        if (!string.IsNullOrEmpty(command.Tone))
-        //        {
-        //            promptBuilder.AppendLine($"The tone should be {command.Tone}.");
-        //        }
-        //        else
-        //        {
-        //            promptBuilder.AppendLine($"The tone should be Informative.");
-        //        }
-
-        //        if (!string.IsNullOrEmpty(command.TargetAudience))
-        //        {
-        //            promptBuilder.AppendLine($"The target audience is {command.TargetAudience}.");
-        //        }
-        //        else
-        //        {
-        //            promptBuilder.AppendLine($"The target audience is Fitness Enthusiasts.");
-        //        }
-
-        //        if (command.Keywords != null && command.Keywords.Any())
-        //        {
-        //            promptBuilder.AppendLine($"Please include this/these SEO keyword(s): {command.Keywords}.Use this/these keyword(s) near the beginning of the content (ideally in the first paragraph)." +
-        //                $" Ensure that this/these keyword(s) fit(s) seamlessly into the content and use this/these keyword(s)" +
-        //                $"throughout the body in a way that maintains a natural flow. Also use this/these keyword(s) " +
-        //                $"in the conclusion or closing paragraphs");
-        //        }
-        //        else
-        //        {
-        //            promptBuilder.AppendLine($"Please include this/these SEO keyword(s): {command.Keywords}.Use this/these keyword(s) near the beginning of the content (ideally in the first paragraph)." +
-        //                $" Ensure that this/these keyword(s) fit(s) seamlessly into the content and use this/these keyword(s)" +
-        //                $"throughout the body in a way that maintains a natural flow. Also use this/these keyword(s) " +
-        //                $"in the conclusion or closing paragraphs");
-        //        }
-
-        //        if (!string.IsNullOrEmpty(command.CategoryId.ToString()))
-        //        {
-        //            var category = await _context.Category.FindAsync(command.CategoryId);
-        //            if (category != null)
-        //            {
-        //                promptBuilder.AppendLine($"The category for this blog post is {category.Name}.");
-        //            }
-        //        }
-
-        //        if (!string.IsNullOrEmpty(command.ProductId.ToString()))
-        //        {
-        //            var product = await _context.Product.FindAsync(command.ProductId);
-        //            if (product != null)
-        //            {
-        //                string vendor = product.VendorName;
-        //                string affiliateLink = $"https://hop.clickbank.net/?affiliate=zzzzz&vendor={vendor}";
-        //                string updatedAffiliateLink = affiliateLink.Replace("zzzzz", _affiliate);
-
-        //                command.ProductName = product.ProductName;
-        //                command.AffiliateLink = updatedAffiliateLink;
-
-        //                promptBuilder.AppendLine($"Please include an affiliate promotion for {product.ProductName} using this link: {updatedAffiliateLink}.");
-        //            }
-        //        }
-
-        //        int maxTokens = command.LengthPreference switch
-        //        {
-        //            BlogPostLength.Short => 1000,
-        //            BlogPostLength.Medium => 2000,
-        //            BlogPostLength.Long => 4000,
-        //            _ => 2000,
-        //        };
-
-        //        return new ChatCompletionRequest
-        //        {
-        //            Model = _gptModel,
-        //            Messages = new List<ChatMessage>
-        //        {
-        //            new ChatMessage { Role = "system", Content = promptBuilder.ToString() }
-        //        },
-        //            Temperature = command.CreativityLevel
-        //        };
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await _globalHelper.Log(ex, currentClassName);
-        //        throw new Exception("An error occurred while processing the request.", ex);
-        //    }
-        //}
-
-
-        //private async Task<string> PostOpenAiRequestAsync(ChatCompletionRequest chatCompletionRequest, CancellationToken cancellationToken)
-        //{
-        //    try
-        //    {
-        //        var options = new JsonSerializerOptions
-        //        {
-        //            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        //        };
-        //        var body = JsonSerializer.Serialize(chatCompletionRequest, options);
-        //        var content = new StringContent(body, Encoding.UTF8, "application/json");
-        //        var response = await _httpClient.PostAsync("v1/chat/completions", content, cancellationToken);
-
-        //        if (response.IsSuccessStatusCode)
-        //        {
-        //            return await response.Content.ReadAsStringAsync(cancellationToken);
-        //        }
-        //        else
-        //        {
-        //            var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-        //            Debug.WriteLine(errorContent);
-        //            switch (response.StatusCode)
-        //            {
-        //                case System.Net.HttpStatusCode.BadRequest:
-        //                    throw new Exception("Bad request to the API. Details: " + errorContent);
-        //                case System.Net.HttpStatusCode.Unauthorized:
-        //                    throw new Exception("Unauthorized access. Make sure your API key is correct.");
-        //                case System.Net.HttpStatusCode.Forbidden:
-        //                    throw new Exception("Access forbidden. Check API key permissions.");
-        //                case System.Net.HttpStatusCode.NotFound:
-        //                    throw new Exception("The requested resource was not found.");
-        //                case System.Net.HttpStatusCode.TooManyRequests:
-        //                    throw new Exception("Rate limit exceeded. Try again later.");
-        //                default:
-        //                    throw new Exception($"Unexpected API error: {response.StatusCode}. Details: {errorContent}");
-        //            }
-        //        }
-        //        throw new InvalidOperationException("Failed to generate content from OpenAI.");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await _globalHelper.Log(ex, currentClassName);
-        //        throw new Exception("An error occurred while processing the request.", ex);
-        //    }
-
-        //}
-
-        //private async Task<string> ExtractGeneratedText(string responseString)
-        //{
-        //    try
-        //    {
-        //        var options = new JsonSerializerOptions
-        //        {
-        //            PropertyNameCaseInsensitive = true
-        //        };
-
-        //        var response = JsonSerializer.Deserialize<ChatCompletionResponse>(responseString, options);
-        //        if (response == null || response.Choices == null || !response.Choices.Any())
-        //        {
-        //            return "Failed to extract content. No choices available.";
-        //        }
-
-        //        var firstChoiceContent = response.Choices.FirstOrDefault()?.Message?.Content;
-        //        if (string.IsNullOrEmpty(firstChoiceContent))
-        //        {
-        //            return "Failed to extract content. The first choice is empty.";
-        //        }
-
-        //        return firstChoiceContent;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await _globalHelper.Log(ex, currentClassName);
-        //        throw new Exception("An error occurred while processing the request.", ex);
-        //    }
-        //}
-
-        //private async Task<string> ConvertToHtml(string generatedText, string productName = "", string affiliateLink = "")
-        //{
-        //    try
-        //    {
-        //        var htmlBuilder = new StringBuilder();
-
-        //        if (generatedText.Contains("TITLE:"))
-        //        {
-        //            var title = generatedText.Substring(generatedText.IndexOf("TITLE:") + "TITLE:".Length,
-        //                                                generatedText.IndexOf("BODY:") - (generatedText.IndexOf("TITLE:") + "TITLE:".Length));
-        //            htmlBuilder.AppendLine($"<h1>{title.Trim()}</h1>");
-        //        }
-
-        //        if (generatedText.Contains("BODY:"))
-        //        {
-        //            var body = generatedText.Substring(generatedText.IndexOf("BODY:") + "BODY:".Length,
-        //                                                generatedText.IndexOf("AFFILIATE_LINK:") - (generatedText.IndexOf("BODY:") + "BODY:".Length)).Trim();
-
-        //            var paragraphs = body.Split(new string[] { "\n\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-
-        //            foreach (var paragraph in paragraphs)
-        //            {
-        //                var processedParagraph = paragraph.Trim();
-
-        //                if (!string.IsNullOrEmpty(productName) && processedParagraph.Contains(productName))
-        //                {
-        //                    processedParagraph = processedParagraph.Replace(productName, $"<a href='{affiliateLink}'>{productName}</a>");
-        //                }
-
-        //                htmlBuilder.AppendLine($"<p>{processedParagraph}</p>");
-        //            }
-        //        }
-
-        //        if (generatedText.Contains("AFFILIATE_LINK:") && string.IsNullOrEmpty(affiliateLink))
-        //        {
-        //            affiliateLink = generatedText.Substring(generatedText.IndexOf("AFFILIATE_LINK:") + "AFFILIATE_LINK:".Length).Trim();
-        //            htmlBuilder.AppendLine($"<a href='{affiliateLink}'>Check out this product!</a>");
-        //        }
-
-        //        var finalHtml = htmlBuilder.ToString().Replace("[AFFILIATE_LINK]", "");
-
-        //        finalHtml += InsertProductLinks(productName, affiliateLink);
-
-        //        return finalHtml;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await _globalHelper.Log(ex, currentClassName);
-        //        throw new Exception("An error occurred while processing the request.", ex);
-        //    }
-        //}
-
-
-        //private string InsertProductLinks(string productName, string affiliateLink)
-        //{
-        //    return $"\n\n<p><a style=\"color:red;\" href=\"{affiliateLink}\">(SPECIAL PROMO) Click Here to Buy {productName} at a Special Discounted Price While Supplies Last.</a></p>" +
-        //        $"\n\n <b>Disclaimer</b>: The above is a sponsored post, the views expressed do not represent the stand and views of TheWellnessJunction Editorial.\r\n\r\n";
-        //}
-
-        //#endregion Private
 
     }
 }

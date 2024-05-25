@@ -20,6 +20,7 @@
     <PackageReference Include="Google.Ads.GoogleAds" Version="18.1.0" />
     <PackageReference Include="HtmlSanitizer" Version="8.0.843" />
     <PackageReference Include="MapperSegregatorCore" Version="6.1.0" />
+    <PackageReference Include="Markdig" Version="0.37.0" />
     <PackageReference Include="MediatR" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.4" />
