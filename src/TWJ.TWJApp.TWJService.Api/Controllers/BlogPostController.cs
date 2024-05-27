@@ -10,6 +10,7 @@ using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.Update;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetAll;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetByTagName;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetByUrl;
+using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetFiltered;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetRelated;
 using TWJ.TWJApp.TWJService.Application.Services.Template.Commands.Delete;
 using TWJ.TWJApp.TWJService.Application.Services.Template.Commands.Update;
@@ -52,6 +53,17 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
             return Ok(result);
         }
         #endregion GetRelated
+
+        #region GetFiltered
+        [HttpGet("GetFiltered")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetFiltered([FromQuery] GetFilteredBlogPostQuery command, CancellationToken cancellation)
+        {
+            var result = await Mediator.Send(command, cancellation);
+
+            return Ok(result);
+        }
+        #endregion GetFiltered
 
         #region GetByTagName
         [HttpGet("GetByTagName")]

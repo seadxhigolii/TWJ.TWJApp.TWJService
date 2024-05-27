@@ -4,17 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using TWJ.TWJApp.TWJService.Application.Dto.Models;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
-using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetByUrl;
-using TWJ.TWJApp.TWJService.Common.Constants;
-using TWJ.TWJApp.TWJService.Common.Exceptions;
-using static Google.Rpc.Context.AttributeContext.Types;
-using TWJ.TWJApp.TWJService.Domain.Entities;
-using Google.Type;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetRelated
 {
@@ -33,11 +25,14 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetRelated
         {
             try
             {
-                var blogPost = await _context.BlogPosts.AsNoTracking().FirstOrDefaultAsync(x => x.URL == request.URL, cancellationToken);
+                var blogPost = await _context.BlogPosts.AsNoTracking().FirstOrDefaultAsync(x => x.URL == request.URL && x.Published == true, cancellationToken);
 
-                var relatedBlogPostList = await _context.BlogPosts.Where(x=>x.BlogPostCategoryId == blogPost.BlogPostCategoryId && x.Id != blogPost.Id).Take(3).ToListAsync();
-                
-                if (relatedBlogPostList == null) throw new BadRequestException(ValidatorMessages.NotFound("Record"));
+                if (blogPost == null) return new List<GetRelatedBlogPostModel>();
+
+                var relatedBlogPostList = await _context.BlogPosts
+                    .Where(x => x.BlogPostCategoryId == blogPost.BlogPostCategoryId && x.Published == true)
+                    .Take(3)
+                    .ToListAsync();
 
                 var relatedBlogPostListModel = new List<GetRelatedBlogPostModel>();
 
@@ -65,7 +60,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetRelated
                         relatedBlogPostListModel.Add(bP);
                     }
                 }
-                
+
                 return relatedBlogPostListModel;
             }
             catch (Exception ex)
@@ -73,5 +68,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetRelated
                 throw ex;
             }
         }
+
     }
 }
