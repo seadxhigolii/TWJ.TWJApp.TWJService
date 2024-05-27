@@ -1,6 +1,7 @@
 ﻿using MapperSegregator.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using OpenQA.Selenium;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,11 +32,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetByUrl
         {
             try
             {
-                var data = await _context.BlogPosts.AsNoTracking().FirstOrDefaultAsync(x => x.URL == request.URL, cancellationToken);
+                var data = await _context.BlogPosts.AsNoTracking().FirstOrDefaultAsync(x => x.URL == request.URL && x.Published == true, cancellationToken);
+
+                if (data == null) throw new NotFoundException(ValidatorMessages.NotFound("Record"));
 
                 var author = await _context.User.FindAsync(data.UserId);
-
-                if (data == null) throw new BadRequestException(ValidatorMessages.NotFound("Record"));
 
                 var blogPost = new GetBlogPostByUrlModel
                 {

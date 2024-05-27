@@ -20,6 +20,10 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetFiltere
         public int Dislikes { get; set; }
         public int NumberOfComments { get; set; }
         public Guid? ProductID { get; set; }
+        public string AuthorName { get; set; }
+        public string AuthorImage { get; set; }
+        public string URL { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         public async Task MapData(IProfileMapper profileMapper)
         {
@@ -39,7 +43,9 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetFiltere
                         Likes = src.Likes,
                         Dislikes = src.Dislikes,
                         NumberOfComments = src.NumberOfComments,
-                        ProductID = src.ProductID
+                        ProductID = src.ProductID,
+                        URL = src.URL,
+                        CreatedAt = src.CreatedAt
                     };
                 });
         }
