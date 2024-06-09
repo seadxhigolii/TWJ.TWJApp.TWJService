@@ -1,4 +1,6 @@
-﻿namespace TWJ.TWJApp.TWJService.Application.Dto.Commands.Base
+﻿using System;
+
+namespace TWJ.TWJApp.TWJService.Application.Dto.Commands.Base
 {
     public class FilterRequest
     {
@@ -8,5 +10,7 @@
         public string? SortBy { get; set; }
         public string? SortDirection { get; set; }
         public int? TopRecords { get; set; }
+        public string TagName { get; set; }
+        public Guid? TagID { get; set; }
     }
 }

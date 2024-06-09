@@ -8,10 +8,12 @@ using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.Generate;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateRandom;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.Update;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetAll;
+using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetByAuthorFiltered;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetByTagName;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetByUrl;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetFiltered;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetRelated;
+using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetTopTags;
 using TWJ.TWJApp.TWJService.Application.Services.Template.Commands.Delete;
 using TWJ.TWJApp.TWJService.Application.Services.Template.Commands.Update;
 
@@ -65,10 +67,32 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
         }
         #endregion GetFiltered
 
+        #region GetTopTags
+        [HttpGet("GetTopTags")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetTopTags([FromQuery] GetTopTagsBlogPostQuery command, CancellationToken cancellation)
+        {
+            var result = await Mediator.Send(command, cancellation);
+
+            return Ok(result);
+        }
+        #endregion GetTopTags
+
         #region GetByTagName
         [HttpGet("GetByTagName")]
         [AllowAnonymous]
         public async Task<IActionResult> GetByTagName([FromQuery] GetBlogPostByTagNameQuery command, CancellationToken cancellation)
+        {
+            var result = await Mediator.Send(command, cancellation);
+
+            return Ok(result);
+        }
+        #endregion GetByTagName
+
+        #region GetByAuthorFiltered
+        [HttpGet("GetByAuthorFiltered")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetByAuthorFiltered([FromQuery] GetByAuthorFilteredQuery command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
 

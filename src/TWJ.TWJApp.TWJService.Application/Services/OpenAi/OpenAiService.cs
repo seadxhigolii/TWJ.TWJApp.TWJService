@@ -708,7 +708,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                 var tag = await _context.Tag.FirstOrDefaultAsync(t => t.Name == tagName, cancellationToken);
                 if (tag == null)
                 {
-                    tag = new Tag { Name = tagName };
+                    tag = new Domain.Entities.Tag { Name = tagName.ToLower() };
                     await _context.Tag.AddAsync(tag);
                     await _context.SaveChangesAsync(cancellationToken);
                 }
