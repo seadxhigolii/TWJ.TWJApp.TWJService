@@ -25,14 +25,28 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetRelated
         {
             try
             {
-                var blogPost = await _context.BlogPosts.AsNoTracking().FirstOrDefaultAsync(x => x.URL == request.URL && x.Published == true, cancellationToken);
+                var blogPost = await _context.BlogPosts
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.URL == request.URL && x.Published == true, cancellationToken);
 
                 if (blogPost == null) return new List<GetRelatedBlogPostModel>();
 
+                var tagIds = await _context.BlogPostTags
+                    .Where(bpt => bpt.BlogPostID == blogPost.Id)
+                    .Select(bpt => bpt.TagID)
+                    .ToListAsync(cancellationToken);
+
                 var relatedBlogPostList = await _context.BlogPosts
-                    .Where(x => x.BlogPostCategoryId == blogPost.BlogPostCategoryId && x.Published == true)
+                    .Where(bp => bp.Id != blogPost.Id && bp.Published == true)
+                    .Where(bp => _context.BlogPostTags
+                        .Where(bpt => tagIds.Contains(bpt.TagID))
+                        .Select(bpt => bpt.BlogPostID)
+                        .Distinct()
+                        .Contains(bp.Id))
+                    .OrderByDescending(bp => _context.BlogPostTags
+                        .Count(bpt => bpt.BlogPostID == bp.Id && tagIds.Contains(bpt.TagID)))
                     .Take(3)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
                 var relatedBlogPostListModel = new List<GetRelatedBlogPostModel>();
 
@@ -68,6 +82,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetRelated
                 throw ex;
             }
         }
+
 
     }
 }

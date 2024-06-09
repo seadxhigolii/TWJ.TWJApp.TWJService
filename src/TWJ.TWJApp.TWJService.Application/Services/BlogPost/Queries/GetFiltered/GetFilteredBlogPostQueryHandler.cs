@@ -34,8 +34,42 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetFiltere
         {
             try
             {
-                IQueryable<TWJ.TWJApp.TWJService.Domain.Entities.BlogPost> query = _context.BlogPosts.AsQueryable()
-                                                                                    .Where(x => !string.IsNullOrEmpty(x.Image));
+                IQueryable<TWJ.TWJApp.TWJService.Domain.Entities.BlogPost> query = null;
+                if (request.TagID != null)
+                {
+                    query = _context.BlogPosts.AsQueryable()
+                                          .Where(bp => !string.IsNullOrEmpty(bp.Image))
+                                          .Join(_context.BlogPostTags,
+                                                post => post.Id,
+                                                tag => tag.BlogPostID,
+                                                (post, tag) => new { Post = post, Tag = tag })
+                                          .Where(x => x.Tag.TagID == request.TagID)
+                                          .Select(x => x.Post)
+                                          .OrderByDescending(x => x.CreatedAt);
+                }
+                else if (!string.IsNullOrEmpty(request.TagName))
+                {
+                    var tagId = _context.Tag.Where(t => t.Name == request.TagName).Select(t => t.Id).FirstOrDefault();
+
+                    if (tagId != Guid.Empty)
+                    {
+                        query = _context.BlogPosts.AsQueryable()
+                                                  .Where(bp => !string.IsNullOrEmpty(bp.Image))
+                                                  .Join(_context.BlogPostTags,
+                                                        post => post.Id,
+                                                        tag => tag.BlogPostID,
+                                                        (post, tag) => new { Post = post, Tag = tag })
+                                                  .Where(x => x.Tag.TagID == tagId)
+                                                  .Select(x => x.Post)
+                                                  .OrderByDescending(x => x.CreatedAt);
+                    }
+                }
+                else
+                {
+                    query = _context.BlogPosts.AsQueryable()
+                                              .Where(x => !string.IsNullOrEmpty(x.Image))
+                                              .OrderByDescending(x => x.CreatedAt);
+                }
 
                 var totalItems = await query.CountAsync(cancellationToken);
 

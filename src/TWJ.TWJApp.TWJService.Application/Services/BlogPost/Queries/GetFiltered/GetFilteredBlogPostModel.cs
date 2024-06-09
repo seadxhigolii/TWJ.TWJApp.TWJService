@@ -9,7 +9,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetFiltere
     {
         public Guid Id { get; set; }
         public string Title { get; set; }
-        public string Content { get; set; }
         public Guid UserId { get; set; }
         public Guid ProductCategoryId { get; set; }
         public Guid BlogPostCategoryId { get; set; }
@@ -34,7 +33,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetFiltere
                     {
                         Id = src.Id,
                         Title = src.Title,
-                        Content = src.Content,
                         UserId = src.UserId,
                         ProductCategoryId = src.ProductCategoryId,
                         Tags = src.Tags,
