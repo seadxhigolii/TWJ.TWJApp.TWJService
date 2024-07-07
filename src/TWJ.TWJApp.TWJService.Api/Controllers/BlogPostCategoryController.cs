@@ -11,11 +11,11 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BlogPostCategoryController : BaseController
     {       
         #region Get-All
         [HttpGet("GetAll")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery]GetAllBlogPostCategoryQuery command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -26,7 +26,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Add
         [HttpPost("Add")]
-        [AllowAnonymous]
         public async Task<IActionResult> Add([FromBody] AddBlogPostCategoryCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -37,7 +36,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Update
         [HttpPut("Update")]
-        [AllowAnonymous]
         public async Task<IActionResult> Update([FromBody] UpdateBlogPostCategoryCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -48,7 +46,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Delete
         [HttpDelete("Delete")]
-        [AllowAnonymous]
         public async Task<IActionResult> Delete([FromBody] DeleteBlogPostCategoryCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);

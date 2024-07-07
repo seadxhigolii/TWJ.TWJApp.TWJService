@@ -20,39 +20,10 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.Add
         private void Validations()
         {
             RuleFor(x => x.Title)
-              .NotEmpty().WithMessage("Title is required.")
-              .MinimumLength(5).WithMessage("Title should be at least 5 characters.")
-              .MaximumLength(100).WithMessage("Title should be at most 100 characters.");
+              .NotEmpty().WithMessage("Title is required.");
 
             RuleFor(x => x.Content)
                 .NotEmpty().WithMessage("Content is required.");
-
-            RuleFor(x => x.UserId)
-                .NotEqual(default(Guid)).WithMessage("UserId is required.");
-
-            RuleFor(x => x.ProductCategoryId)
-                .NotEqual(default(Guid)).WithMessage("CategoryId is required.");
-            
-            RuleFor(x => x.BlogPostCategoryId)
-                .NotEqual(default(Guid)).WithMessage("BlogPostCategoryId is required.");
-
-            RuleFor(x => x.Tags)
-                .MaximumLength(500).WithMessage("Tags should be at most 500 characters.");
-
-            RuleFor(x => x.Views)
-                .GreaterThanOrEqualTo(0).WithMessage("Views cannot be negative.");
-
-            RuleFor(x => x.Likes)
-                .GreaterThanOrEqualTo(0).WithMessage("Likes cannot be negative.");
-
-            RuleFor(x => x.Dislikes)
-                .GreaterThanOrEqualTo(0).WithMessage("Dislikes cannot be negative.");
-
-            RuleFor(x => x.NumberOfComments)
-                .GreaterThanOrEqualTo(0).WithMessage("NumberOfComments cannot be negative.");
-
-            RuleFor(x => x.ProductID)
-                .NotEqual(default(Guid?)).When(x => x.ProductID.HasValue);
         }
     }
 }

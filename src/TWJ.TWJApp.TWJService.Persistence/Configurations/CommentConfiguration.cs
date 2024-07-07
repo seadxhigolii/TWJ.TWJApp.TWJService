@@ -13,6 +13,7 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
             builder.Property(comment => comment.Id).HasColumnName("Id").IsRequired();
 
             builder.Property(comment => comment.Content).HasColumnName("Content").IsRequired();
+            builder.Property(comment => comment.Content).HasColumnName("Email").IsRequired();
             builder.Property(comment => comment.BlogPostID).HasColumnName("BlogPostID").IsRequired();
             builder.Property(comment => comment.UserID).HasColumnName("UserID").IsRequired();
 

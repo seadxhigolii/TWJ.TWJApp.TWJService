@@ -12,23 +12,12 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
 
     public class TemplateSettingController : BaseController
     {
-        //#region Get-All
-        //[HttpGet("GetAll")]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> GetAll([FromBody] GetAllTemplatesQuery command, CancellationToken cancellation)
-        //{
-        //    var result = await Mediator.Send(command, cancellation);
-
-        //    return Ok(result);
-        //}
-        //#endregion Get-All
-
         #region Add
         [HttpPost("Add")]
-        [AllowAnonymous]
         public async Task<IActionResult> Add([FromBody] AddTemplateSettingCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -37,10 +26,8 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
         }
         #endregion Add
 
-
         #region Update
         [HttpPut("Update")]
-        [AllowAnonymous]
         public async Task<IActionResult> Update([FromBody] UpdateTemplateSettingCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -49,10 +36,8 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
         }
         #endregion Update
 
-
         #region Delete
         [HttpDelete("Delete")]
-        [AllowAnonymous]
         public async Task<IActionResult> Delete([FromBody] DeleteTemplateSettingCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);

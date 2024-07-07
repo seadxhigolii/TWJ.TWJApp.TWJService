@@ -6,10 +6,14 @@ using System.Threading.Tasks;
 
 namespace TWJ.TWJApp.TWJService.Application.Dto.Models
 {
+    public class KeywordScoreWrapper
+    {
+        public List<KeywordScore> Keywords { get; set; }
+    }
     public class KeywordScore
     {
         public string Keyword { get; set; }
-        public int Score { get; set; }
+        public double Score { get; set; }
     }
 
 }

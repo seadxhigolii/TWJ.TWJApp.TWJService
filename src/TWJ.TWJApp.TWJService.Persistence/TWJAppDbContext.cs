@@ -43,6 +43,10 @@ namespace TWJ.TWJApp.TWJService.Persistence
         public DbSet<Banner> Banners { get; set; }
         public DbSet<BlogPostBanner> BlogPostBanners { get; set; }
         public DbSet<AdClick> AdClicks { get; set; }
+        public DbSet<FeaturedAdClick> FeaturedAdClicks { get; set; }
+        public DbSet<Quote> Quotes { get; set; }
+        public DbSet<InstagramPost> InstagramPosts { get; set; }
+        public DbSet<Fact> Facts { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

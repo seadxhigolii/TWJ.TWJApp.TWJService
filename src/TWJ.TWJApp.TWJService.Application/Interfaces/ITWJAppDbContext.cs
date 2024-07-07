@@ -27,6 +27,11 @@ namespace TWJ.TWJApp.TWJService.Application.Interfaces
         DbSet<NewsLetterSubscriber> NewsLetterSubscribers { get; set; }
         DbSet<Banner> Banners { get; set; }
         DbSet<BlogPostBanner> BlogPostBanners { get; set; }
+        DbSet<AdClick> AdClicks { get; set; }
+        DbSet<FeaturedAdClick> FeaturedAdClicks { get; set; }
+        DbSet<Quote> Quotes { get; set; }
+        DbSet<InstagramPost> InstagramPosts { get; set; }
+        DbSet<Fact> Facts { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

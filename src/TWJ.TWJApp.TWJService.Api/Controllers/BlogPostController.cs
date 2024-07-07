@@ -9,6 +9,7 @@ using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateRando
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.Update;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetAll;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetByAuthorFiltered;
+using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetById;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetByTagName;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetByUrl;
 using TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetFiltered;
@@ -21,11 +22,11 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BlogPostController : BaseController
     {
         #region Get-All
         [HttpGet("GetAll")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery] GetAllBlogPostQuery command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -44,6 +45,16 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
             return Ok(result);
         }
         #endregion GetByUrl
+
+        #region GetById
+        [HttpGet("GetById")]
+        public async Task<IActionResult> GetById([FromQuery] GetBlogPostByIdQuery command, CancellationToken cancellation)
+        {
+            var result = await Mediator.Send(command, cancellation);
+
+            return Ok(result);
+        }
+        #endregion GetById
 
         #region GetRelated
         [HttpGet("GetRelated")]
@@ -102,7 +113,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Add
         [HttpPost("Add")]
-        [AllowAnonymous]
         public async Task<IActionResult> Add([FromBody] AddBlogPostCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -112,7 +122,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
         #endregion Add
 
         #region Generate
-        [AllowAnonymous]
         [HttpPost("Generate")]
         public async Task<IActionResult> Generate([FromBody] GenerateBlogPostCommand command, CancellationToken cancellation)
         {
@@ -123,7 +132,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
         #endregion Generate
 
         #region GenerateSEOFocused
-        [AllowAnonymous]
         [HttpPost("GenerateSEOFocused")]
         public async Task<IActionResult> GenerateSEOFocused([FromBody] GenerateSEOFocuedBlogPostCommand command,CancellationToken cancellation)
         {
@@ -134,7 +142,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
         #endregion GenerateSEOFocused
 
         #region GenerateRandom
-        [AllowAnonymous]
         [HttpPost("GenerateRandom")]
         public async Task<IActionResult> GenerateRandom([FromBody] GenerateRandomBlogPostCommand command, CancellationToken cancellation)
         {
@@ -146,7 +153,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Update
         [HttpPut("Update")]
-        [AllowAnonymous]
         public async Task<IActionResult> Update([FromBody] UpdateBlogPostCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -157,7 +163,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Delete
         [HttpDelete("Delete")]
-        [AllowAnonymous]
         public async Task<IActionResult> Delete([FromBody] DeleteBlogPostCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);

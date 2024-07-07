@@ -24,12 +24,19 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
             builder.Property(u => u.DateOfBirth).HasColumnName("DateOfBirth").IsRequired();
             builder.Property(u => u.City).HasColumnName("City").IsRequired();
             builder.Property(u => u.Country).HasColumnName("Country").IsRequired();
+            builder.Property(u => u.Description).HasColumnName("Description");
             #endregion
 
             #region Configure Table Name
             builder.ToTable("Users");
             #endregion
+
+            #region Relationship Configuration
+            builder.HasMany(u => u.BlogPosts)
+                .WithOne(p => p.User) 
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict); 
+            #endregion
         }
     }
-
 }

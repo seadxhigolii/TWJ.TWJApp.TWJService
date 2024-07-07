@@ -11,11 +11,11 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class NewsLetterSubscriberController : BaseController
     {       
         #region Get-All
         [HttpGet("GetAll")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery]GetAllNewsLetterSubscriberQuery command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -37,7 +37,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Update
         [HttpPut("Update")]
-        [AllowAnonymous]
         public async Task<IActionResult> Update([FromBody] UpdateNewsLetterSubscriberCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -48,7 +47,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Delete
         [HttpDelete("Delete")]
-        [AllowAnonymous]
         public async Task<IActionResult> Delete([FromBody] DeleteNewsLetterSubscriberCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);

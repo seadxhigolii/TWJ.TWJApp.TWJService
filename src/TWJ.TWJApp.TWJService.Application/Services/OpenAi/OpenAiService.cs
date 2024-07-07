@@ -27,6 +27,8 @@ using TWJ.TWJApp.TWJService.Application.Interfaces.Amazon;
 using TWJ.TWJApp.TWJService.Domain.Entities;
 using TWJ.TWJApp.TWJService.Domain.Entities.OpenAi;
 using TWJ.TWJApp.TWJService.Domain.Enums;
+using Newtonsoft.Json.Linq;
+using HtmlAgilityPack;
 
 
 namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
@@ -63,6 +65,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
 
             try
             {
+                var blogPostId = Guid.NewGuid();
                 string title = await GenerateSectionAsync(settings.TitlePrompt, cancellationToken);
                 blogPostContent.AppendLine($"TITLE:\n{title}");
                 blogPostContent.AppendLine($"[advertisement]"); 
@@ -106,22 +109,24 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
 
                 string concepts = await GenerateSectionAsync(settings.ImageConceptsPrompt, cancellationToken);
 
-                string backLinkKeywordList = await GenerateSectionAsync(settings.BackLinkKeywordsPrompt.Replace("%%TITLE%%", title), cancellationToken);
-                var json = await ConvertBackLinkKeywordsToJSONAsync(backLinkKeywordList);
+                string backLinkKeywords = await GenerateSectionAsync(settings.BackLinkKeywordsPrompt.Replace("%%TITLE%%", title).Replace("%%INTRODUCTION%%", introduction), cancellationToken);
 
-                string finalHtmlContent = await FormatBlogPostToHtmlAndInsertProductLink(blogPostContent.ToString(), productList, productToPromote);
+                string jsonBackLinkKeywords = await ConvertHtmlToJsonAsync(backLinkKeywords);
+
+                string finalHtmlContent = await FormatBlogPostToHtmlAndInsertProductLink(blogPostContent.ToString(), productList, productToPromote, blogPostId);
 
 
                 return new BlogPostResponse
                 {
+                    Id = blogPostId,
                     Title = title.Replace("'", "").Replace("\"", ""),
                     HtmlContent = finalHtmlContent,
                     BlogPostCategoryId = settings.CategoryId,
-                    BackLinkKeywords = json,
+                    BackLinkKeywords = jsonBackLinkKeywords,
                     URL = _globalHelper.TitleToUrlSlug(title),
                     ProductId = productToPromote.Id,
-                    Image = await GenerateImageAsync(settings.ImagePrompt.Replace("%%IMAGE_CONCEPTS%%", concepts))
-                    //Image = "https://thewellnessjunctionbucket.s3.eu-north-1.amazonaws.com/6f013177-c7e3-45ae-88c4-f848a5b6de58.jpg"
+                    //Image = await GenerateImageAsync(settings.ImagePrompt.Replace("%%IMAGE_CONCEPTS%%", concepts))
+                    Image = "https://thewellnessjunctionbucket.s3.eu-north-1.amazonaws.com/6f013177-c7e3-45ae-88c4-f848a5b6de58.jpg"
                 };
             }
             catch (Exception ex)
@@ -226,9 +231,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                     return settings;
                 case BlogPostType.LatestNews:
                     var randomNews = await _context.News
-                        .FromSqlRaw("SELECT * FROM \"News\" WHERE \"Active\" = TRUE ORDER BY RANDOM() LIMIT 1")
+                        .FromSqlRaw("SELECT * FROM \"News\" WHERE \"IsUsed\" = FALSE AND \"Active\" = TRUE ORDER BY RANDOM() LIMIT 1")
                         .FirstOrDefaultAsync();
-
+                    randomNews.IsUsed = true;
+                    _context.News.Update(randomNews);
+                    await _context.SaveChangesAsync();
                     settings.TitlePrompt = $"Generate a captivating blog post title about this topic \"{randomNews.Title}\".";
                     settings.IntroductionPrompt = $"Begin the blog post on '%%TITLE%%' with a clear and direct introduction. " +
                             $"Provide essential insights based on the following details: '{randomNews.Description}'. " +
@@ -298,7 +305,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
 
 
         #region Private Methods
-        private async Task<string> GenerateSectionAsync(string prompt, CancellationToken cancellationToken = default)
+        public async Task<string> GenerateSectionAsync(string prompt, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -549,7 +556,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
             }
         }
 
-        private async Task<string> FormatBlogPostToHtmlAndInsertProductLink(string blogPostContent, List<Domain.Entities.Product> productList, Domain.Entities.Product productToPromote)
+        private async Task<string> FormatBlogPostToHtmlAndInsertProductLink(string blogPostContent, List<Domain.Entities.Product> productList, Domain.Entities.Product productToPromote, Guid blogPostId)
         {
                 int titleMarkerIndex = blogPostContent.IndexOf("TITLE:\n");
                 if (titleMarkerIndex != -1)
@@ -571,7 +578,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
 
             for (int i = 0; i < productList.Count; i++)
             {
-                string adHtml = await GetAdvertisementHtml(blogPostContent, productList[i]);
+                string adHtml = await GetAdvertisementHtml(blogPostContent, blogPostId, productList[i]);
 
                 int placeholderIndex = blogPostContent.IndexOf("[advertisement]");
 
@@ -587,95 +594,154 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
 
             return blogPostContent;
         }
-        private async Task<string> GetAdvertisementHtml(string content, Domain.Entities.Product product = null)
+        private async Task<string> GetAdvertisementHtml(string content, Guid blogPostId, Domain.Entities.Product product = null)
         {
             var productName = System.Net.WebUtility.HtmlEncode(product.ProductName);
             string updatedAffiliateLink = System.Net.WebUtility.HtmlEncode(product.AffiliateLink.Replace("zzzzz", "medamri"));
 
             string firstBulletPoint = await GenerateSectionAsync($"Write down 1 very short sentence, the most important fact about this product: {product.Description}");
-            string secondBulletPoint = await GenerateSectionAsync($"Write down 1 very short sentence, the 2nd most important fact about this product: {product.Description}");
-            string thirdBulletPoint = await GenerateSectionAsync($"Write down 1 very short sentence, the 3rd most important fact about this product: {product.Description}");
+            string secondBulletPoint = await GenerateSectionAsync($"Write down 1 very short sentence, the 2nd most important fact about this product: {product.Description}. Don't include this fact \"{firstBulletPoint}\".");
+            string thirdBulletPoint = await GenerateSectionAsync($"Write down 1 very short sentence, the 3rd most important fact about this product: {product.Description} Don't include this fact \"{secondBulletPoint}\" and this fact \"{firstBulletPoint}\".");
 
             string bulletPoints = $@"
                 <li class=""z5u6ygxkhb""><span class=""woi1dxuc1l"">•</span>{firstBulletPoint}</li>
                 <li class=""z5u6ygxkhb""><span class=""woi1dxuc1l"">•</span>{secondBulletPoint}</li>
                 <li class=""z5u6ygxkhb""><span class=""woi1dxuc1l"">•</span>{thirdBulletPoint}</li>
-        ";
+            ";
             return $@"
-                    <div class=""yu5kvzao1k"">
-                        <div class=""q63fh1n5n6"">
-                            FEATURED PARTNER OFFER
-                        </div>
-                        <div class=""ofu5n6af6r"">
-                            <div class=""row"">
-                                <div class=""col-lg-12"">
-                                    <div class=""sn931i665u"">{productName}</div>
-                                </div>
+                <div class=""yu5kvzao1k"">
+                    <div class=""q63fh1n5n6"">
+                        FEATURED PARTNER OFFER
+                    </div>
+                    <div class=""ofu5n6af6r"">
+                        <div class=""row"">
+                            <div class=""col-lg-12"">
+                                <div class=""sn931i665u"">{productName}</div>
                             </div>
-                            <div class=""row"">
-                                <div class=""col-lg-3"">
-                                    <div class=""parent-nWQRd354Je"">
-                                        <div class=""nWQRd354Je"">
-                                            <a href=""{updatedAffiliateLink}"">
-                                                <img src=""{product.Image}"" alt=""Product Image"" class=""iRTWT8nXBC img-fluid"">
-                                            </a>
-                                        </div>
+                        </div>
+                        <div class=""row"">
+                            <div class=""col-lg-3"">
+                                <div class=""parent-nWQRd354Je"">
+                                    <div class=""nWQRd354Je"">
+                                        <a href=""{updatedAffiliateLink}"">
+                                            <img src=""{product.Image}"" alt=""Product Image"" class=""iRTWT8nXBC img-fluid"">
+                                        </a>
                                     </div>
                                 </div>
-                                <div class=""col-lg-9"">
-                                    <ul class=""kz1a5bt068"">
-                                       {bulletPoints}
-                                    </ul>
-                                </div>
                             </div>
-                            <div class=""row"">
-                                <div class=""col-lg-12"">
-                                    <div class=""t7aluspha4 btn btn-primary"" onclick=""window.location.href='{updatedAffiliateLink}';"">LEARN MORE</div>
-                                </div>
+                            <div class=""col-lg-9"">
+                                <ul class=""kz1a5bt068"">
+                                   {bulletPoints}
+                                </ul>
                             </div>
-                            <div class=""row"">
-                                <div class=""col-lg-12"">
-                                    <div class=""c9uxf3f2wb"">On Product's Official Website</div>
-                                </div>
+                        </div>
+                        <div class=""row"">
+                            <div class=""col-lg-12"">
+                                <div class=""t7aluspha4 btn btn-primary"" onclick=""trackAdClick('{product.Id}','{blogPostId}','{updatedAffiliateLink}');"">LEARN MORE</div>
+                            </div>
+                        </div>
+                        <div class=""row"">
+                            <div class=""col-lg-12"">
+                                <div class=""c9uxf3f2wb"">On Product's Official Website</div>
                             </div>
                         </div>
                     </div>
-                ";
+                </div>
+            ";
         }
 
-        private async Task<string> ConvertBackLinkKeywordsToJSONAsync(string backLinkKeywordList)
+        public async Task<string> ConvertHtmlToJsonAsync(string html)
         {
             try
             {
-                string fixedBackLinkKeywordList = FixJsonFormatting(backLinkKeywordList);
-
-                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(fixedBackLinkKeywordList)))
+                return await Task.Run(() =>
                 {
-                    var keywordDictionary = await JsonSerializer.DeserializeAsync<Dictionary<string, int>>(stream);
+                    var doc = new HtmlDocument();
+                    doc.LoadHtml(html);
 
-                    var keywordScores = keywordDictionary.Select(kvp => new KeywordScore
+                    var keywordsNode = doc.DocumentNode.SelectSingleNode("//keywords");
+                    if (keywordsNode == null)
                     {
-                        Keyword = kvp.Key,
-                        Score = kvp.Value
-                    }).ToList();
-
-                    using (var outputStream = new MemoryStream())
-                    {
-                        await JsonSerializer.SerializeAsync(outputStream, keywordScores);
-                        outputStream.Seek(0, SeekOrigin.Begin);
-                        using (var reader = new StreamReader(outputStream))
-                        {
-                            return await reader.ReadToEndAsync();
-                        }
+                        throw new Exception("Invalid HTML format: <keywords> tag not found.");
                     }
-                }
-            }
-            catch (JsonException ex)
+
+                    var keywordNodes = keywordsNode.SelectNodes("keyword");
+                    if (keywordNodes == null)
+                    {
+                        throw new Exception("Invalid HTML format: No <keyword> tags found.");
+                    }
+
+                    var keywords = new List<JObject>();
+                    foreach (var keywordNode in keywordNodes)
+                    {
+                        var keyword = keywordNode.InnerText;
+                        var score = keywordNode.GetAttributeValue("score", null);
+                        if (string.IsNullOrEmpty(score))
+                        {
+                            throw new Exception("Invalid HTML format: <keyword> tag missing score attribute.");
+                        }
+
+                        if (!double.TryParse(score, out double scoreValue))
+                        {
+                            throw new Exception($"Invalid score value: {score}");
+                        }
+
+                        var keywordObj = new JObject
+                {
+                    { "keyword", keyword },
+                    { "score", scoreValue }
+                };
+                        keywords.Add(keywordObj);
+                    }
+
+                    var json = new JObject
             {
-                await _globalHelper.Log(ex, currentClassName);
-                return "[]";
+                { "keywords", new JArray(keywords) }
+            };
+
+                    return json.ToString();
+                });
             }
+            catch (Exception e)
+            {
+                await _globalHelper.Log(e, currentClassName);
+                return "";
+            }            
         }
+
+        //private async Task<string> ConvertBackLinkKeywordsToJSONAsync(string backLinkKeywordList)
+        //{
+        //    try
+        //    {
+        //        string fixedBackLinkKeywordList = FixJsonFormatting(backLinkKeywordList);
+
+        //        using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(fixedBackLinkKeywordList)))
+        //        {
+        //            var keywordDictionary = await JsonSerializer.DeserializeAsync<Dictionary<string, int>>(stream);
+
+        //            var keywordScores = keywordDictionary.Select(kvp => new KeywordScore
+        //            {
+        //                Keyword = kvp.Key,
+        //                Score = kvp.Value
+        //            }).ToList();
+
+        //            using (var outputStream = new MemoryStream())
+        //            {
+        //                await JsonSerializer.SerializeAsync(outputStream, keywordScores);
+        //                outputStream.Seek(0, SeekOrigin.Begin);
+        //                using (var reader = new StreamReader(outputStream))
+        //                {
+        //                    return await reader.ReadToEndAsync();
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch (JsonException ex)
+        //    {
+        //        await _globalHelper.Log(ex, currentClassName);
+        //        return "[]";
+        //    }
+        //}
 
         private string FixJsonFormatting(string json)
         {
@@ -693,6 +759,8 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
 
             string tags = await GenerateSectionAsync(tagsPrompt, cancellationToken);
 
+            tags = tags.ToLower();
+
             await ProcessTagsAsync(tags, blogPostId, cancellationToken);
 
             return tags;
@@ -708,7 +776,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                 var tag = await _context.Tag.FirstOrDefaultAsync(t => t.Name == tagName, cancellationToken);
                 if (tag == null)
                 {
-                    tag = new Domain.Entities.Tag { Name = tagName.ToLower() };
+                    tag = new Domain.Entities.Tag { Name = tagName };
                     await _context.Tag.AddAsync(tag);
                     await _context.SaveChangesAsync(cancellationToken);
                 }

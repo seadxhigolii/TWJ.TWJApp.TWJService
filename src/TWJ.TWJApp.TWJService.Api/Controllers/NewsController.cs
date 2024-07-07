@@ -12,11 +12,11 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class NewsController : BaseController
     {       
         #region Get-All
         [HttpGet("GetAll")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery]GetAllNewsQuery command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -27,7 +27,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Add
         [HttpPost("Add")]
-        [AllowAnonymous]
         public async Task<IActionResult> Add([FromBody] AddNewsCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -38,7 +37,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Generate
         [HttpPost("Generate")]
-        [AllowAnonymous]
         public async Task<IActionResult> Generate([FromBody] GenerateNewsCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -49,7 +47,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Update
         [HttpPut("Update")]
-        [AllowAnonymous]
         public async Task<IActionResult> Update([FromBody] UpdateNewsCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -60,7 +57,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Delete
         [HttpDelete("Delete")]
-        [AllowAnonymous]
         public async Task<IActionResult> Delete([FromBody] DeleteNewsCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);

@@ -26,6 +26,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         #region Entity Models
         public ICollection<BlogPost> BlogPosts { get; set; }
         public ICollection<AdClick> AdClicks { get; set; }
+        public ICollection<FeaturedAdClick> FeaturedAdClicks { get; set; }
         public ICollection<Banner> Banners { get; set; }
         public Category Category { get; set; }     
 

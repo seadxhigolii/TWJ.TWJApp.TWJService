@@ -18,6 +18,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetTopTags
     public class BlogPostDto
     {
         public Guid Id { get; set; }
+        public Guid UserID { get; set; }
         public string Title { get; set; }
         public string AuthorName { get; set; }
         public string ImageURL { get; set; }

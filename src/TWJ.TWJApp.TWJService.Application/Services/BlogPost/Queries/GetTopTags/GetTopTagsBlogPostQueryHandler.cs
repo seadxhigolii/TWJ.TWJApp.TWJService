@@ -60,7 +60,8 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetTopTags
                                   AuthorName = user.FirstName + " " + user.LastName,
                                   CreatedAt = post.CreatedAt,
                                   URL = post.URL,
-                                  ImageURL = post.Image                                  
+                                  ImageURL = post.Image,
+                                  UserID = post.UserId
                               })
                               .AsNoTracking()
                               .Take(4)
@@ -81,7 +82,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetTopTags
             foreach (var tag in topTags)
             {
                 var blogPostIds = await _context.BlogPostTags
-                                                .Where(bpt => bpt.TagID == tag.Id)
+                                                .Where(bpt => bpt.TagID == tag.Id && tag.PostCount > 0)
                                                 .Select(bpt => bpt.BlogPostID)
                                                 .ToListAsync(cancellationToken);
 
@@ -96,7 +97,8 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetTopTags
                                            AuthorName = user.FirstName + " " + user.LastName,
                                            CreatedAt = post.CreatedAt,
                                            URL = post.URL,
-                                           ImageURL = post.Image
+                                           ImageURL = post.Image,
+                                           UserID = post.UserId
                                        })
                                        .AsNoTracking()
                                        .Take(4)

@@ -10,7 +10,9 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
     public class InstagramPost : BaseEntity<Guid>
     {
         #region Properties
-        public Byte[] Image { get; set; }
+        public string Image { get; set; }
+        public int Type { get; set; }
+        public bool IsVideo { get; set; }
         #endregion
     }
 

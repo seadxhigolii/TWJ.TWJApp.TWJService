@@ -10,8 +10,8 @@ using TWJ.TWJApp.TWJService.Application.Services.Template.Queries.GetAll;
 namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/[controller]")]
-    [AllowAnonymous]
     [ApiController]
+    [Authorize]
 
     public class TemplateController : BaseController
     {

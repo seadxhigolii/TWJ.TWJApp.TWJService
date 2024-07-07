@@ -1,21 +1,16 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.IO;
 using TWJ.TWJApp.TWJService.Api.Controllers.Base;
-using TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login;
 
 namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class GenerateFilesController : BaseController
     {
         #region Login
         [HttpPost("Generate/{entityName}")]
-        [AllowAnonymous]
         public async void Generate(string entityName)
         {
             GenerateFilesForEntity(entityName);
