@@ -12,7 +12,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         #region Properties
         public Guid BlogPostID { get; set; }
         public Guid SEOKeywordID { get; set; }
-        public int Score { get; set; }
+        public double Score { get; set; }
 
         #endregion
 

@@ -10,12 +10,11 @@ using System.Threading.Tasks;
 using TWJ.TWJApp.TWJService.Application.Interfaces;
 using TWJ.TWJApp.TWJService.Common.Constants;
 using TWJ.TWJApp.TWJService.Common.Exceptions;
-using TWJ.TWJApp.TWJService.Domain.Entities;
 using TWJ.TWJApp.TWJService.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Cryptography;
+using Microsoft.Extensions.Caching.Memory;
 
 
 namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login
@@ -24,16 +23,19 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login
     {
         private readonly ITWJAppDbContext _context;
         private readonly IConfiguration _configuration;
-        public LoginAccountCommandHandler(ITWJAppDbContext context, IConfiguration configuration)
+        private readonly IMemoryCache _cache;
+        public LoginAccountCommandHandler(ITWJAppDbContext context, IConfiguration configuration, IMemoryCache cache)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _cache = cache;
         }
 
         public async Task<LoginAccountModel> Handle(LoginAccountCommand request, CancellationToken cancellationToken)
         {
             var user = await GetUser(request);
-            if(user == null)
+            if (user == null)
             {
                 throw new ArgumentNullException(nameof(user));
             }
@@ -43,14 +45,22 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login
 
             var (token, expire) = await GetAccessToken(user);
 
+            var cacheKey = user.Id.ToString(); 
+            _cache.Set(cacheKey, user, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(7)
+            });
+
             return new LoginAccountModel
             {
+                UserId = user.Id.ToString(),
                 Token = token,
                 ExpireDate = expire
             };
         }
 
-        public bool ValidatePassword(User user, string enteredPassword)
+
+        public bool ValidatePassword(Domain.Entities.User user, string enteredPassword)
         {
             string hashedPassword = user.Password;
 
@@ -58,7 +68,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login
 
             return isPasswordValid;
         }
-        private async Task<(string token, DateTime expire)> GetAccessToken(User user)
+        private async Task<(string token, DateTime expire)> GetAccessToken(Domain.Entities.User user)
         {
             var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["AppSettings:Token"])), SecurityAlgorithms.HmacSha512);
 
@@ -67,14 +77,14 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(await GetIdentityClaims(user)),
-                Expires = DateTime.UtcNow.AddHours(2),
+                Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = signingCredentials
             };
 
             return (tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor)), tokenDescriptor.Expires.Value);
         }
 
-        private static Task<List<Claim>> GetIdentityClaims(User user)
+        private static Task<List<Claim>> GetIdentityClaims(Domain.Entities.User user)
         {
             List<Claim> claims = new();
 
@@ -90,9 +100,9 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login
             return Task.FromResult(claims);
         }
 
-        private async Task<User> GetUser(LoginAccountCommand request)
+        private async Task<Domain.Entities.User> GetUser(LoginAccountCommand request)
         {
-            User user;
+            Domain.Entities.User user;
             if (new Regex(ValidatorRegex.Email).IsMatch(request.EmailOrUsername))
                 user = await _context.User.FirstOrDefaultAsync(x => x.Email.ToLower() == request.EmailOrUsername.ToLower());
             else

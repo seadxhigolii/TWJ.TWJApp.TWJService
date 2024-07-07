@@ -11,11 +11,11 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoryController : BaseController
     {       
         #region Get-All
         [HttpGet("GetAll")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery]GetAllCategoryQuery command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -26,7 +26,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Add
         [HttpPost("Add")]
-        [AllowAnonymous]
         public async Task<IActionResult> Add([FromBody] AddCategoryCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -35,10 +34,8 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
         }
         #endregion Add
 
-
         #region Update
         [HttpPut("Update")]
-        [AllowAnonymous]
         public async Task<IActionResult> Update([FromBody] UpdateCategoryCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -47,10 +44,8 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
         }
         #endregion Update
 
-
         #region Delete
         [HttpDelete("Delete")]
-        [AllowAnonymous]
         public async Task<IActionResult> Delete([FromBody] DeleteCategoryCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);

@@ -12,11 +12,11 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BannerController : BaseController
     {       
         #region Get-All
         [HttpGet("GetAll")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery]GetAllBannerQuery command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -25,8 +25,7 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
         }
         #endregion Get-All
 
-
-        #region Get-All
+        #region GetRandom
         [HttpGet("GetRandom")]
         [AllowAnonymous]
         public async Task<IActionResult> GetRandom([FromQuery] GetRandomBannerQuery command, CancellationToken cancellation)
@@ -35,11 +34,10 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
             return Ok(result);
         }
-        #endregion Get-All
+        #endregion GetRandom
 
         #region Add
         [HttpPost("Add")]
-        [AllowAnonymous]
         public async Task<IActionResult> Add([FromBody] AddBannerCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -50,7 +48,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Update
         [HttpPut("Update")]
-        [AllowAnonymous]
         public async Task<IActionResult> Update([FromBody] UpdateBannerCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -61,7 +58,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Delete
         [HttpDelete("Delete")]
-        [AllowAnonymous]
         public async Task<IActionResult> Delete([FromBody] DeleteBannerCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);

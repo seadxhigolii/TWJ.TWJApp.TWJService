@@ -22,11 +22,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
             $"Construct the call to action in concise paragraphs, focusing on the value these recommendations add to a healthy lifestyle."+
             " Use the Markdown Syntax for italic, bold keywords and external backlinks for keywords. " +
             "Do not write references or sources at the end. ";
-        public string BackLinkKeywordsPrompt { get; set; } = $"In an effort to boost SEO for a blog focused on healthy lifestyles and habits, " +
-                            "and considering the latest post titled '%%TITLE%%', generate a list of 5-10 SEO-rich keywords or phrases. " +
-                            "These should be unique, likely to draw high-quality backlinks, and relevant to the content's focus on wellness. " +
-                            "Present the keywords in JSON format with 'keyword' as the key and a relevance score from 0 to 100 as the value." +
-                            "Here is the template you must use: {{\"keyword\", \"score\"}} \r\n.";
+        public string BackLinkKeywordsPrompt { get; set; } = $"Please create up to 10 short keywords/phrases for this blog post titled '%%TITLE%%' with a score for each keyword/phrase (between 0 and 100). Use the following HTML format: <keywords><keyword score=\"score1\">keyword1</keyword><keyword score=\"score2\">keyword2</keyword><keyword score=\"score3\">keyword3</keyword></keywords>. The content of the blog post is: \"%%INTRODUCTION%%\"";
         public string ImageConceptsPrompt { get; set; } = $"Extract the core concepts or themes from the blog title: '%%TITLE%%'." +
                             "List these concepts, separated by commas, to guide the creation of a visually appealing image that reflects " +
                             "the blog's content.";

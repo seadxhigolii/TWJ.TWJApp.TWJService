@@ -13,6 +13,9 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
             builder.Property(post => post.Id).HasColumnName("Id").IsRequired();
 
             builder.Property(post => post.Image).HasColumnName("Image").IsRequired();
+            builder.Property(post => post.Type).HasColumnName("Type");
+            builder.Property(post => post.Type).HasColumnName("Type");
+            builder.Property(post => post.IsVideo).HasColumnName("IsVideo");
 
             builder.ToTable("InstagramPosts");
         }

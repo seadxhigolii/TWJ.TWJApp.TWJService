@@ -8,6 +8,7 @@ namespace TWJ.TWJApp.TWJService.Application.Dto.Models
 {
     public class BlogPostResponse
     {
+        public Guid Id { get; set; }
         public string Title { get; set; }
         public string HtmlContent { get; set; }
         public Guid BlogPostCategoryId { get; set; }

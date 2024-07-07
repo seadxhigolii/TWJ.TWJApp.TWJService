@@ -18,6 +18,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         public string City { get; set; }
         public string Country { get; set; }
         public string Image { get; set; }
+        public string Description { get; set; }
         #endregion
 
         #region Entity Models

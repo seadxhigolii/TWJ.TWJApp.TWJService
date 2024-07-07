@@ -1,16 +1,33 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using TWJ.TWJApp.TWJService.Api.Controllers.Base;
 using TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Login;
+using TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Logout;
 using TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Register;
+using TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add;
 
 namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
-    [Route("api/account")]
+    [Route("api/Auth")]
     [ApiController]
+    [Authorize]
     public class AuthController : BaseController
     {
+        private readonly IConfiguration _configuration;
+        private readonly AddInstagramPostCommandHandler _addInstagramPostCommandHandler;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<AuthController> _logger;
+        public AuthController(IConfiguration configuration, AddInstagramPostCommandHandler addInstagramPostCommandHandler, IHttpClientFactory httpClientFactory, ILogger<AuthController> logger)
+        {
+            _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
+            _addInstagramPostCommandHandler = addInstagramPostCommandHandler;
+            _logger = logger;
+        }
+
         #region Login
         [HttpPost("Login")]
         [AllowAnonymous]
@@ -32,5 +49,15 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
             return Ok(result);
         }
         #endregion
+
+        #region Logout
+        [HttpPost("Logout")]
+        public async Task<IActionResult> Logout([FromBody] LogoutAccountCommand command, CancellationToken cancellation)
+        {
+            var result = await Mediator.Send(command, cancellation);
+
+            return Ok(result);
+        }
+        #endregion Logout
     }
 }

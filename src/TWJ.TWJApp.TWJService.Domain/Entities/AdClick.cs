@@ -12,14 +12,17 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         #region Properties
         public Guid ProductId { get; set; }
         public Guid BlogPostId { get; set; }
+        public Guid BannerId { get; set; }
         public DateTime ClickTime { get; set; }
         public string UserSessionId { get; set; } 
+        public string URL { get; set; } 
         public bool Converted { get; set; }
         #endregion
 
         #region Entities
         public Product Product { get; set; }
         public BlogPost BlogPost { get; set; }
+        public Banner Banner { get; set; }
         #endregion Entities
     }
 }

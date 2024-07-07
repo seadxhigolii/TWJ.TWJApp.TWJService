@@ -30,7 +30,14 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetById
 
                 if (data == null) throw new BadRequestException(ValidatorMessages.NotFound("Record"));
 
-                return await _mapper.MapAsync<TWJ.TWJApp.TWJService.Domain.Entities.BlogPost, GetBlogPostByIdModel>(data);
+                var result = new GetBlogPostByIdModel()
+                {
+                    Id = data.Id,
+                    Title = data.Title,
+                    Content = data.Content
+                };
+
+                return result;
             }
             catch (Exception)
             {

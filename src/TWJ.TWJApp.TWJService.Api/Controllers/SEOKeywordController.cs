@@ -13,11 +13,11 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class SEOKeywordController : BaseController
     {       
         #region Get-All
         [HttpGet("GetAll")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery]GetAllSEOKeywordQuery command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -28,7 +28,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Add
         [HttpPost("Add")]
-        [AllowAnonymous]
         public async Task<IActionResult> Add([FromBody] AddSEOKeywordCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -39,7 +38,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Import
         [HttpPost("Import")]
-        [AllowAnonymous]
         public async Task<IActionResult> Import(CancellationToken cancellation)
         {
             var filePath = Path.Combine(Environment.CurrentDirectory, "seokeywords.csv");
@@ -50,7 +48,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Update
         [HttpPut("Update")]
-        [AllowAnonymous]
         public async Task<IActionResult> Update([FromBody] UpdateSEOKeywordCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -61,7 +58,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Delete
         [HttpDelete("Delete")]
-        [AllowAnonymous]
         public async Task<IActionResult> Delete([FromBody] DeleteSEOKeywordCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);

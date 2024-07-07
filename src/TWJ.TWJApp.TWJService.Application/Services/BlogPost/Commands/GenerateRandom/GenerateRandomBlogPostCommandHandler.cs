@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
@@ -23,13 +24,15 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateR
         private readonly IConfiguration _configuration;
         private readonly IGlobalHelperService _globalHelper;
         private readonly IOpenAiService _openAiService;
+        private readonly IMemoryCache _cache;
         private readonly string currentClassName = "";
 
-        public GenerateRandomBlogPostCommandHandler(ITWJAppDbContext context, IGlobalHelperService globalHelper, IOpenAiService openAiService, IConfiguration configuration)
+        public GenerateRandomBlogPostCommandHandler(ITWJAppDbContext context, IGlobalHelperService globalHelper, IOpenAiService openAiService, IConfiguration configuration, IMemoryCache cache)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _globalHelper = globalHelper ?? throw new ArgumentNullException(nameof(globalHelper));
             _openAiService = openAiService ?? throw new ArgumentNullException(nameof(openAiService));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             currentClassName = GetType().Name;
             _configuration = configuration;
         }
@@ -38,14 +41,18 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateR
         {
             try
             {
+                var count = await _context.User.CountAsync();
+                var index = new Random().Next(count);
+                var randomUserId = await _context.User.Skip(index).Take(1).Where(x=>x.isActive == true).Select(x => x.Id).FirstOrDefaultAsync();
+
                 var result = await _openAiService.GenerateBlogPostAsync(BlogPostType.LatestNews,cancellationToken);
 
                 var blogPost = new Domain.Entities.BlogPost
                 {
-                    Id = Guid.NewGuid(),
+                    Id = result.Id,
                     Title = result.Title,
                     Content = result.HtmlContent,
-                    UserId = Guid.Parse("0b3020cf-c562-4ac6-82ee-342780ebfbee"),
+                    UserId = randomUserId,
                     BlogPostCategoryId = result.BlogPostCategoryId,
                     BackLinkKeywords = result.BackLinkKeywords,
                     URL = result.URL,
@@ -78,14 +85,21 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateR
         {
             try
             {
-                var keywordList = JsonConvert.DeserializeObject<List<KeywordScore>>(keywordJson);
+                var keywordWrapper = JsonConvert.DeserializeObject<KeywordScoreWrapper>(keywordJson);
+                var keywordList = keywordWrapper.Keywords;
+
                 foreach (var keywordScore in keywordList)
                 {
                     var seoKeyword = await _context.SEOKeywords
                                                    .FirstOrDefaultAsync(k => k.Keyword == keywordScore.Keyword, cancellationToken);
                     if (seoKeyword == null)
                     {
-                        seoKeyword = new Domain.Entities.SEOKeyword { Id = Guid.NewGuid(), Keyword = keywordScore.Keyword, CategoryId = Guid.Parse("37159d28-d1b6-4e94-ba8b-11b9dbf06267") };
+                        seoKeyword = new Domain.Entities.SEOKeyword
+                        {
+                            Id = Guid.NewGuid(),
+                            Keyword = keywordScore.Keyword,
+                            CategoryId = Guid.Parse("37159d28-d1b6-4e94-ba8b-11b9dbf06267")
+                        };
                         await _context.SEOKeywords.AddAsync(seoKeyword, cancellationToken);
                         await _context.SaveChangesAsync(cancellationToken);
                     }
@@ -104,8 +118,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateR
             catch (Exception ex)
             {
                 await _globalHelper.Log(ex, currentClassName);
-                throw;
-            }            
+            }
         }
 
         public async Task AddBacklinksToContent(string content, Guid blogPostId, CancellationToken cancellationToken)
@@ -142,9 +155,18 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateR
                     {
                         var escapedKeyword = Regex.Escape(kw.Keyword);
                         var keywordRegex = new Regex($@"\b{escapedKeyword}\b", RegexOptions.IgnoreCase);
-                        var replacement = $"<a class=\"backlink-cvzejg3k6w\" href=\"http://localhost:4200/#/post/{kw.BlogPostUrl}\">{kw.Keyword}</a>";
-                        content = keywordRegex.Replace(content, replacement, 1);
-                        linkedKeywords.Add(kw.Keyword.ToLower());
+
+                        content = keywordRegex.Replace(content, match =>
+                        {
+                            var originalKeyword = match.Value;
+                            var replacementKeyword = char.IsUpper(originalKeyword[0])
+                                ? char.ToUpper(kw.Keyword[0]) + kw.Keyword.Substring(1)
+                                : kw.Keyword;
+
+                            var replacement = $"<a class=\"backlink-cvzejg3k6w\" href=\"http://localhost:4200/#/post/{kw.BlogPostUrl}\">{replacementKeyword}</a>";
+                            linkedKeywords.Add(kw.Keyword.ToLower());
+                            return replacement;
+                        }, 1);
                     }
                 }
 
@@ -163,36 +185,40 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateR
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error updating blog post content: {ex.Message}");
-                throw;
+                await _globalHelper.Log(ex, currentClassName);
             }
         }
-
 
         private async Task UpdateTagPostCounts(string tagString, CancellationToken cancellationToken)
         {
-            var tagNames = tagString.Split(',')
-                           .Select(tag => tag.Trim())
-                           .Where(tag => !string.IsNullOrEmpty(tag))
-                           .Distinct();
-
-            foreach (var tagName in tagNames)
+            try
             {
-                var tag = await _context.Tag.FirstOrDefaultAsync(t => t.Name == tagName, cancellationToken);
+                var tagNames = tagString.Split(',')
+                       .Select(tag => tag.Trim())
+                       .Where(tag => !string.IsNullOrEmpty(tag))
+                       .Distinct();
 
-                if (tag != null)
+                foreach (var tagName in tagNames)
                 {
-                    tag.PostCount += 1;
+                    var tag = await _context.Tag.FirstOrDefaultAsync(t => t.Name == tagName, cancellationToken);
+
+                    if (tag != null)
+                    {
+                        tag.PostCount += 1;
+                    }
+                    else
+                    {
+                        tag = new Domain.Entities.Tag { Name = tagName, PostCount = 1 };
+                        await _context.Tag.AddAsync(tag, cancellationToken);
+                    }
                 }
-                else
-                {
-                    tag = new Domain.Entities.Tag { Name = tagName, PostCount = 1 };
-                    await _context.Tag.AddAsync(tag, cancellationToken);
-                }
+
+                await _context.SaveChangesAsync(cancellationToken);
             }
-
-            await _context.SaveChangesAsync(cancellationToken);
+            catch (Exception ex)
+            {
+                await _globalHelper.Log(ex, currentClassName);
+            }        
         }
-
     }
 }

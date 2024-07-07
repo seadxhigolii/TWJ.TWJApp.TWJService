@@ -19,6 +19,8 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
 
             builder.Property(ac => ac.BlogPostId).IsRequired();
             builder.Property(ac => ac.ProductId);
+            builder.Property(ac => ac.BannerId);
+            builder.Property(ac => ac.URL);
 
             builder.Property(ac => ac.ClickTime);
             builder.Property(ac => ac.UserSessionId);
@@ -32,6 +34,11 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
             builder.HasOne(ac => ac.BlogPost)
                 .WithMany(bp => bp.AdClicks)
                 .HasForeignKey(ac => ac.BlogPostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(ac => ac.Banner)
+                .WithMany(bp => bp.AdClicks)
+                .HasForeignKey(ac => ac.BannerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.ToTable("AdClicks");

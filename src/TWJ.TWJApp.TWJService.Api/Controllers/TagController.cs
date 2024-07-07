@@ -12,11 +12,11 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TagController : BaseController
     {       
         #region Get-All
         [HttpGet("GetAll")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery]GetAllTagQuery command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -35,38 +35,5 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
             return Ok(result);
         }
         #endregion GetFiltered
-
-        //#region Add
-        //[HttpPost("Add")]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> Add([FromBody] AddTagCommand command, CancellationToken cancellation)
-        //{
-        //    var result = await Mediator.Send(command, cancellation);
-
-        //    return Ok(result);
-        //}
-        //#endregion Add
-
-        //#region Update
-        //[HttpPut("Update")]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> Update([FromBody] UpdateTagCommand command, CancellationToken cancellation)
-        //{
-        //    var result = await Mediator.Send(command, cancellation);
-
-        //    return Ok(result);
-        //}
-        //#endregion Update
-
-        //#region Delete
-        //[HttpDelete("Delete")]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> Delete([FromBody] DeleteTagCommand command, CancellationToken cancellation)
-        //{
-        //    var result = await Mediator.Send(command, cancellation);
-
-        //    return Ok(result);
-        //}
-        //#endregion Delete
     }
 }

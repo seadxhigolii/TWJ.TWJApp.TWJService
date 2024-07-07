@@ -8,6 +8,7 @@ namespace TWJ.TWJApp.TWJService.Application.Interfaces
 {
     public interface IOpenAiService
     {
+        Task<string> GenerateSectionAsync(string prompt, CancellationToken cancellationToken = default);
         Task<string> GenerateTagsAsync(string content, Guid blogPostId, CancellationToken cancellationToken);
         Task<BlogPostResponse> GenerateBlogPostAsync(BlogPostType postType, CancellationToken cancellationToken);
 

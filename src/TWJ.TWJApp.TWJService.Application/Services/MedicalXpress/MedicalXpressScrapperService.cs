@@ -12,9 +12,8 @@ namespace TWJ.TWJApp.TWJService.Application.Services.MedicalXpress
 {
     public class MedicalXpressService : IMedicalXpressService
     {
-        private readonly IMedicalXpressScrapperService _medicalXpressScrapperService;
-        private readonly IConfiguration _configuration;
-        public MedicalXpressService(IMedicalXpressScrapperService medicalXpressScrapperService) 
+        private readonly WebScraper.Interfaces.IMedicalXpressScrapperService _medicalXpressScrapperService;
+        public MedicalXpressService(WebScraper.Interfaces.IMedicalXpressScrapperService medicalXpressScrapperService) 
         { 
             _medicalXpressScrapperService = medicalXpressScrapperService;
         }

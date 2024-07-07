@@ -8,8 +8,9 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
     {
         #region Properties
         public string Content { get; set; }
+        public string Email { get; set; }
         public Guid BlogPostID { get; set; }
-        public Guid UserID { get; set; }
+        public string UserID { get; set; }
         #endregion
 
         #region Entity Models

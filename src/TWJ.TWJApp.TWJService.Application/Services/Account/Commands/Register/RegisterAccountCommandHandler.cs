@@ -31,7 +31,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Account.Commands.Register
                     throw new BadRequestException("Email or username is already taken.");
                 }
 
-                var newUser = new User
+                var newUser = new Domain.Entities.User
                 {
                     Id = Guid.NewGuid(),
                     FirstName = request.FirstName,
