@@ -13,7 +13,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:5000"
+      "applicationUrl": "http://127.0.0.1:5000"
     },
     "Docker": {
       "commandName": "Docker",
@@ -25,10 +25,10 @@
     "WSL": {
       "commandName": "WSL2",
       "launchBrowser": true,
-      "launchUrl": "http://localhost:5000",
+      "launchUrl": "http://127.0.0.1:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "http://localhost:5000"
+        "ASPNETCORE_URLS": "http://127.0.0.1:5000"
       },
       "distributionName": ""
     }
@@ -38,7 +38,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:50406",
+      "applicationUrl": "http://127.0.0.1:50406",
       "sslPort": 44319
     }
   }

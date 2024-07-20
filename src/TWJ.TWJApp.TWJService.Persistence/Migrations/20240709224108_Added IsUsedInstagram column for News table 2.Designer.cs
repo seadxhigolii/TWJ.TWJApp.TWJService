@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TWJ.TWJApp.TWJService.Persistence;
@@ -11,9 +12,10 @@ using TWJ.TWJApp.TWJService.Persistence;
 namespace TWJ.TWJApp.TWJService.Persistence.Migrations
 {
     [DbContext(typeof(TWJAppDbContext))]
-    partial class TWJAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240709224108_Added IsUsedInstagram column for News table 2")]
+    partial class AddedIsUsedInstagramcolumnforNewstable2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1412,40 +1414,6 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("UserRole");
-                });
-
-            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.UserSettings", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("Id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("CreatedAt");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text")
-                        .HasColumnName("CreatedBy");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("DeletedAt");
-
-                    b.Property<string>("Key")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("UpdatedAt");
-
-                    b.Property<string>("Value")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UserSettings");
                 });
 
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.AdClick", b =>

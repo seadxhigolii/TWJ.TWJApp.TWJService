@@ -41,9 +41,10 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateR
         {
             try
             {
-                var count = await _context.User.CountAsync();
+                var activeUsers = await _context.User.Where(x => x.isActive == true).ToListAsync();
+                var count = activeUsers.Count;
                 var index = new Random().Next(count);
-                var randomUserId = await _context.User.Skip(index).Take(1).Where(x=>x.isActive == true).Select(x => x.Id).FirstOrDefaultAsync();
+                var randomUserId = activeUsers[index].Id;
 
                 var result = await _openAiService.GenerateBlogPostAsync(BlogPostType.LatestNews,cancellationToken);
 

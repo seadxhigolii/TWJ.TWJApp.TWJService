@@ -65,7 +65,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Video
                 string outputFilePath = $"{Guid.NewGuid()}-video-template-{requestType}.mp4";
                 string tempVideoPath = $"{Guid.NewGuid()}-temp-video.mp4";
                 string tempAudioPath = $"{Guid.NewGuid()}-temp-audio.wav";
-                string tempVideoWithAudioPath = $"{Guid.NewGuid()}-video-with-audio.mp4";
+                string tempVideoWithAudioPath = $"{Guid.NewGuid()}-template-{requestType}.mp4";
 
                 await DownloadVideoTemplate(videoUrl, tempVideoPath);
                 var (width, height, fps, frameCount) = GetVideoMetadata(tempVideoPath);
@@ -82,7 +82,8 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Video
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("An unexpected error occurred: " + ex.Message);
+                await _globalHelper.Log(ex, "VideoService");
+                return Unit.Value;
             }
         }
 
@@ -94,7 +95,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Video
 
             if (instagramTemplate == null)
             {
-                throw new ApplicationException("No suitable video template found.");
+                await _globalHelper.Log(new Exception("No suitable video template found."), "VideoService");
             }
 
             return instagramTemplate;
@@ -108,7 +109,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Video
 
             if (!quotes.Any())
             {
-                throw new ApplicationException("No suitable quote found.");
+                await _globalHelper.Log(new Exception("No suitable quote found.."), "VideoService");
             }
 
             var random = new Random();
@@ -172,11 +173,66 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Video
                     fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
                     break;
                 case 2:
-                    quoteRect = new RectangleF(120, 320, 820, 500);
+                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Youngserif Regular.ttf");
+                    customFontPath = Path.GetFullPath(customFontPath);
+                    privateFonts.AddFontFile(customFontPath);
+                    fontFamily = privateFonts.Families[0];
+
+                    quoteRect = new RectangleF(103, 608, 856, 521);
+                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    break;
+                case 3:
+                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Kollektif.ttf");
+                    customFontPath = Path.GetFullPath(customFontPath);
+                    privateFonts.AddFontFile(customFontPath);
+                    fontFamily = privateFonts.Families[0];
+
+                    quoteRect = new RectangleF(103, 608, 856, 521);
+                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    break;
+                case 4:
+                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Bahuraksa.otf");
+                    customFontPath = Path.GetFullPath(customFontPath);
+                    privateFonts.AddFontFile(customFontPath);
+                    fontFamily = privateFonts.Families[0];
+
+                    quoteRect = new RectangleF(103, 608, 856, 521);
+                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    break;
+                case 5:
+                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Paragon Regular.otf");
+                    customFontPath = Path.GetFullPath(customFontPath);
+                    privateFonts.AddFontFile(customFontPath);
+                    fontFamily = privateFonts.Families[0];
+
+                    quoteRect = new RectangleF(103, 608, 856, 521);
+                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    break;
+                case 6:
+                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Suave.ttf");
+                    customFontPath = Path.GetFullPath(customFontPath);
+                    privateFonts.AddFontFile(customFontPath);
+                    fontFamily = privateFonts.Families[0];
+
+                    quoteRect = new RectangleF(103, 608, 856, 521);
+                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    break;
+                case 7:
+                    customFontPath = Path.Combine(apiDirectory, "Fonts", "MartianMono.ttf");
+                    customFontPath = Path.GetFullPath(customFontPath);
+                    privateFonts.AddFontFile(customFontPath);
+                    fontFamily = privateFonts.Families[0];
+
+                    quoteRect = new RectangleF(103, 608, 856, 521);
                     fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
                     break;
                 default:
-                    quoteRect = new RectangleF(103, 308, 856, 521);
+                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Rinnet Regular.otf");
+                    customFontPath = Path.GetFullPath(customFontPath);
+                    privateFonts.AddFontFile(customFontPath);
+                    fontFamily = privateFonts.Families[0];
+
+                    quoteRect = new RectangleF(103, 608, 856, 521);
                     fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
                     break;
             }

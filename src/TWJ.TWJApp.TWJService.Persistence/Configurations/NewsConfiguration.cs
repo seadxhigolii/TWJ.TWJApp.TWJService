@@ -23,6 +23,7 @@ namespace TWJ.TWJApp.TWJService.Persistence.Configurations
             builder.Property(post => post.URL).HasColumnName("URL");
             builder.Property(post => post.Tags).HasColumnName("Tags");
             builder.Property(post => post.IsUsed).HasColumnName("IsUsed");
+            builder.Property(post => post.IsUsed).HasColumnName("IsUsedInstagram");
             builder.Property(post => post.Active).HasColumnName("Active");
             builder.Property(post => post.NoOfPosts).HasColumnName("NoOfPosts");
 

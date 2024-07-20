@@ -14,6 +14,7 @@ namespace TWJ.TWJApp.TWJService.Domain.Entities
         public string URL { get; set; }
         public string Tags { get; set; }
         public bool IsUsed { get; set; } = false;
+        public bool IsUsedInstagram { get; set; } = false;
         public bool Active { get; set; } = true;
         public int NoOfPosts { get; set; } = 0;
         public DateTime ReleaseDate { get; set; }

@@ -47,6 +47,7 @@ namespace TWJ.TWJApp.TWJService.Persistence
         public DbSet<Quote> Quotes { get; set; }
         public DbSet<InstagramPost> InstagramPosts { get; set; }
         public DbSet<Fact> Facts { get; set; }
+        public DbSet<UserSettings> UserSettings { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

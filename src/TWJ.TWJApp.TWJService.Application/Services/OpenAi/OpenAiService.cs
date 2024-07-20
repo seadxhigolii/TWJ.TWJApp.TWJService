@@ -325,7 +325,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
             catch (Exception ex)
             {
                 await _globalHelper.Log(ex, currentClassName);
-                return $"An error occurred while generating the blog post: {ex.Message}";
+                return $"An error occurred while generating the section: {ex.Message}";
             }
 
         }
