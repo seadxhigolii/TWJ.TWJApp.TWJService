@@ -59,6 +59,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Amazon.S3
                     await utility.UploadAsync(request);
                 }
 
+                if(!string.IsNullOrEmpty(subDirectoryInBucket) && subDirectoryInBucket == "Instagram Posts") 
+                {
+                    subDirectoryInBucket = "Instagram+Posts";
+                }
+
                 string fileUrl = $"{amazonS3URL}/{(string.IsNullOrEmpty(subDirectoryInBucket) ? "" : subDirectoryInBucket + "/")}{fileNameInS3}";
 
                 return fileUrl;

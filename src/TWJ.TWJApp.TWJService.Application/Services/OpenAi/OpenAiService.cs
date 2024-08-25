@@ -325,7 +325,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
             catch (Exception ex)
             {
                 await _globalHelper.Log(ex, currentClassName);
-                return $"An error occurred while generating the section: {ex.Message}";
+                throw ex;
             }
 
         }
@@ -848,13 +848,13 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                 var response = JsonSerializer.Deserialize<ChatCompletionResponse>(responseString, options);
                 if (response == null || response.Choices == null || !response.Choices.Any())
                 {
-                    return "Failed to extract content. No choices available.";
+                    throw new Exception("Failed to extract content. No choices available.");
                 }
 
                 var firstChoiceContent = response.Choices.FirstOrDefault()?.Message?.Content;
                 if (string.IsNullOrEmpty(firstChoiceContent))
                 {
-                    return "Failed to extract content. The first choice is empty.";
+                    throw new Exception("Failed to extract content. The first choice is empty.");
                 }
 
                 return firstChoiceContent;

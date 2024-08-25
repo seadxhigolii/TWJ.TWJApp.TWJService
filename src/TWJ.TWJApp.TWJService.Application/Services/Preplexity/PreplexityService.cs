@@ -132,15 +132,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Preplexity
             }
             catch (HttpRequestException e) 
             {
-                Debug.WriteLine($"HTTP Request Error: {e.Message}");
-                if (e.InnerException != null)
-                {
-                    Debug.WriteLine($"Inner Exception: {e.InnerException.Message}");
-                }
+                throw e;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"An error occurred: {ex.Message}");
+                throw ex;
             }
             return "";
         }

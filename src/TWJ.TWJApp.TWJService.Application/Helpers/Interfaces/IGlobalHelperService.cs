@@ -20,6 +20,7 @@ namespace TWJ.TWJApp.TWJService.Application.Helpers.Interfaces
         Task<Unit> PostToInstagramAsync(string imageUrl, string quoteContent, string caption, CancellationToken cancellationToken);
         Task<Unit> PostToFacebookAsync(string imageUrl, string quoteContent, string caption, CancellationToken cancellationToken);
         Task<Unit> PostToTwitterAsync(string imageUrl, string caption, CancellationToken cancellationToken = default);
+        Task<Unit> PostReelToInstagramAsync(string videoUrl, string caption, CancellationToken cancellationToken = default);
         (byte[] Key, byte[] IV) GenerateAesKeys();
         byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV);
         string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV);

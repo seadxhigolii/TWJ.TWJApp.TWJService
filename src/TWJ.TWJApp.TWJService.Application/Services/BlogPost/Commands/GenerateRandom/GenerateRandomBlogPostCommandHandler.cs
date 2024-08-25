@@ -26,6 +26,8 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateR
         private readonly IOpenAiService _openAiService;
         private readonly IMemoryCache _cache;
         private readonly string currentClassName = "";
+        private readonly string _environment;
+        private readonly string _webURL;
 
         public GenerateRandomBlogPostCommandHandler(ITWJAppDbContext context, IGlobalHelperService globalHelper, IOpenAiService openAiService, IConfiguration configuration, IMemoryCache cache)
         {
@@ -35,9 +37,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateR
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
             currentClassName = GetType().Name;
             _configuration = configuration;
+            _environment = _configuration["Environment"];
+            _environment = _configuration["AppSettings:WebURL"];
         }
 
-        public async Task<BlogPostResponse> Handle(GenerateRandomBlogPostCommand request, CancellationToken cancellationToken)
+        public async Task<BlogPostResponse> Handle(GenerateRandomBlogPostCommand request, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -164,7 +168,8 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateR
                                 ? char.ToUpper(kw.Keyword[0]) + kw.Keyword.Substring(1)
                                 : kw.Keyword;
 
-                            var replacement = $"<a class=\"backlink-cvzejg3k6w\" href=\"http://localhost:4200/#/post/{kw.BlogPostUrl}\">{replacementKeyword}</a>";
+                            var replacement = $"<a class=\"backlink-cvzejg3k6w\" href=\"{_webURL}{kw.BlogPostUrl}\">{replacementKeyword}</a>";
+                            
                             linkedKeywords.Add(kw.Keyword.ToLower());
                             return replacement;
                         }, 1);

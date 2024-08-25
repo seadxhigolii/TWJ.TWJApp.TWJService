@@ -48,13 +48,43 @@ namespace TWJ.TWJApp.TWJService.Application.Services.News.Commands.Generate
         {
             try
             {
-                //var newsTitleList = await _preplexityService.GenerateTitleAsync($"Give me 10 news titles (give titles only) from this URL \"{medicalXpressURL}\".");
-                //var newsList = await _medicalXpressSerivce.PerformWebScrapAsync(medicalXpressURL);
-                //var newsList = await _veryWellHealthScrapperService.PerformWebScrapAsync(veryWellHealthURL);
-                //var newsList = await _scienceDailyScrapperService.PerformWebScrapAsync(scienceDailyURL);
-                var newsList = await _medicalNewsTodayScrapperService.PerformWebScrapAsync(medicalNewsTodayURL);
+                var combinedNewsList = new List<Domain.Entities.NewsDataItem>(); // Initialize an empty list
 
-                foreach (var newsTitle in newsList)
+                switch (request.NewsType)
+                {
+                    case 1:
+                            var newsList1 = await _medicalXpressSerivce.PerformWebScrapAsync(medicalXpressURL);
+                            combinedNewsList.AddRange(newsList1.Select(item => new Domain.Entities.NewsDataItem
+                            {
+                                Title = item.Title
+                            }));
+                        break;
+                    case 2:
+                            var newsList2 = await _veryWellHealthScrapperService.PerformWebScrapAsync(veryWellHealthURL);
+                            combinedNewsList.AddRange(newsList2.Select(item => new Domain.Entities.NewsDataItem
+                            {
+                                Title = item.Title
+                            }));
+                        break;
+                    case 3:
+                            var newsList3 = await _scienceDailyScrapperService.PerformWebScrapAsync(scienceDailyURL);
+                            combinedNewsList.AddRange(newsList3.Select(item => new Domain.Entities.NewsDataItem
+                            {
+                                Title = item.Title
+                            }));
+                        break;
+                    case 4:
+                            var newsList4 = await _medicalNewsTodayScrapperService.PerformWebScrapAsync(medicalNewsTodayURL);
+                            combinedNewsList.AddRange(newsList4.Select(item => new Domain.Entities.NewsDataItem
+                            {
+                                Title = item.Title
+                            }));
+                        break;
+                    default:
+                        break;
+                }
+
+                foreach (var newsTitle in combinedNewsList)
                 {
                     var isDuplicate = await _context.News
                         .AsNoTracking()

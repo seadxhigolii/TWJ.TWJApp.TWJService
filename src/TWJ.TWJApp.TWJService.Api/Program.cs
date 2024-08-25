@@ -1,9 +1,24 @@
+using Hangfire;
+using MapperSegregator.Extensions.DependencyInjection;
+using TWJ.TWJApp.TWJService.Api.Extensions.Configurations;
 using TWJ.TWJApp.TWJService.Api.Extensions;
 using TWJ.TWJApp.TWJService.Application.Services.OpenAI;
+using TWJ.TWJApp.TWJService.Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigins",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:4200", "https://www.twj-health.com")
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
+        });
+});
+
 builder.Services.AddHttpClient<OpenAiService>();
 
 builder.Services.AddServices(builder.Configuration)
@@ -12,7 +27,10 @@ builder.Services.AddServices(builder.Configuration)
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseRouting();
+
+//app.UseMiddleware<AnonymousRateLimitingMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -22,9 +40,32 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = string.Empty;
     });
 }
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
 
-app.UseServices();
+app.UseHttpsRedirection();
 
-app.MapControllers();
+app.UseCors("AllowSpecificOrigins");
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseHangfireDashboard();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+    endpoints.MapControllers();
+    endpoints.MapHangfireDashboard();
+});
+
+app.UseRegisteredHelpers();
+app.UseMapperServices();
+
+ServiceExtension.ConfigureHangfireJobs(app);
 
 app.Run();

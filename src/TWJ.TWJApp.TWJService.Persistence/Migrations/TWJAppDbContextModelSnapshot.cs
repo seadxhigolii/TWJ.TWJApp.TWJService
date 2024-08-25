@@ -696,6 +696,43 @@ namespace TWJ.TWJApp.TWJService.Persistence.Migrations
                     b.ToTable("FeaturedAdClicks");
                 });
 
+            modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.Graph", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("Id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAt");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("CreatedBy");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("DeletedAt");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("UpdatedAt");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Graphs");
+                });
+
             modelBuilder.Entity("TWJ.TWJApp.TWJService.Domain.Entities.InstagramPost", b =>
                 {
                     b.Property<Guid>("Id")

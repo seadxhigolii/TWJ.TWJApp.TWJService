@@ -17,16 +17,11 @@ using Newtonsoft.Json.Linq;
 using System.Net.Http;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-using Tweetinvi;
-using Tweetinvi.Models;
-using Tweetinvi.Parameters;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
-using Google.Apis.Auth.OAuth2;
 using System.Security.Cryptography;
 using System.IO;
-using TWJ.TWJApp.TWJService.Application.Dto.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
@@ -348,11 +343,11 @@ namespace TWJ.TWJApp.TWJService.Application.Helpers.Services
                     accessToken20.Value = await RefreshAccessTokenAsync(_twitterClientID, _twitterClientSecret);
                 }
 
-                byte[] key = Convert.FromBase64String(_aesKey);
-                byte[] iv = Convert.FromBase64String(_aesIV);
+                byte[] key = Convert.FromBase64String(_aesKey.Trim());
+                byte[] iv = Convert.FromBase64String(_aesIV.Trim());
 
-                var decrpytedAccessToken20 = DecryptStringFromBytes_Aes(Convert.FromBase64String(accessToken20.Value), key, iv);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", decrpytedAccessToken20);
+                var decryptedAccessToken20 = DecryptStringFromBytes_Aes(Convert.FromBase64String(accessToken20.Value.Trim()), key, iv);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", decryptedAccessToken20);
 
                 var response = await client.SendAsync(request, cancellationToken);
                 var responseString = await response.Content.ReadAsStringAsync();
@@ -373,6 +368,143 @@ namespace TWJ.TWJApp.TWJService.Application.Helpers.Services
                 throw new ApplicationException("An unexpected error occurred: " + ex.Message, ex);
             }
         }
+
+        public async Task<Unit> PostReelToInstagramAsync(string videoUrl, string caption, CancellationToken cancellationToken = default)
+        {
+            string currentClassName = nameof(GlobalHelperService);
+
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+
+                string businessAccountRequestUrl = $"https://graph.facebook.com/v20.0/{_facebookPageID}?fields=instagram_business_account&access_token={_instagramAccessToken}";
+
+                var businessAccountResponse = await SendHttpRequestWithRetry(async () =>
+                {
+                    return await client.GetAsync(businessAccountRequestUrl, cancellationToken);
+                });
+
+                var businessAccountContent = await businessAccountResponse.Content.ReadAsStringAsync();
+
+                if (!businessAccountResponse.IsSuccessStatusCode)
+                {
+                    var errorMessage = $"Error retrieving Instagram Business Account ID: {businessAccountContent}";
+                    await Log(new Exception(errorMessage), currentClassName);
+                    throw new ApplicationException(errorMessage);
+                }
+
+                var businessAccountId = JObject.Parse(businessAccountContent)["instagram_business_account"]["id"].ToString();
+
+                // Create video media object
+                var createMediaUrl = $"https://graph.facebook.com/v14.0/{businessAccountId}/media";
+                var createMediaContent = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("video_url", videoUrl),
+                    new KeyValuePair<string, string>("caption", caption),
+                    new KeyValuePair<string, string>("media_type", "REELS"),
+                    new KeyValuePair<string, string>("share_to_feed", "true"),
+                    new KeyValuePair<string, string>("access_token", _instagramAccessToken)
+                });
+
+                var createMediaResponse = await SendHttpRequestWithRetry(async () =>
+                {
+                    return await client.PostAsync(createMediaUrl, createMediaContent, cancellationToken);
+                });
+
+                var createMediaResponseContent = await createMediaResponse.Content.ReadAsStringAsync();
+
+                if (!createMediaResponse.IsSuccessStatusCode)
+                {
+                    var errorMessage = $"Error creating media object: {createMediaResponseContent}";
+                    await Log(new Exception(errorMessage), currentClassName);
+                    throw new ApplicationException(errorMessage);
+                }
+
+                var mediaObjectId = JObject.Parse(createMediaResponseContent)["id"].ToString();
+
+                // Wait for the media object to be ready for publishing
+                bool isMediaReady = false;
+                int retries = 0;
+                const int maxRetries = 20;
+
+                while (!isMediaReady && retries < maxRetries)
+                {
+                    await Task.Delay(5000, cancellationToken); // Wait for 5 seconds
+
+                    var checkStatusUrl = $"https://graph.facebook.com/v14.0/{mediaObjectId}?fields=status_code,status&access_token={_instagramAccessToken}";
+                    var checkStatusResponse = await client.GetAsync(checkStatusUrl, cancellationToken);
+                    var checkStatusContent = await checkStatusResponse.Content.ReadAsStringAsync();
+
+                    if (!checkStatusResponse.IsSuccessStatusCode)
+                    {
+                        var errorMessage = $"Error checking media status: {checkStatusContent}";
+                        await Log(new Exception(errorMessage), currentClassName);
+                        throw new ApplicationException(errorMessage);
+                    }
+
+                    var checkStatusResponseJson = JObject.Parse(checkStatusContent);
+                    var statusCode = checkStatusResponseJson["status_code"].ToString();
+                    var status = checkStatusResponseJson["status"].ToString();
+
+                    if (statusCode == "READY")
+                    {
+                        isMediaReady = true;
+                    }
+                    else if(statusCode == "FINISHED")
+                    {
+                        isMediaReady = true;
+                    }
+                    else if (statusCode == "ERROR")
+                    {
+                        var errorMessage = $"Media processing failed: {checkStatusContent}";
+                        await Log(new Exception(errorMessage), currentClassName);
+                        throw new ApplicationException(errorMessage);
+                    }
+
+                    retries++;
+                }
+
+                if (!isMediaReady)
+                {
+                    var errorMessage = "Media is not ready for publishing after multiple retries.";
+                    await Log(new Exception(errorMessage), currentClassName);
+                    throw new ApplicationException(errorMessage);
+                }
+
+                // Publish video media object
+                var publishMediaUrl = $"https://graph.facebook.com/v14.0/{businessAccountId}/media_publish";
+                var publishMediaContent = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("creation_id", mediaObjectId),
+                    new KeyValuePair<string, string>("access_token", _instagramAccessToken)
+                });
+
+                var publishMediaResponse = await SendHttpRequestWithRetry(async () =>
+                {
+                    return await client.PostAsync(publishMediaUrl, publishMediaContent, cancellationToken);
+                });
+
+                var publishMediaResponseContent = await publishMediaResponse.Content.ReadAsStringAsync();
+
+                if (!publishMediaResponse.IsSuccessStatusCode)
+                {
+                    var errorMessage = $"Error publishing media object: {publishMediaResponseContent}";
+                    await Log(new Exception(errorMessage), currentClassName);
+                    throw new ApplicationException(errorMessage);
+                }
+
+                return Unit.None;
+            }
+            catch (Exception ex)
+            {
+                await Log(ex, currentClassName);
+                throw new ApplicationException("An unexpected error occurred: " + ex.Message);
+            }
+        }
+
+
+
+
 
         private async Task<byte[]> DownloadImageAsync(string imageUrl, HttpClient client, CancellationToken cancellationToken)
         {

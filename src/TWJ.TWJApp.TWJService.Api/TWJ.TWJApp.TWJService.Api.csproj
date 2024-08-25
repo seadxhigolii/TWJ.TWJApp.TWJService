@@ -2,19 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>TWJ.TWJApp.TWJService.Api</RootNamespace>
-	<ImplicitUsings>enable</ImplicitUsings>
-	<UserSecretsId>4a71a644-0259-4730-8e6c-eb4a3ee1ad74</UserSecretsId>
-	<DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
-	<DockerfileContext>..\..</DockerfileContext>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>4a71a644-0259-4730-8e6c-eb4a3ee1ad74</UserSecretsId>
+    <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
   </PropertyGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <Compile Include="obj\Debug\net6.0\.NETCoreApp,Version=v6.0.AssemblyAttributes.cs" />
     <Compile Include="obj\Debug\net6.0\TWJ.TWJApp.TWJService.Api.AssemblyInfo.cs" />
     <Compile Include="obj\Debug\net6.0\TWJ.TWJApp.TWJService.Api.GlobalUsings.g.cs" />
     <Compile Include="obj\Debug\net6.0\TWJ.TWJApp.TWJService.Api.MvcApplicationPartsAssemblyInfo.cs" />
-  </ItemGroup>
+  </ItemGroup>-->
 
   <ItemGroup>
     <Content Include="bin\Debug\net6.0\appsettings.Development.json" />
@@ -445,6 +446,10 @@
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="CsvHelper" Version="31.0.2" />
     <PackageReference Include="Google.Ads.GoogleAds" Version="18.1.0" />
+    <PackageReference Include="Hangfire" Version="1.8.14" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.14" />
+    <PackageReference Include="Hangfire.PostgreSql" Version="1.20.9" />
+    <PackageReference Include="Hangfire.SqlServer" Version="1.8.14" />
     <PackageReference Include="HtmlSanitizer" Version="8.0.843" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
     <PackageReference Include="MapperSegregatorCoreDependencyInjection" Version="6.1.0" />
@@ -458,6 +463,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.2" />
+    <PackageReference Include="Quartz" Version="3.13.0" />
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0" />
     <PackageReference Include="TweetinviAPI" Version="5.0.4" />
   </ItemGroup>
@@ -470,6 +477,7 @@
 
   <ItemGroup>
     <Folder Include="bin\Debug\net6.0\runtimes\browser\lib\net6.0\" />
+    <Folder Include="Extensions\Hangfire\" />
   </ItemGroup>
 
 

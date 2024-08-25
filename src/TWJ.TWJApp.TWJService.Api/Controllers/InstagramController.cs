@@ -14,7 +14,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region Add
         [HttpPost("Add")]
-        [AllowAnonymous]
         public async Task<IActionResult> Add([FromBody] AddInstagramPostCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);
@@ -25,7 +24,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
 
         #region AddTemplate
         [HttpPost("AddTemplate")]
-        [AllowAnonymous]
         public async Task<IActionResult> AddTemplate([FromBody] AddInstagramTemplateCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);

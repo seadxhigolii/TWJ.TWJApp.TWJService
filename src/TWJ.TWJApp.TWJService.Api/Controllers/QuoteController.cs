@@ -13,7 +13,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
     {
         #region Generate
         [HttpPost("Generate")]
-        [AllowAnonymous]
         public async Task<IActionResult> Generate([FromBody] GenerateQuoteCommand command, CancellationToken cancellation)
         {
             var result = await Mediator.Send(command, cancellation);

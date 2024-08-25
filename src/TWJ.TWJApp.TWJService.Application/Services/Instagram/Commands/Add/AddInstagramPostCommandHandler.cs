@@ -18,7 +18,14 @@ using System.Drawing.Text;
 using TWJ.TWJApp.TWJService.Application.Interfaces.Amazon;
 using TWJ.TWJApp.TWJService.Application.Interfaces.Video;
 using System.Text.RegularExpressions;
+using SkiaSharp;
 using SystemImageFormat = System.Drawing.Imaging.ImageFormat;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+using OxyPlot;
+using OxyPlot.SkiaSharp;
+using TWJ.TWJApp.TWJService.Domain.Entities;
+using System.Drawing.Drawing2D;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
 {
@@ -35,9 +42,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
 
         private readonly string _accessToken;
         private readonly string _pexelsApiKey;
+        private readonly string _environment;
         private readonly string _googleSearchApiKey;
         private readonly string _envatoApiKey;
         private readonly string _googleSearchEngineID;
+        private readonly string _className;
 
         public AddInstagramPostCommandHandler(
             ITWJAppDbContext context,
@@ -59,24 +68,35 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
             _envatoApiKey = _configuration["Envato:Key"];
             _googleSearchApiKey = _configuration["Google:Search:Key"];
             _googleSearchEngineID = _configuration["Google:Search:EngineID"];
+            _environment = _configuration["Environment"];
             _openAiService = openAiService;
             _amazonS3Service = amazonS3Service;
             _videoService = videoService;
+            _className = GetType().Name;
         }
 
         public async Task<Unit> Handle(AddInstagramPostCommand request, CancellationToken cancellationToken)
         {
             try
             {
-                
+                Random randomTemplate = new Random();
+
                 if (request.IsVideo == true)
                 {
+                    int randomInstagramReelTemplate = 0;
+                    do
+                    {
+                        randomInstagramReelTemplate = randomTemplate.Next(1, 16);
+                    } while (randomInstagramReelTemplate == 14);
+
+                    request.Type = randomInstagramReelTemplate;
                     var video = await _videoService.GenerateVideo(request.Type, cancellationToken);
                 }
                 else
                 {
                     var instagramTemplate = await _context.InstagramPosts.Where(x => x.Type == request.Type).FirstOrDefaultAsync();
-
+                    StringFormat stringFormat = null;
+                    Fact fact = new Fact();
                     string imageUrl = instagramTemplate.Image;
                     string fileName = $"{Guid.NewGuid()}-template-{request.Type}.jpg";
 
@@ -94,7 +114,16 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
                     }
 
                     string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                    string apiDirectory = Path.Combine(Directory.GetParent(currentDirectory).Parent.Parent.Parent.FullName);
+                    string apiDirectory = "";
+
+                    if (_environment == "Development")
+                    {
+                        apiDirectory = Path.Combine(Directory.GetParent(currentDirectory).Parent.Parent.Parent.FullName);
+                    }
+                    else
+                    {
+                        apiDirectory = Path.Combine(currentDirectory);
+                    }
 
                     using (HttpClient client = new HttpClient())
                     {
@@ -319,6 +348,51 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
                                             authorFont = new Font(fontFamily, 23, FontStyle.Bold);
                                             authorRect = new RectangleF(237, 879, 609, 70);
                                             break;
+                                        case 20:
+                                            fact = await _context.Facts
+                                                            .OrderBy(n => Guid.NewGuid())
+                                                            .FirstOrDefaultAsync(cancellationToken);
+
+                                            customFontPath = Path.Combine(apiDirectory, "Fonts", "Montserrat Regular.otf");
+                                            customFontPath = Path.GetFullPath(customFontPath);
+                                            privateFonts.AddFontFile(customFontPath);
+
+                                            fontFamily = privateFonts.Families[0];
+                                            brush = new SolidBrush(Color.Black);
+                                            quoteRect = new RectangleF(88, 531, 851, 358);
+                                            fontSize = _globalHelper.CalculateFontSize(fact.Content, quoteRect);
+                                            break;
+                                        case 21:
+
+                                            var graphImage = await _context.InstagramPosts
+                                                        .Where(x=> x.Type == 21)
+                                                        .OrderBy(n=> Guid.NewGuid())
+                                                        .FirstOrDefaultAsync(cancellationToken);
+
+                                            string url = graphImage.Image;
+                                            string graphKeyword = "Instagram+Graphs/";
+
+                                            string titleResult = ExtractPathAfterKeyword(url, graphKeyword);
+
+                                            var graphInstagramNewsCaptionPrompt = $"Begin an instagram caption on '{titleResult}'." +
+                                                                                    $"Do not write the Title in caption please. Jump right to the facts." +
+                                                                                    "Focus on delivering information in a straightforward manner, in a short format, avoiding any dramatic language." +
+                                                                                    $"Don't use any Emoji or symbol please, but use 3 hashtags.";
+
+                                            var graphtwitterNewsCaptionPrompt = $"Begin tweet on '{titleResult}' with a question. " +
+                                                                                $"Do not write the Title in tweet please." +
+                                                                                "Focus on delivering information in a straightforward manner, avoiding any dramatic language. " +
+                                                                                $"DO NOT exceed the Twitter tweet characters limit of 250 characters, please make sure to not exceed tweet limit of 250 characters." +
+                                                                                $"Do not use any Emoji or other characters, only plain text.";
+
+
+                                            var graphInstagramCaption = await _openAiService.GenerateSectionAsync(graphInstagramNewsCaptionPrompt, cancellationToken);
+                                            var graphTwitterCaption = await _openAiService.GenerateSectionAsync(graphtwitterNewsCaptionPrompt, cancellationToken);
+
+                                            await _globalHelper.PostToInstagramAsync(graphImage.Image, "", graphInstagramCaption, cancellationToken);
+                                            await _globalHelper.PostToTwitterAsync(graphImage.Image, graphTwitterCaption, cancellationToken);
+
+                                            return Unit.Value;
                                         case 18:
                                             news = await _context.News
                                                             .OrderBy(n => Guid.NewGuid())
@@ -445,9 +519,20 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
                                                                     {
                                                                         pexelsGraphics.DrawImage(croppedImage, 0, 0);
 
-                                                                        var pexelsOverlayBrush = new SolidBrush(Color.FromArgb(230, 140, 177, 109));
+                                                                        using (var overlayBrush = new LinearGradientBrush(
+                                                                        new Rectangle(0, 0, pexelsImage.Width, pexelsImage.Height),
+                                                                        Color.Transparent,
+                                                                        Color.Black,
+                                                                        LinearGradientMode.Vertical))
+                                                                        {
+                                                                            ColorBlend colorBlend = new ColorBlend(3);
+                                                                            colorBlend.Colors = new[] { Color.FromArgb(0, 0, 0, 0), Color.FromArgb(255, 0, 0, 0), Color.FromArgb(255, 0, 0, 0) };
+                                                                            colorBlend.Positions = new[] { 0.0f, 0.6f, 1.0f };
 
-                                                                        pexelsGraphics.FillRectangle(pexelsOverlayBrush, new Rectangle(0, 0, pexelsImage.Width, pexelsImage.Height));
+                                                                            overlayBrush.InterpolationColors = colorBlend;
+
+                                                                            pexelsGraphics.FillRectangle(overlayBrush, new Rectangle(0, 0, pexelsImage.Width, pexelsImage.Height));
+                                                                        }
 
 
                                                                         customFontPath = Path.Combine(apiDirectory, "Fonts", "LeagueGothic Regular.otf");
@@ -458,11 +543,11 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
                                                                         var pexelsFontSize = _globalHelper.CalculateFontSize(newsTitle, new RectangleF(10, 10, pexelsImage.Width - 20, pexelsImage.Height - 20));
                                                                         var pexelsFont = new Font(pexelsFontFamily, pexelsFontSize, FontStyle.Bold);
                                                                         var pexelsBrush = new SolidBrush(Color.White);
-                                                                        var pexelsTitleRect = new RectangleF(10, 10, pexelsImage.Width - 20, pexelsImage.Height - 20);
+                                                                        var pexelsTitleRect = new RectangleF(10, (float)(pexelsImage.Height * 0.66) + 10, pexelsImage.Width - 20, (float)(pexelsImage.Height * 0.3) - 20);
                                                                         var pexelsStringFormat = new StringFormat
                                                                         {
                                                                             Alignment = StringAlignment.Center,
-                                                                            LineAlignment = StringAlignment.Center
+                                                                            LineAlignment = StringAlignment.Near
                                                                         };
 
                                                                         pexelsGraphics.DrawString(newsTitle, pexelsFont, pexelsBrush, pexelsTitleRect, pexelsStringFormat);
@@ -490,8 +575,8 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
                                                                         var instagramNewsCaption = await _openAiService.GenerateSectionAsync(instagramNewsCaptionPrompt, cancellationToken);
                                                                         var twitterNewsCaption = await _openAiService.GenerateSectionAsync(twitterNewsCaptionPrompt, cancellationToken);
 
-                                                                        //await _globalHelper.PostToInstagramAsync(newsS3Path, newsTitle, instagramNewsCaption, cancellationToken);
-                                                                        //await _globalHelper.PostToTwitterAsync(newsS3Path, twitterNewsCaption, cancellationToken);
+                                                                        await _globalHelper.PostToInstagramAsync(newsS3Path, newsTitle, instagramNewsCaption, cancellationToken);
+                                                                        await _globalHelper.PostToTwitterAsync(newsS3Path, twitterNewsCaption, cancellationToken);
 
                                                                         news.IsUsedInstagram = true;
                                                                         _context.News.Update(news);
@@ -506,32 +591,92 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
                                                 }
                                             }
                                         case 19:
-                                            string graphIdeaPrompt = "Think of an idea for a graph for health related stats which will have category on x-axis and value (number) on y-axis." +
+                                            Random randomChartType = new Random();
+                                            int chartType = randomChartType.Next(1,3);
+
+                                            var charts = await _context.Graphs.Where(x => x.Type == chartType).ToListAsync();
+                                            string graphIdea = "";
+                                            if (charts.Any())
+                                            {
+                                                int randomIndex = randomChartType.Next(charts.Count);
+                                                var randomChart = charts[randomIndex];
+                                                graphIdea = randomChart.Title;
+                                            }
+                                            else
+                                            {
+                                                string graphIdeaPrompt = "Think of an idea for a graph for health related stats which will have category on x-axis and value (number) on y-axis." +
                                                 "Please write only the title for this graph, that's all. Nothing else, just the title.";
 
-                                            var graphIdea = await _openAiService.GenerateSectionAsync(graphIdeaPrompt, cancellationToken);
+                                                graphIdea = await _openAiService.GenerateSectionAsync(graphIdeaPrompt, cancellationToken);
+                                            }
 
-                                            string graphPrompt = $"Generate a graph for a dataset for this title '{graphIdea}' in the following format: \n" +
-                                                 "<graph>\n" +
-                                                 "<categories>\n" +
-                                                 "<element>Category1</element>\n" +
-                                                 "<element>Category2</element>\n" +
-                                                 "<element>Category3</element>\n" +
-                                                 "<element>Category4</element>\n" +
-                                                 "<element>Category5</element>\n" +
-                                                 "</categories>\n" +
-                                                 "<values>\n" +
-                                                 "<Category1>Value1</Category1>\n" +
-                                                 "<Category2>Value2</Category2>\n" +
-                                                 "<Category3>Value3</Category3>\n" +
-                                                 "<Category4>Value4</Category4>\n" +
-                                                 "<Category5>Value5</Category5>\n" +
-                                                 "</values>\n" +
-                                                 "</graph>\n" +
-                                                 "Please write down only the graph in this format and that's all. Nothing else.";
-                                                    
+                                            string graphPrompt = "";
 
-
+                                            switch (chartType)
+                                            {
+                                                case 1:
+                                                    graphPrompt = $"Generate a graph for a dataset for this title '{graphIdea}' in the following format: \n" +
+                                                         "<graph>\n" +
+                                                         "<categories>\n" +
+                                                         "<element>Category1</element>\n" +
+                                                         "<element>Category2</element>\n" +
+                                                         "<element>Category3</element>\n" +
+                                                         "<element>Category4</element>\n" +
+                                                         "<element>Category5</element>\n" +
+                                                         "</categories>\n" +
+                                                         "<values>\n" +
+                                                         "<Category1>Value1</Category1>\n" +
+                                                         "<Category2>Value2</Category2>\n" +
+                                                         "<Category3>Value3</Category3>\n" +
+                                                         "<Category4>Value4</Category4>\n" +
+                                                         "<Category5>Value5</Category5>\n" +
+                                                         "</values>\n" +
+                                                         "</graph>\n" +
+                                                         "Please write down only the graph in this format and that's all. Nothing else.";
+                                                    break;
+                                                case 2:
+                                                    graphPrompt = $"Generate a graph for a dataset for this title '{graphIdea}' in the following format: \n" +
+                                                          "<graph>\n" +
+                                                          "<categories>\n" +
+                                                          "<element>Category1</element>\n" +
+                                                          "<element>Category2</element>\n" +
+                                                          "<element>Category3</element>\n" +
+                                                          "<element>Category4</element>\n" +
+                                                          "<element>Category5</element>\n" +
+                                                          "</categories>\n" +
+                                                          "<values>\n" +
+                                                          "<Category1>Percentage1</Category1>\n" +
+                                                          "<Category2>Percentage2</Category2>\n" +
+                                                          "<Category3>Percentage3</Category3>\n" +
+                                                          "<Category4>Percentage4</Category4>\n" +
+                                                          "<Category5>Percentage5</Category5>\n" +
+                                                          "</values>\n" +
+                                                          "</graph>\n" +
+                                                          "Please write down only the graph in this format and that's all. Nothing else.";
+                                                    break;
+                                                case 3:
+                                                    graphPrompt = $"Generate a graph for a dataset for this title '{graphIdea}' in the following format: \n" +
+                                                        "<graph>\n" +
+                                                        "<xaxis>\n" +
+                                                        "<element>Point1</element>\n" +
+                                                        "<element>Point2</element>\n" +
+                                                        "<element>Point3</element>\n" +
+                                                        "<element>Point4</element>\n" +
+                                                        "<element>Point5</element>\n" +
+                                                        "</xaxis>\n" +
+                                                        "<values>\n" +
+                                                        "<Point1>Value1</Point1>\n" +
+                                                        "<Point2>Value2</Point2>\n" +
+                                                        "<Point3>Value3</Point3>\n" +
+                                                        "<Point4>Value4</Point4>\n" +
+                                                        "<Point5>Value5</Point5>\n" +
+                                                        "</values>\n" +
+                                                        "</graph>\n" +
+                                                        "Please write down only the graph in this format and that's all. Nothing else.";
+                                                    break;
+                                                default:
+                                                    break;
+                                            }
 
                                             var graphResponse = await _openAiService.GenerateSectionAsync(graphPrompt, cancellationToken);
 
@@ -540,14 +685,30 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
                                                 throw new ApplicationException("Failed to generate graph data.");
                                             }
 
-                                            var graphData = ParseGraphData(graphResponse);
+                                            var graphData = ParseGraphData(graphResponse, chartType);
 
                                             if (graphData == null || !graphData.Any())
                                             {
                                                 throw new ApplicationException("No suitable graph data found.");
                                             }
+                                            byte[] chartImageBytes = null;
+                                            switch (chartType)
+                                            {
+                                                case 1:
+                                                    chartImageBytes = GenerateChartImage(graphData, graphIdea);
+                                                    break;
+                                                case 2:
+                                                    chartImageBytes = GeneratePieChartImage(graphData, graphIdea);
+                                                    break;
+                                                case 3:
+                                                    chartImageBytes = GenerateLineChartImage(graphData, graphIdea);
+                                                    break;
+                                                default:
+                                                    break;
+                                            }
 
-                                            using (var chartImage = GenerateChartImage(graphData))
+                                            using (var chartMS = new MemoryStream(chartImageBytes))
+                                            using (var chartImage = Image.FromStream(chartMS))
                                             {
                                                 string chartFileName = $"{Guid.NewGuid()}-chart-{request.Type}.jpg";
                                                 string chartFilePath = Path.Combine(apiDirectory, chartFileName);
@@ -555,14 +716,14 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
 
                                                 var s3ChartPath = await _amazonS3Service.UploadFileToS3Async(chartFilePath, "Instagram Posts", chartFileName);
 
-                                                //var instagramChartCaptionPrompt = "Generate an Instagram caption for a graph showing the prevalence of common health conditions by age group. Focus on delivering the information in a straightforward manner and use 3 hashtags. No emojis or symbols.";
-                                                //var instagramChartCaption = await _openAiService.GenerateSectionAsync(instagramChartCaptionPrompt, cancellationToken);
+                                                var instagramChartCaptionPrompt = "Generate an Instagram caption for a graph showing the prevalence of common health conditions by age group. Focus on delivering the information in a straightforward manner and use 3 hashtags. No emojis or symbols.";
+                                                var instagramChartCaption = await _openAiService.GenerateSectionAsync(instagramChartCaptionPrompt, cancellationToken);
 
-                                                //var twitterChartCaptionPrompt = "Generate a tweet for a graph showing the prevalence of common health conditions by age group. The tweet should provide essential insights and stay within the 250-character limit. No emojis or symbols.";
-                                                //var twitterChartCaption = await _openAiService.GenerateSectionAsync(twitterChartCaptionPrompt, cancellationToken);
+                                                var twitterChartCaptionPrompt = "Generate a tweet for a graph showing the prevalence of common health conditions by age group. The tweet should provide essential insights and stay within the 250-character limit. No emojis or symbols.";
+                                                var twitterChartCaption = await _openAiService.GenerateSectionAsync(twitterChartCaptionPrompt, cancellationToken);
 
                                                 //await _globalHelper.PostToInstagramAsync(s3ChartPath, "Health Conditions Chart", instagramChartCaption, cancellationToken);
-                                                //await _globalHelper.PostToTwitterAsync(s3ChartPath, twitterChartCaption, cancellationToken);
+                                                await _globalHelper.PostToTwitterAsync(s3ChartPath, twitterChartCaption, cancellationToken);
                                             }
 
                                             return Unit.Value;
@@ -572,54 +733,64 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
 
                                     font = new Font(fontFamily, fontSize, FontStyle.Regular);
 
-                                    var stringFormat = new StringFormat
+                                    stringFormat = new StringFormat
                                     {
                                         Alignment = StringAlignment.Center,
                                         LineAlignment = StringAlignment.Center
                                     };
 
-                                    if (request.Type == 15 || request.Type == 16)
+                                    if (request.Type != 20)
                                     {
-                                        font = new Font(fontFamily, fontSize, FontStyle.Bold);
-                                        graphics.DrawString(quote.Content, font, brush, quoteRect, stringFormat);
+                                        if (request.Type == 15 || request.Type == 16)
+                                        {
+                                            font = new Font(fontFamily, fontSize, FontStyle.Bold);
+                                            graphics.DrawString(quote.Content, font, brush, quoteRect, stringFormat);
+                                        }
+                                        else
+                                        {
+                                            graphics.DrawString(quote.Content, font, brush, quoteRect, stringFormat);
+                                        }
                                     }
                                     else
                                     {
-                                        graphics.DrawString(quote.Content, font, brush, quoteRect, stringFormat);
+                                        graphics.DrawString(fact.Content, font, brush, quoteRect, stringFormat);
                                     }
 
-                                    if (request.Type == 3)
+                                    if (request.Type != 20)
                                     {
-                                        _globalHelper.DrawTextWithSpacing(graphics, quote.Author, authorFont, brush, authorRect, 2, 10, stringFormat);
-                                    }
-                                    else if (request.Type == 5 || request.Type == 6 || request.Type == 7)
-                                    {
-                                        brush = new SolidBrush(Color.White);
-                                        graphics.DrawString(quote.Author, authorFont, brush, authorRect, stringFormat);
-                                    }
-                                    else if (request.Type == 8)
-                                    {
-                                        color = ColorTranslator.FromHtml("#3E641D");
-                                        brush = new SolidBrush(color);
-                                        graphics.DrawString(quote.Author, authorFont, brush, authorRect, stringFormat);
-                                    }
-                                    else if (request.Type == 2)
-                                    {
-                                        DateTime now = DateTime.Now;
-                                        string formattedDate = now.ToString("MMMM dd, yyyy, HH:mm");
-                                        float dateFontSize = 22f;
-                                        Font dateFont = new Font(fontFamily, dateFontSize, FontStyle.Regular);
+                                        if (request.Type == 3)
+                                        {
+                                            _globalHelper.DrawTextWithSpacing(graphics, quote.Author, authorFont, brush, authorRect, 2, 10, stringFormat);
+                                        }
+                                        else if (request.Type == 5 || request.Type == 6 || request.Type == 7)
+                                        {
+                                            brush = new SolidBrush(Color.White);
+                                            graphics.DrawString(quote.Author, authorFont, brush, authorRect, stringFormat);
+                                        }
+                                        else if (request.Type == 8)
+                                        {
+                                            color = ColorTranslator.FromHtml("#3E641D");
+                                            brush = new SolidBrush(color);
+                                            graphics.DrawString(quote.Author, authorFont, brush, authorRect, stringFormat);
+                                        }
+                                        else if (request.Type == 2)
+                                        {
+                                            DateTime now = DateTime.Now;
+                                            string formattedDate = now.ToString("MMMM dd, yyyy, HH:mm");
+                                            float dateFontSize = 22f;
+                                            Font dateFont = new Font(fontFamily, dateFontSize, FontStyle.Regular);
 
-                                        graphics.DrawString(formattedDate, dateFont, brush, dateRect, stringFormat);
-                                        graphics.DrawString(quote.Author, authorFont, brush, authorRect, stringFormat);
+                                            graphics.DrawString(formattedDate, dateFont, brush, dateRect, stringFormat);
+                                            graphics.DrawString(quote.Author, authorFont, brush, authorRect, stringFormat);
 
-                                        dateFont.Dispose();
-                                    }
+                                            dateFont.Dispose();
+                                        }
 
-                                    else
-                                    {
-                                        graphics.DrawString(quote.Author, authorFont, brush, authorRect, stringFormat);
-                                    }
+                                        else
+                                        {
+                                            graphics.DrawString(quote.Author, authorFont, brush, authorRect, stringFormat);
+                                        }
+                                    }                                    
                                 }
                                 string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
                                 //string filePath = fileName;
@@ -628,26 +799,52 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
 
                                 var s3Path = await _amazonS3Service.UploadFileToS3Async(filePath, "Instagram Posts", fileName);
 
+                                if (request.Type != 20)
+                                {
+                                    var instagramCaptionPrompt = $"Begin an instagram caption on this quote '{quote.Content}'." +
+                                        $"Do not write the quote itself in caption please. Jump right to the facts." +
+                                        $"Provide essential insights and facts. " +
+                                        "Focus on delivering information in a straightforward manner, in a short format, avoiding any dramatic language." +
+                                        $"Don't use any Emoji or symbol please, but use 3 hashtags.";
 
-                                //var instagramCaptionPrompt = $"Begin an instagram caption on this quote '{quote.Content}'." +
-                                //        $"Do not write the quote itself in caption please. Jump right to the facts." +
-                                //        $"Provide essential insights and facts. " +
-                                //        "Focus on delivering information in a straightforward manner, in a short format, avoiding any dramatic language." +
-                                //        $"Don't use any Emoji or symbol please, but use 3 hashtags.";
+                                    var instagramCaption = await _openAiService.GenerateSectionAsync(instagramCaptionPrompt, cancellationToken);
 
-                                //var instagramCaption = await _openAiService.GenerateSectionAsync(instagramCaptionPrompt, cancellationToken);
+                                    var twitterCaptionPrompt = $"Begin tweet on this quote '{quote.Content}'. " +
+                                        $"Do not write the quote itself in tweet please." +
+                                        $"Provide essential insights only. " +
+                                        "Focus on delivering information in a straightforward manner, avoiding any dramatic language. " +
+                                        $"DO NOT exceed the Twitter tweet characters limit of 250 characters, please make sure to not exceed tweet limit of 250 characters." +
+                                        $"Do not use any Emoji or other characters, only plain text.";
+
+                                    var twitterCaption = await _openAiService.GenerateSectionAsync(twitterCaptionPrompt, cancellationToken);
+
+                                    await _globalHelper.PostToInstagramAsync(s3Path, quote.Content, instagramCaption, cancellationToken);
+                                    await _globalHelper.PostToTwitterAsync(s3Path, twitterCaption, cancellationToken);
+                                }
+                                else if(request.Type == 20)
+                                {
+                                    var instagramCaptionPrompt = $"Begin an instagram caption on this quote '{fact.Content}'." +
+                                        $"Do not write the quote itself in caption please. Jump right to the facts." +
+                                        $"Provide essential insights and facts. " +
+                                        "Focus on delivering information in a straightforward manner, in a short format, avoiding any dramatic language." +
+                                        $"Don't use any Emoji or symbol please, but use 3 hashtags.";
+
+                                    var instagramCaption = await _openAiService.GenerateSectionAsync(instagramCaptionPrompt, cancellationToken);
+
+                                    var twitterCaptionPrompt = $"Begin tweet on this quote '{fact.Content}'. " +
+                                        $"Do not write the quote itself in tweet please." +
+                                        $"Provide essential insights only. " +
+                                        "Focus on delivering information in a straightforward manner, avoiding any dramatic language. " +
+                                        $"DO NOT exceed the Twitter tweet characters limit of 250 characters, please make sure to not exceed tweet limit of 250 characters." +
+                                        $"Do not use any Emoji or other characters, only plain text.";
+
+                                    var twitterCaption = await _openAiService.GenerateSectionAsync(twitterCaptionPrompt, cancellationToken);
+
+                                    await _globalHelper.PostToInstagramAsync(s3Path, quote.Content, instagramCaption, cancellationToken);
+                                    await _globalHelper.PostToTwitterAsync(s3Path, twitterCaption, cancellationToken);
+
+                                }
                                 
-                                //var twitterCaptionPrompt = $"Begin tweet on this quote '{quote.Content}'. " +
-                                //    $"Do not write the quote itself in tweet please." +
-                                //    $"Provide essential insights only. " +
-                                //    "Focus on delivering information in a straightforward manner, avoiding any dramatic language. " +
-                                //    $"DO NOT exceed the Twitter tweet characters limit of 250 characters, please make sure to not exceed tweet limit of 250 characters." +
-                                //    $"Do not use any Emoji or other characters, only plain text.";
-
-                                //var twitterCaption = await _openAiService.GenerateSectionAsync(twitterCaptionPrompt, cancellationToken);
-
-                                //await _globalHelper.PostToInstagramAsync(s3Path, quote.Content, instagramCaption, cancellationToken);
-                                //await _globalHelper.PostToTwitterAsync(s3Path, twitterCaption, cancellationToken);
                             }
                         }
                     }
@@ -656,6 +853,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
             }
             catch (Exception ex)
             {
+                await _globalHelper.Log(ex, _className);
                 throw new ApplicationException("An unexpected error occurred: " + ex.Message);
             }
         }
@@ -673,96 +871,247 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
             }
             return keywords;
         }
-        private Dictionary<string, double> ParseGraphData(string graphResponse)
+        private Dictionary<string, double> ParseGraphData(string graphResponse, int chartType)
         {
             var cleanedGraphResponse = Regex.Replace(graphResponse, @"\s+", " ").Trim();
-
             var graphData = new Dictionary<string, double>();
 
-            var categoriesMatch = Regex.Match(cleanedGraphResponse, @"<categories>(.*?)<\/categories>");
-            var categories = new List<string>();
-            if (categoriesMatch.Success)
+            switch (chartType)
             {
-                var categoryMatches = Regex.Matches(categoriesMatch.Groups[1].Value, @"<element>(.*?)<\/element>");
-                foreach (Match match in categoryMatches)
-                {
-                    categories.Add(match.Groups[1].Value);
-                }
-            }
-
-            var valuesMatch = Regex.Match(cleanedGraphResponse, @"<values>(.*?)<\/values>");
-            if (valuesMatch.Success)
-            {
-                foreach (var category in categories)
-                {
-                    var valueMatch = Regex.Match(valuesMatch.Groups[1].Value, $@"<{category}>(.*?)<\/{category}>");
-                    if (valueMatch.Success && double.TryParse(valueMatch.Groups[1].Value, out double value))
+                case 1: // Horizontal Bar Chart
+                    var categoriesMatch = Regex.Match(cleanedGraphResponse, @"<categories>(.*?)<\/categories>");
+                    var categories = new List<string>();
+                    if (categoriesMatch.Success)
                     {
-                        graphData[category] = value;
+                        var categoryMatches = Regex.Matches(categoriesMatch.Groups[1].Value, @"<element>(.*?)<\/element>");
+                        foreach (Match match in categoryMatches)
+                        {
+                            categories.Add(match.Groups[1].Value);
+                        }
                     }
-                }
+
+                    var valuesMatch = Regex.Match(cleanedGraphResponse, @"<values>(.*?)<\/values>");
+                    if (valuesMatch.Success)
+                    {
+                        foreach (var category in categories)
+                        {
+                            var valueMatch = Regex.Match(valuesMatch.Groups[1].Value, $@"<{category}>(.*?)<\/{category}>");
+                            if (valueMatch.Success && double.TryParse(valueMatch.Groups[1].Value, out double value))
+                            {
+                                graphData[category] = value;
+                            }
+                        }
+                    }
+                    break;
+
+                case 2: // Pie Chart
+                    var pieCategoriesMatch = Regex.Match(cleanedGraphResponse, @"<categories>(.*?)<\/categories>");
+                    var pieCategories = new List<string>();
+                    if (pieCategoriesMatch.Success)
+                    {
+                        var pieCategoryMatches = Regex.Matches(pieCategoriesMatch.Groups[1].Value, @"<element>(.*?)<\/element>");
+                        foreach (Match match in pieCategoryMatches)
+                        {
+                            pieCategories.Add(match.Groups[1].Value);
+                        }
+                    }
+
+                    var pieValuesMatch = Regex.Match(cleanedGraphResponse, @"<values>(.*?)<\/values>");
+                    if (pieValuesMatch.Success)
+                    {
+                        foreach (var category in pieCategories)
+                        {
+                            var valueMatch = Regex.Match(pieValuesMatch.Groups[1].Value, $@"<{category}>(.*?)<\/{category}>");
+                            if (valueMatch.Success && double.TryParse(valueMatch.Groups[1].Value.TrimEnd('%'), out double value))
+                            {
+                                graphData[category] = value;
+                            }
+                        }
+                    }
+                    break;
+
+                case 3: // Linear Chart
+                    var xaxisMatch = Regex.Match(cleanedGraphResponse, @"<xaxis>(.*?)<\/xaxis>");
+                    var xaxis = new List<string>();
+                    if (xaxisMatch.Success)
+                    {
+                        var xaxisMatches = Regex.Matches(xaxisMatch.Groups[1].Value, @"<element>(.*?)<\/element>");
+                        foreach (Match match in xaxisMatches)
+                        {
+                            xaxis.Add(match.Groups[1].Value);
+                        }
+                    }
+
+                    var linearValuesMatch = Regex.Match(cleanedGraphResponse, @"<values>(.*?)<\/values>");
+                    if (linearValuesMatch.Success)
+                    {
+                        foreach (var point in xaxis)
+                        {
+                            var valueMatch = Regex.Match(linearValuesMatch.Groups[1].Value, $@"<{point}>(.*?)<\/{point}>");
+                            if (valueMatch.Success && double.TryParse(valueMatch.Groups[1].Value, out double value))
+                            {
+                                graphData[point] = value;
+                            }
+                        }
+                    }
+                    break;
+
+                default:
+                    throw new ArgumentException("Invalid chart type");
             }
 
             return graphData;
         }
 
-
-
-
-
-        private Bitmap GenerateChartImage(Dictionary<string, double> graphData)
+        private byte[] GenerateLineChartImage(Dictionary<string, double> graphData, string graphTitle)
         {
-            int width = 720;  // 10% smaller
-            int height = 540;  // 10% smaller
-            var bitmap = new Bitmap(width, height);
-            var graphics = Graphics.FromImage(bitmap);
+            var plotModel = new PlotModel { Title = graphTitle, Background = OxyColors.White };
 
-            graphics.Clear(Color.White);
-            var font = new Font("Arial", 8);
-            var brush = new SolidBrush(Color.Black);
-
-            int margin = 60;
-            int graphWidth = width - 2 * margin;
-            int graphHeight = height - 2 * margin;
-
-            var categories = graphData.Keys.ToList();
-            int barWidth = graphWidth / categories.Count;
-
-            // Calculate the maximum value in the data to scale the graph appropriately
-            double maxValue = graphData.Values.Max();
-
-            int x = margin;
-            foreach (var category in categories)
+            // Create category axis and value axis
+            var categoryAxis = new CategoryAxis
             {
-                int barHeight = (int)(graphData[category] / maxValue * graphHeight);
-                graphics.FillRectangle(Brushes.Blue, x, height - margin - barHeight, barWidth, barHeight);
+                Position = AxisPosition.Bottom,
+                Key = "CategoryAxis",
+                ItemsSource = graphData.Keys.ToList() // Set the labels directly
+            };
+            plotModel.Axes.Add(categoryAxis);
 
-                // Draw x-axis labels diagonally
-                graphics.TranslateTransform(x + barWidth / 2, height - margin + 5);
-                graphics.RotateTransform(45);
-                graphics.DrawString(category, font, brush, 0, 0);
-                graphics.ResetTransform();
+            var valueAxis = new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                Minimum = 0
+            };
+            plotModel.Axes.Add(valueAxis);
 
-                x += barWidth + 5;
+            // Create the line series
+            var lineSeries = new LineSeries
+            {
+                Title = graphTitle,
+                LabelFormatString = "{0}"
+            };
+
+            // Add data points to the line series
+            var index = 0;
+            foreach (var kvp in graphData)
+            {
+                lineSeries.Points.Add(new DataPoint(index, kvp.Value));
+                index++;
             }
 
-            // Draw y-axis labels horizontally
-            int yInterval = (int)Math.Ceiling(maxValue / 10); // Adjust interval as necessary
-            for (int i = 0; i <= maxValue; i += yInterval)
+            plotModel.Series.Add(lineSeries);
+
+            // Export the plot to a PNG image
+            using (var stream = new MemoryStream())
             {
-                int yPosition = height - margin - (int)(i / maxValue * graphHeight);
-                graphics.DrawString(i.ToString(), font, brush, margin - 30, yPosition - 10);
+                var exporter = new CustomPngExporter { Width = 800, Height = 600, CustomBackground = OxyColors.White };
+                exporter.Export(plotModel, stream);
+                return stream.ToArray();
             }
-
-            // Draw axes
-            graphics.DrawLine(Pens.Black, margin, height - margin, width - margin, height - margin);  // x-axis
-            graphics.DrawLine(Pens.Black, margin, height - margin, margin, margin);  // y-axis
-
-            return bitmap;
         }
 
 
+        private byte[] GeneratePieChartImage(Dictionary<string, double> graphData, string graphTitle)
+        {
+            var plotModel = new PlotModel { Title = graphTitle, Background = OxyColors.White };
 
+            var pieSeries = new PieSeries
+            {
+                StartAngle = 0,
+                AngleSpan = 360,
+                InnerDiameter = 0,
+                ExplodedDistance = 0,
+                StrokeThickness = 2.0,
+                Stroke = OxyColors.White
+            };
+
+            foreach (var item in graphData)
+            {
+                pieSeries.Slices.Add(new PieSlice(item.Key, item.Value) { IsExploded = false });
+            }
+
+            plotModel.Series.Add(pieSeries);
+
+            using (var stream = new MemoryStream())
+            {
+                var exporter = new CustomPngExporter { Width = 800, Height = 600, CustomBackground = OxyColors.White };
+                exporter.Export(plotModel, stream);
+                return stream.ToArray();
+            }
+        }
+        private byte[] GenerateChartImage(Dictionary<string, double> graphData, string graphTitle)
+        {
+            var plotModel = new PlotModel { Title = graphTitle, Background = OxyColors.White };
+
+            var categoryAxis = new CategoryAxis
+            {
+                Position = AxisPosition.Left,
+                Key = "CategoryAxis",
+                ItemsSource = graphData.Keys.ToList()
+            };
+            plotModel.Axes.Add(categoryAxis);
+
+            var valueAxis = new LinearAxis
+            {
+                Position = AxisPosition.Bottom,
+                Key = "ValueAxis",
+                Minimum = 0
+            };
+            plotModel.Axes.Add(valueAxis);
+
+            var barSeries = new BarSeries
+            {
+                ItemsSource = graphData.Values.Select(v => new BarItem { Value = v }).ToList(),
+                LabelPlacement = LabelPlacement.Inside,
+                LabelFormatString = "{0}"
+            };
+            plotModel.Series.Add(barSeries);
+
+            using (var stream = new MemoryStream())
+            {
+                var exporter = new CustomPngExporter { Width = 800, Height = 600, CustomBackground = OxyColors.White };
+                exporter.Export(plotModel, stream);
+                return stream.ToArray();
+            }
+        }
+        public class CustomPngExporter : PngExporter
+        {
+            public OxyColor CustomBackground { get; set; } = OxyColors.White;
+
+            public new void Export(IPlotModel model, Stream stream)
+            {
+                using var bitmap = new SKBitmap(this.Width, this.Height);
+                using (var canvas = new SKCanvas(bitmap))
+                using (var context = new SkiaRenderContext { RenderTarget = RenderTarget.PixelGraphic, SkCanvas = canvas, UseTextShaping = this.UseTextShaping })
+                {
+                    var dpiScale = this.Dpi / 96;
+                    context.DpiScale = dpiScale;
+                    model.Update(true);
+
+                    // Use the CustomBackground property
+                    canvas.Clear(this.CustomBackground.ToSKColor());
+                    model.Render(context, new OxyRect(0, 0, this.Width / dpiScale, this.Height / dpiScale));
+                }
+
+                using var skStream = new SKManagedWStream(stream);
+                SKPixmap.Encode(skStream, bitmap, SKEncodedImageFormat.Png, 0);
+            }
+        }
+
+        static string ExtractPathAfterKeyword(string url, string keyword)
+        {
+            Uri uri = new Uri(url);
+
+            string path = uri.AbsolutePath;
+
+            int keywordIndex = path.IndexOf(keyword, StringComparison.OrdinalIgnoreCase);
+
+            if (keywordIndex != -1)
+            {
+                return path.Substring(keywordIndex + keyword.Length);
+            }
+
+            return string.Empty;
+        }
         //public async Task<Unit> Handle(AddInstagramPostCommand request, CancellationToken cancellationToken)
         //{
         //    string currentClassName = nameof(AddInstagramPostCommandHandler);
