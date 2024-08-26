@@ -28,7 +28,9 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Tag.Queries.GetFiltered
         {
             try
             {
-                IQueryable<TWJ.TWJApp.TWJService.Domain.Entities.Tag> query = _context.Tag.AsQueryable().OrderByDescending(x=>x.PostCount);
+                IQueryable<TWJ.TWJApp.TWJService.Domain.Entities.Tag> query = _context.Tag.AsQueryable().Where(x=>x.PostCount > 0).OrderByDescending(x=>x.PostCount);
+
+                var totalItems = await query.CountAsync(cancellationToken);
 
                 query = query.ApplySorting(request.SortBy, request.SortDirection, topRecords: request.TopRecords);
 
@@ -36,8 +38,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Tag.Queries.GetFiltered
                 {
                     query = query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize);
                 }
-
-                var totalItems = await _context.SEOKeywords.CountAsync(cancellationToken);
 
                 var mappedData = await query.Select(src => new GetFilteredTagModel
                 {

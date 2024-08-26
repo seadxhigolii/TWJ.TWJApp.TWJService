@@ -6,5 +6,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Instagram.Commands.Add
     {
         public int Type { get; set; }
         public bool IsVideo { get; set; }
+        public bool? IsMotivationalQuote { get; set; } = false;
     }
 }

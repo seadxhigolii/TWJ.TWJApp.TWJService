@@ -20,6 +20,9 @@ using OpenCvSharp;
 using Xabe.FFmpeg;
 using System.Drawing.Text;
 using TWJ.TWJApp.TWJService.Domain.Entities;
+using System.Diagnostics;
+using System.Text;
+using Microsoft.Extensions.Hosting;
 
 namespace TWJ.TWJApp.TWJService.Application.Services.Video
 {
@@ -34,6 +37,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Video
         private readonly IAmazonS3Service _amazonS3Service;
 
         private readonly string _accessToken;
+        private readonly string _environment;
 
         public VideoService(
             ITWJAppDbContext context,
@@ -50,6 +54,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Video
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
             _accessToken = _configuration["Instagram:LongLiveAccessToken"];
+            _environment = _configuration["Environment"];
             _openAiService = openAiService;
             _amazonS3Service = amazonS3Service;
         }
@@ -78,12 +83,24 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Video
 
                 CleanUpTemporaryFiles(tempVideoPath, tempAudioPath, outputFilePath);
 
+                var s3Path = await _amazonS3Service.UploadFileToS3Async(tempVideoWithAudioPath, "Instagram Posts", Path.GetFileName(tempVideoWithAudioPath));
+
+                if (File.Exists(tempVideoWithAudioPath))
+                {
+                    File.Delete(tempVideoWithAudioPath);
+                }
+
+                var captionPrompt = $"Generate an Instagram caption for this quote: '{quote.Content}'. Provide insights, avoid dramatic language, and include 3 hashtags.";
+                var caption = await _openAiService.GenerateSectionAsync(captionPrompt, cancellationToken);
+
+                await _globalHelper.PostReelToInstagramAsync(s3Path, caption, cancellationToken);
+
                 return Unit.Value;
             }
             catch (Exception ex)
             {
                 await _globalHelper.Log(ex, "VideoService");
-                return Unit.Value;
+                throw new ApplicationException("An unexpected error occurred: " + ex.Message);
             }
         }
 
@@ -154,88 +171,56 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Video
 
             PrivateFontCollection privateFonts = new PrivateFontCollection();
             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string apiDirectory = Path.Combine(Directory.GetParent(currentDirectory).Parent.Parent.Parent.FullName);
+            string apiDirectory;
+
+
+            if (_environment == "Development")
+            {
+                apiDirectory = Path.Combine(Directory.GetParent(currentDirectory).Parent.Parent.Parent.FullName, "Fonts");
+            }
+            else
+            {
+                apiDirectory = Path.Combine(currentDirectory, "Fonts");
+            }
+
             string customFontPath = "";
             FontFamily fontFamily = new FontFamily(GenericFontFamilies.SansSerif);
 
-            RectangleF quoteRect;
+            RectangleF quoteRect = new RectangleF(103, 608, 856, 521);
             float fontSize;
 
             switch (requestType)
             {
                 case 1:
-                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Rinnet Regular.otf");
-                    customFontPath = Path.GetFullPath(customFontPath);
-                    privateFonts.AddFontFile(customFontPath);
-                    fontFamily = privateFonts.Families[0];
-
-                    quoteRect = new RectangleF(103, 608, 856, 521);
-                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    customFontPath = Path.Combine(apiDirectory, "Rinnet Regular.otf");
                     break;
                 case 2:
-                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Youngserif Regular.ttf");
-                    customFontPath = Path.GetFullPath(customFontPath);
-                    privateFonts.AddFontFile(customFontPath);
-                    fontFamily = privateFonts.Families[0];
-
-                    quoteRect = new RectangleF(103, 608, 856, 521);
-                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    customFontPath = Path.Combine(apiDirectory, "Youngserif Regular.ttf");
                     break;
                 case 3:
-                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Kollektif.ttf");
-                    customFontPath = Path.GetFullPath(customFontPath);
-                    privateFonts.AddFontFile(customFontPath);
-                    fontFamily = privateFonts.Families[0];
-
-                    quoteRect = new RectangleF(103, 608, 856, 521);
-                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    customFontPath = Path.Combine(apiDirectory, "Kollektif.ttf");
                     break;
                 case 4:
-                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Bahuraksa.otf");
-                    customFontPath = Path.GetFullPath(customFontPath);
-                    privateFonts.AddFontFile(customFontPath);
-                    fontFamily = privateFonts.Families[0];
-
-                    quoteRect = new RectangleF(103, 608, 856, 521);
-                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    customFontPath = Path.Combine(apiDirectory, "Bahuraksa.otf");
                     break;
                 case 5:
-                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Paragon Regular.otf");
-                    customFontPath = Path.GetFullPath(customFontPath);
-                    privateFonts.AddFontFile(customFontPath);
-                    fontFamily = privateFonts.Families[0];
-
-                    quoteRect = new RectangleF(103, 608, 856, 521);
-                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    customFontPath = Path.Combine(apiDirectory, "Paragon Regular.otf");
                     break;
                 case 6:
-                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Suave.ttf");
-                    customFontPath = Path.GetFullPath(customFontPath);
-                    privateFonts.AddFontFile(customFontPath);
-                    fontFamily = privateFonts.Families[0];
-
-                    quoteRect = new RectangleF(103, 608, 856, 521);
-                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    customFontPath = Path.Combine(apiDirectory, "Suave.ttf");
                     break;
                 case 7:
-                    customFontPath = Path.Combine(apiDirectory, "Fonts", "MartianMono.ttf");
-                    customFontPath = Path.GetFullPath(customFontPath);
-                    privateFonts.AddFontFile(customFontPath);
-                    fontFamily = privateFonts.Families[0];
-
-                    quoteRect = new RectangleF(103, 608, 856, 521);
-                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    customFontPath = Path.Combine(apiDirectory, "MartianMono.ttf");
                     break;
                 default:
-                    customFontPath = Path.Combine(apiDirectory, "Fonts", "Rinnet Regular.otf");
-                    customFontPath = Path.GetFullPath(customFontPath);
-                    privateFonts.AddFontFile(customFontPath);
-                    fontFamily = privateFonts.Families[0];
-
-                    quoteRect = new RectangleF(103, 608, 856, 521);
-                    fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
+                    customFontPath = Path.Combine(apiDirectory, "Rinnet Regular.otf");
                     break;
             }
+
+            customFontPath = Path.GetFullPath(customFontPath);
+            privateFonts.AddFontFile(customFontPath);
+            fontFamily = privateFonts.Families[0];
+            fontSize = _globalHelper.CalculateFontSize(quote.Content, quoteRect);
 
             var inputFile = new MediaFile { Filename = tempVideoPath };
             using (var engine = new Engine())
@@ -305,19 +290,80 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Video
 
         private async Task MergeAudioWithVideo(string outputFilePath, string tempAudioPath, string tempVideoWithAudioPath)
         {
-            FFmpeg.SetExecutablesPath(@"C:\Sources\thewellnessjunction\src\TWJ.TWJApp.TWJService.Api\ffmpeg\bin");
-            await FFmpeg.Conversions.New()
-                .AddParameter($"-i {outputFilePath}")
-                .AddParameter($"-i {tempAudioPath}")
-                .SetOutput(tempVideoWithAudioPath)
-                .Start();
+            var ffmpeg = new ProcessStartInfo
+            {
+                FileName = "ffmpeg",
+                Arguments = $"-i \"{outputFilePath}\" -i \"{tempAudioPath}\" -vf \"scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2\" -c:v libx264 -profile:v main -level 4.0 -pix_fmt yuv420p -b:v 4M -maxrate 4M -bufsize 2M -c:a aac -b:a 128k -ac 2 -ar 44100 -movflags +faststart \"{tempVideoWithAudioPath}\"",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+
+            using (var process = new Process())
+            {
+                process.StartInfo = ffmpeg;
+
+                var outputBuilder = new StringBuilder();
+                var errorBuilder = new StringBuilder();
+
+                process.OutputDataReceived += (sender, args) => outputBuilder.AppendLine(args.Data);
+                process.ErrorDataReceived += (sender, args) => errorBuilder.AppendLine(args.Data);
+
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                await process.WaitForExitAsync();
+
+                await LogInfo($"FFmpeg output: {outputBuilder}");
+                await LogInfo($"FFmpeg error: {errorBuilder}");
+
+                if (process.ExitCode != 0)
+                {
+                    var errorMessage = $"FFmpeg process exited with code {process.ExitCode}. Error: {errorBuilder}";
+                    throw new ApplicationException(errorMessage);
+                }
+            }
         }
+
+
+        private async Task LogInfo(string message)
+        {
+            // Implement your logging mechanism here
+            // Example:
+            await Task.Run(() => Console.WriteLine(message));
+        }
+
+
 
         private void CleanUpTemporaryFiles(string tempVideoPath, string tempAudioPath, string outputFilePath)
         {
             File.Delete(tempVideoPath);
             File.Delete(tempAudioPath);
             File.Delete(outputFilePath);
+        }
+
+        private void ConvertVideoToInstagramFormat(string inputPath, string outputPath)
+        {
+            var ffmpeg = new ProcessStartInfo
+            {
+                FileName = "ffmpeg",
+                Arguments = $"-i {inputPath} -vf \"scale=1080:-1\" -c:v libx264 -profile:v high -level:v 4.1 -pix_fmt yuv420p -b:v 5M -c:a aac -b:a 128k -movflags +faststart {outputPath}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+
+            using (var process = Process.Start(ffmpeg))
+            {
+                process.WaitForExit();
+                if (process.ExitCode != 0)
+                {
+                    throw new ApplicationException($"FFmpeg process exited with code {process.ExitCode}: {process.StandardError.ReadToEnd()}");
+                }
+            }
         }
     }
 }

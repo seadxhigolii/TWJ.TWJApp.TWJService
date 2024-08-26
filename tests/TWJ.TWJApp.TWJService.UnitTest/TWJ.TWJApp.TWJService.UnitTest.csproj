@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>TWJ.TWJApp.TWJService.UnitTest</RootNamespace>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>

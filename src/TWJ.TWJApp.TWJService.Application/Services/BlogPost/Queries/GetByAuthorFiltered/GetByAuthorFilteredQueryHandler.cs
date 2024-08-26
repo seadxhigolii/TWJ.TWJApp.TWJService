@@ -55,6 +55,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Queries.GetByAutho
                     Title = src.Title,
                     Image = src.Image,
                     URL = src.URL,
+                    UserId = src.UserId,
                     CreatedAt = src.CreatedAt,
                     AuthorName = _context.User.Where(u => u.Id == src.UserId).Select(u => u.FirstName + " " + u.LastName).FirstOrDefault(),
                     AuthorImage = _context.User.Where(u => u.Id == src.UserId).Select(u => u.Image).FirstOrDefault()

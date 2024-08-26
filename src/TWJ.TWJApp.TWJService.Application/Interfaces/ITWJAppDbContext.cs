@@ -33,6 +33,7 @@ namespace TWJ.TWJApp.TWJService.Application.Interfaces
         DbSet<InstagramPost> InstagramPosts { get; set; }
         DbSet<Fact> Facts { get; set; }
         DbSet<UserSettings> UserSettings { get; set; }
+        DbSet<Graph> Graphs { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }
