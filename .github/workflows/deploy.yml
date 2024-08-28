@@ -19,4 +19,4 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Run deployment script
-        run: ./scripts/deploy.sh
+        run: .src/TWJ.TWJApp.TWJService.Api/scripts
