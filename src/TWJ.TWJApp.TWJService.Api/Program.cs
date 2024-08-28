@@ -4,6 +4,7 @@ using TWJ.TWJApp.TWJService.Api.Extensions.Configurations;
 using TWJ.TWJApp.TWJService.Api.Extensions;
 using TWJ.TWJApp.TWJService.Application.Services.OpenAI;
 using TWJ.TWJApp.TWJService.Api.Middlewares;
+using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 
