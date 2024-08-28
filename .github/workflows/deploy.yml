@@ -13,10 +13,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up SSH agent
-        uses: webfactory/ssh-agent@v0.5.3
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aws-key.pem
+          chmod 600 ~/.ssh/aws-key.pem
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          dotnet-version: '6.0.x'
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --configuration Release
+
+      - name: Publish project
+        run: dotnet publish --configuration Release --output ./src/TWJ.TWJApp.TWJService.Api/bin/Release/net6.0/publish
+
+      - name: Make deploy.sh executable
+        run: chmod +x ./src/TWJ.TWJApp.TWJService.Api/scripts/deploy.sh
 
       - name: Run deployment script
-        run: .src/TWJ.TWJApp.TWJService.Api/scripts
+        run: ./src/TWJ.TWJApp.TWJService.Api/scripts/deploy.sh
