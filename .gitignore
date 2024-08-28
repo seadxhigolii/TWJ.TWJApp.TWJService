@@ -35,3 +35,6 @@ msbuild.wrn
 appsettings.json
 appsettings.Development.json
 appsettings.Staging.json
+
+# Ignore publish folder
+/bin/Release/net6.0/publish/
