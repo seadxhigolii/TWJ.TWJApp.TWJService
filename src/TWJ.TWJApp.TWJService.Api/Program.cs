@@ -25,6 +25,13 @@ builder.Services.AddServices(builder.Configuration)
                 .AddMvc()
                 .MvcBuildServices();
 
+// Add Swagger only in non-production environments
+if (!builder.Environment.IsProduction())
+{
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+}
+
 var app = builder.Build();
 
 app.UseRouting();
@@ -52,7 +59,11 @@ app.UseCors("AllowSpecificOrigins");
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseHangfireDashboard();
+
+if (!builder.Environment.IsProduction())
+{
+    app.UseHangfireDashboard();
+}
 
 app.UseEndpoints(endpoints =>
 {
