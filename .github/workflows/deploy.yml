@@ -18,5 +18,5 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Run deployment script
-        run: .src/TWJ.TWJApp.TWJService.Api/scripts
+      - name: Make deploy.sh executable
+        run: chmod +x ./src/TWJ.TWJApp.TWJService.Api/scripts/deploy.sh
