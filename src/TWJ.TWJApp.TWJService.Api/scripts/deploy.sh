@@ -5,7 +5,7 @@ SERVER_USER=ec2-user
 SERVER_IP=52.202.73.100
 PEM_FILE="$HOME/.ssh/aws-key.pem"  # Path where the PEM file will be saved from GitHub secrets
 REMOTE_PATH=/var/www/twjapp
-LOCAL_PUBLISH_PATH="./src/TWJ.TWJApp.TWJService.Api/bin/Release/net6.0/publish"
+LOCAL_PUBLISH_PATH="/home/runner/work/TWJ.TWJApp.TWJService/TWJ.TWJApp.TWJService/publish-folder"
 
 echo "Starting deployment..."
 
@@ -16,10 +16,10 @@ if [ ! -d "$LOCAL_PUBLISH_PATH" ]; then
 fi
 
 # Transfer the files from the correct publish directory
-scp -o StrictHostKeyChecking=no -i "$PEM_FILE" -r "$LOCAL_PUBLISH_PATH/*" $SERVER_USER@$SERVER_IP:$REMOTE_PATH
+scp -i "$PEM_FILE" -r "$LOCAL_PUBLISH_PATH/*" $SERVER_USER@$SERVER_IP:$REMOTE_PATH
 
 # SSH into the server to stop the running process and restart the app
-ssh -o StrictHostKeyChecking=no -i "$PEM_FILE" $SERVER_USER@$SERVER_IP << EOF
+ssh -i "$PEM_FILE" $SERVER_USER@$SERVER_IP << EOF
    # Find the process ID and kill it
    PID=\$(ps aux | grep 'dotnet TWJ.TWJApp.TWJService.Api.dll' | grep -v grep | awk '{print \$2}')
    if [ ! -z "\$PID" ]; then
