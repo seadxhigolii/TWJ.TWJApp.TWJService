@@ -125,8 +125,8 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
                     BackLinkKeywords = jsonBackLinkKeywords,
                     URL = _globalHelper.TitleToUrlSlug(title),
                     ProductId = productToPromote.Id,
-                    //Image = await GenerateImageAsync(settings.ImagePrompt.Replace("%%IMAGE_CONCEPTS%%", concepts))
-                    Image = "https://thewellnessjunctionbucket.s3.eu-north-1.amazonaws.com/6f013177-c7e3-45ae-88c4-f848a5b6de58.jpg"
+                    Image = await GenerateImageAsync(settings.ImagePrompt.Replace("%%IMAGE_CONCEPTS%%", concepts))
+                    //Image = "https://thewellnessjunctionbucket.s3.eu-north-1.amazonaws.com/6f013177-c7e3-45ae-88c4-f848a5b6de58.jpg"
                 };
             }
             catch (Exception ex)
