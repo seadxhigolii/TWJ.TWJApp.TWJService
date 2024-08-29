@@ -16,10 +16,10 @@ if [ ! -d "$LOCAL_PUBLISH_PATH" ]; then
 fi
 
 # Transfer the files from the correct publish directory
-scp -i "$PEM_FILE" -r "$LOCAL_PUBLISH_PATH/*" $SERVER_USER@$SERVER_IP:$REMOTE_PATH
+scp -o StrictHostKeyChecking=no -i "$PEM_FILE" -r "$LOCAL_PUBLISH_PATH/*" $SERVER_USER@$SERVER_IP:$REMOTE_PATH
 
 # SSH into the server to stop the running process and restart the app
-ssh -i "$PEM_FILE" $SERVER_USER@$SERVER_IP << EOF
+ssh -o StrictHostKeyChecking=no -i "$PEM_FILE" $SERVER_USER@$SERVER_IP << EOF
    # Find the process ID and kill it
    PID=\$(ps aux | grep 'dotnet TWJ.TWJApp.TWJService.Api.dll' | grep -v grep | awk '{print \$2}')
    if [ ! -z "\$PID" ]; then
