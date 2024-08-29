@@ -6,21 +6,12 @@ on:
       - master
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aws-key.pem
-          chmod 600 ~/.ssh/aws-key.pem
-
-      - name: Add server to known hosts
-        run: ssh-keyscan -H 52.202.73.100 >> ~/.ssh/known_hosts
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v1
@@ -35,6 +26,31 @@ jobs:
 
       - name: Publish project
         run: dotnet publish --configuration Release --output ./src/TWJ.TWJApp.TWJService.Api/bin/Release/net6.0/publish
+
+      - name: Upload publish folder as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: publish-folder
+          path: ./src/TWJ.TWJApp.TWJService.Api/bin/Release/net6.0/publish
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: publish-folder
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aws-key.pem
+          chmod 600 ~/.ssh/aws-key.pem
 
       - name: Make deploy.sh executable
         run: chmod +x ./src/TWJ.TWJApp.TWJService.Api/scripts/deploy.sh
