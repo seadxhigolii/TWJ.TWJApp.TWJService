@@ -45,6 +45,9 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: publish-folder
+      
+      - name: List downloaded files
+        run: ls -l /home/runner/work/TWJ.TWJApp.TWJService/TWJ.TWJApp.TWJService/publish-folder
 
       - name: Set up SSH key
         run: |
