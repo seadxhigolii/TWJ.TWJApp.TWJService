@@ -15,6 +15,9 @@ if [ ! -d "$LOCAL_PUBLISH_PATH" ]; then
   exit 1
 fi
 
+# Add the server's SSH key to known_hosts
+ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+
 # Transfer the files from the correct publish directory
 scp -i "$PEM_FILE" -r "$LOCAL_PUBLISH_PATH/*" $SERVER_USER@$SERVER_IP:$REMOTE_PATH
 
