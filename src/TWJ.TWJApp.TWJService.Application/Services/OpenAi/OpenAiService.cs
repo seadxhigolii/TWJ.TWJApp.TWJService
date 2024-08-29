@@ -132,6 +132,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.OpenAI
             catch (Exception ex)
             {
                 await _globalHelper.Log(ex, currentClassName);
+                throw ex;
             }
         }
 
