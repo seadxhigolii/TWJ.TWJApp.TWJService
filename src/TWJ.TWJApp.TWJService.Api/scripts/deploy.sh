@@ -5,7 +5,7 @@ SERVER_USER=ec2-user
 SERVER_IP=52.202.73.100
 PEM_FILE="$HOME/.ssh/aws-key.pem"  # Path where the PEM file will be saved from GitHub secrets
 REMOTE_PATH=/var/www/twjapp
-LOCAL_PUBLISH_PATH="/home/runner/work/TWJ.TWJApp.TWJService/TWJ.TWJApp.TWJService/publish"
+LOCAL_PUBLISH_PATH="./downloaded-artifacts/publish-folder"
 
 echo "Starting deployment..."
 
