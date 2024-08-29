@@ -19,6 +19,9 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aws-key.pem
           chmod 600 ~/.ssh/aws-key.pem
 
+      - name: Add server to known hosts
+        run: ssh-keyscan -H 52.202.73.100 >> ~/.ssh/known_hosts
+
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v1
         with:
