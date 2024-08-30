@@ -20,11 +20,18 @@ if [ -z "$(ls -A $LOCAL_PUBLISH_PATH)" ]; then
   exit 1
 fi
 
+# Debugging: List files to be transferred
+echo "Listing files in $LOCAL_PUBLISH_PATH:"
+ls -l $LOCAL_PUBLISH_PATH
+
 # Add the server's SSH key to known_hosts
 ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
 
 # Transfer the files from the publish directory
-scp -i "$PEM_FILE" -r "$LOCAL_PUBLISH_PATH/." $SERVER_USER@$SERVER_IP:$REMOTE_PATH
+scp -i "$PEM_FILE" -r $LOCAL_PUBLISH_PATH/* $SERVER_USER@$SERVER_IP:$REMOTE_PATH/
+
+# Debugging: Verify transfer by listing files on the server
+ssh -i "$PEM_FILE" $SERVER_USER@$SERVER_IP "ls -l $REMOTE_PATH"
 
 # SSH into the server to stop the running process and restart the app
 ssh -i "$PEM_FILE" $SERVER_USER@$SERVER_IP << EOF
@@ -38,10 +45,15 @@ ssh -i "$PEM_FILE" $SERVER_USER@$SERVER_IP << EOF
    # Navigate to the application directory
    cd $REMOTE_PATH
 
-   # Start the application in the background
-   nohup dotnet TWJ.TWJApp.TWJService.Api.dll > output.log 2>&1 &
-   echo "Restarted application."
-   exit
+   # Check if the DLL exists before trying to run it
+   if [ -f "TWJ.TWJApp.TWJService.Api.dll" ]; then
+       # Start the application in the background
+       nohup dotnet TWJ.TWJApp.TWJService.Api.dll > output.log 2>&1 &
+       echo "Restarted application."
+   else
+       echo "Error: TWJ.TWJApp.TWJService.Api.dll not found in $REMOTE_PATH"
+       exit 1
+   fi
 EOF
 
 echo "Deployment finished!"
