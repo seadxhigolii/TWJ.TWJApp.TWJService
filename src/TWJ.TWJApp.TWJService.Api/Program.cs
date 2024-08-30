@@ -13,7 +13,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigins",
         builder =>
         {
-            builder.WithOrigins("http://localhost:4200", "https://www.twj-health.com")
+            builder.WithOrigins("http://localhost:4200", "https://www.twj-health.com", "https://twj-health.com")
                    .AllowAnyMethod()
                    .AllowAnyHeader()
                    .AllowCredentials();
