@@ -27,11 +27,11 @@ builder.Services.AddServices(builder.Configuration)
                 .MvcBuildServices();
 
 // Add Swagger only in non-production environments
-if (!builder.Environment.IsProduction())
-{
+//if (!builder.Environment.IsProduction())
+//{
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-}
+//}
 
 var app = builder.Build();
 
