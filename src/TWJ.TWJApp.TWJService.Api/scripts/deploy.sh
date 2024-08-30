@@ -15,11 +15,16 @@ if [ ! -d "$LOCAL_PUBLISH_PATH" ]; then
   exit 1
 fi
 
+if [ -z "$(ls -A $LOCAL_PUBLISH_PATH)" ]; then
+  echo "Error: The publish directory is empty."
+  exit 1
+fi
+
 # Add the server's SSH key to known_hosts
 ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
 
-# Transfer the files from the correct publish directory
-scp -i "$PEM_FILE" -r "$LOCAL_PUBLISH_PATH/*" $SERVER_USER@$SERVER_IP:$REMOTE_PATH
+# Transfer the files from the publish directory
+scp -i "$PEM_FILE" -r "$LOCAL_PUBLISH_PATH/." $SERVER_USER@$SERVER_IP:$REMOTE_PATH
 
 # SSH into the server to stop the running process and restart the app
 ssh -i "$PEM_FILE" $SERVER_USER@$SERVER_IP << EOF
