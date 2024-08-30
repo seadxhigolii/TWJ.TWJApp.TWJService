@@ -48,7 +48,6 @@ var app = builder.Build();
 
 app.UseRouting();
 
-// Uncomment if using middleware for rate limiting or other purposes
 // app.UseMiddleware<AnonymousRateLimitingMiddleware>();
 
 // Configure middleware based on environment

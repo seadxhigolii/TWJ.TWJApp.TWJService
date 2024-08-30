@@ -168,7 +168,7 @@ namespace TWJ.TWJApp.TWJService.Application.Services.BlogPost.Commands.GenerateR
                                 ? char.ToUpper(kw.Keyword[0]) + kw.Keyword.Substring(1)
                                 : kw.Keyword;
 
-                            var replacement = $"<a class=\"backlink-cvzejg3k6w\" href=\"{_webURL}{kw.BlogPostUrl}\">{replacementKeyword}</a>";
+                            var replacement = $"<a class=\"backlink-cvzejg3k6w\" href=\"{_webURL}/#/post/{kw.BlogPostUrl}\">{replacementKeyword}</a>";
                             
                             linkedKeywords.Add(kw.Keyword.ToLower());
                             return replacement;
