@@ -16,7 +16,7 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
     });
 });
 
-// Configure CORS to allow requests from specific origins
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigins",
