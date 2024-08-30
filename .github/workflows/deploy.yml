@@ -60,4 +60,4 @@ jobs:
         run: chmod +x ./src/TWJ.TWJApp.TWJService.Api/scripts/deploy.sh
 
       - name: Run deployment script
-        run: ./src/TWJ.TWJApp.TWJService.Api/scripts/deploy.sh
+        run: ./src/TWJ.TWJApp.TWJService.Api/scripts/deploy.sh 
