@@ -10,6 +10,9 @@ namespace WebScraper.Services
     {
         public async Task<IList<NewsDataItem>> ScrapeDataAsync(string url)
         {
+            // Set the environment variable for Selenium Manager cache directory
+            Environment.SetEnvironmentVariable("SELENIUM_MANAGER_CACHE", "/var/selenium");
+
             List<NewsDataItem> scrapedData = new List<NewsDataItem>();
             using (IWebDriver driver = new ChromeDriver())
             {

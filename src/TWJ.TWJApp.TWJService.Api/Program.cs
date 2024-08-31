@@ -37,12 +37,8 @@ builder.Services.AddServices(builder.Configuration)
                 .AddMvc()
                 .MvcBuildServices();
 
-// Add Swagger only in non-production environments
-if (!builder.Environment.IsProduction())
-{
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
-}
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -77,11 +73,7 @@ app.UseCors("AllowSpecificOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Configure Hangfire dashboard in non-production environments
-if (!builder.Environment.IsProduction())
-{
-    app.UseHangfireDashboard();
-}
+app.UseHangfireDashboard();
 
 // Set up endpoint routing
 app.UseEndpoints(endpoints =>

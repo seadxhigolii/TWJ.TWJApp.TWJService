@@ -2,7 +2,7 @@
 
 # Define variables
 SERVER_USER=ec2-user
-SERVER_IP=52.202.73.100
+SERVER_IP=44.212.18.216
 PEM_FILE="$HOME/.ssh/aws-key.pem"  # Path where the PEM file will be saved from GitHub secrets
 REMOTE_PATH=/var/www/twjapp
 LOCAL_PUBLISH_PATH="./downloaded-artifacts/publish-folder"
@@ -44,6 +44,9 @@ ssh -i "$PEM_FILE" $SERVER_USER@$SERVER_IP << EOF
 
    # Navigate to the application directory
    cd $REMOTE_PATH
+
+   # Set the environment variable for Selenium Manager
+   export SELENIUM_MANAGER_CACHE=/var/selenium
 
    # Check if the DLL exists before trying to run it
    if [ -f "TWJ.TWJApp.TWJService.Api.dll" ]; then
