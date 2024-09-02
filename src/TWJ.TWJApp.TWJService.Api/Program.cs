@@ -7,13 +7,19 @@ using TWJ.TWJApp.TWJService.Application.Services.OpenAI;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure Kestrel to listen on specific URLs for both HTTP and HTTPS
+var isDocker = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.ListenAnyIP(5000); // HTTP port
-    serverOptions.ListenAnyIP(5001, listenOptions =>
+
+    if (!isDocker) // Skip HTTPS configuration in Docker
     {
-        listenOptions.UseHttps(); // HTTPS port
-    });
+        serverOptions.ListenAnyIP(5001, listenOptions =>
+        {
+            listenOptions.UseHttps(); // HTTPS port
+        });
+    }
 });
 
 
