@@ -1,0 +1,17 @@
+name: Cleanup Artifacts
+
+
+on:
+  schedule:
+    - cron: '15 0 * * *' 
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+    - name: List artifacts
+      run: |
+        # List and delete the artifacts for the latest 100 runs
+        for run_id in $(gh run list --limit 100 --json databaseId -q '.[].databaseId'); do
+          gh run delete $run_id --confirm
+        done
