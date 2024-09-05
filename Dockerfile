@@ -4,11 +4,12 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
+# Install libgdiplus for GDI+ support
+RUN apt-get update && apt-get install -y libgdiplus libc6-dev && rm -rf /var/lib/apt/lists/*
+
 # Build image
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-
-# Copy solution and project files
 COPY *.sln ./
 COPY ./src/TWJ.TWJApp.TWJService.Api/TWJ.TWJApp.TWJService.Api.csproj ./src/TWJ.TWJApp.TWJService.Api/
 COPY ./src/TWJ.TWJApp.TWJService.Common/TWJ.TWJApp.TWJService.Common.csproj ./src/TWJ.TWJApp.TWJService.Common/
@@ -17,27 +18,18 @@ COPY ./src/TWJ.TWJApp.TWJService.Application/TWJ.TWJApp.TWJService.Application.c
 COPY ./src/TWJ.TWJApp.TWJService.Persistence/TWJ.TWJApp.TWJService.Persistence.csproj ./src/TWJ.TWJApp.TWJService.Persistence/
 COPY ./tests/TWJ.TWJApp.TWJService.UnitTest/TWJ.TWJApp.TWJService.UnitTest.csproj ./tests/TWJ.TWJApp.TWJService.UnitTest/
 COPY ./WebScraper/WebScraper.csproj ./WebScraper/
-
-# Restore dependencies using the solution file
 RUN dotnet restore
-
-# Copy everything else and build
 COPY . .
-
-# Build the application
 WORKDIR ./src/TWJ.TWJApp.TWJService.Api
 RUN dotnet build "TWJ.TWJApp.TWJService.Api.csproj" -c Release -o /app/build
 
-# Publish the app
 FROM build AS publish
 RUN dotnet publish "TWJ.TWJApp.TWJService.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Final stage/image
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "TWJ.TWJApp.TWJService.Api.dll"]
-
 
 
 #"C:\Sources\thewellnessjunction\TWJ.TWJApp.TWJService.sln"
