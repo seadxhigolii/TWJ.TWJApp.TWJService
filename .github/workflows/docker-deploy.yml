@@ -3,7 +3,7 @@ name: CI/CD Pipeline for Docker Deployment
 on:
   push:
     branches:
-      - main  # Triggers on push to main branch
+      - master 
 
 jobs:
   deploy:
