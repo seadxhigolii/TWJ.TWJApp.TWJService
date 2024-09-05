@@ -44,7 +44,7 @@ jobs:
       with:
         host: ${{ secrets.EC2_HOST }}  # The EC2 instance IP address
         username: ${{ secrets.EC2_USER }}  # EC2 username (e.g., ec2-user)
-        key: ${{ secrets.EC2_SSH_KEY }}  # The private SSH key (added to GitHub secrets)
+        key: ${{ secrets.SSH_PRIVATE_KEY }}  # The private SSH key (added to GitHub secrets)
         port: 22
         debug: true  # Enable debug mode to output more information
         script: |
