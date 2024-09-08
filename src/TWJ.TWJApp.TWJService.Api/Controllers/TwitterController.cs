@@ -35,12 +35,8 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
         private readonly IGlobalHelperService _globalHelperService;
         private readonly string _twitterClientID;
         private readonly string _twitterClientSecret;
-        private readonly string _twitterAPIKey;
-        private readonly string _twitterAPISecretKey;
         private readonly string _twitterAccessToken;
-        private readonly string _twitterRefreshToken;
-        private readonly string _redirectUri = "http://localhost:5001/api/Twitter/Callback";
-        private readonly string _twitterOAuthUri = "https://twitter.com/i/oauth2/authorize?response_type=code&client_id={ClientID}&redirect_uri={RedirectURI}&scope=tweet.read%20tweet.write%20users.read%20offline.access&state={State}&code_challenge={CodeChallenge}&code_challenge_method=S256\r\n";
+        private readonly string _redirectUri = "http://127.0.0.1:5000/api/Twitter/Callback";
         private readonly string _aesKey;
         private readonly string _aesIV;
 
@@ -49,10 +45,7 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
             _configuration = configuration;
             _twitterClientID = configuration["Twitter:ClientID"];
             _twitterClientSecret = configuration["Twitter:ClientSecret"];
-            _twitterAPIKey = configuration["Twitter:Key"];
-            _twitterAPISecretKey = configuration["Twitter:SecretKey"];
             _twitterAccessToken = configuration["Twitter:access_token"];
-            _twitterRefreshToken = configuration["Twitter:refresh_token"];
             _aesKey = configuration["AES:Key"];
             _aesIV = configuration["AES:IV"];
             _httpClientFactory = httpClientFactory;
