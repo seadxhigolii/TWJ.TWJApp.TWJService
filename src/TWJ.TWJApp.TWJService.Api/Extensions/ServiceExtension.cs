@@ -113,7 +113,7 @@ namespace TWJ.TWJApp.TWJService.Api.Extensions
                 var userSettings = scheduleService.GetUserSettingsAsync().Result;
                 var cancellationToken = new CancellationToken();
 
-                var timeZoneInfo = TimeZoneInfo.Local;
+                var timeZoneInfo = TimeZoneInfo.CreateCustomTimeZone("UTC+02", TimeSpan.FromHours(2), "UTC+02", "UTC+02");
 
                 var dayMappings = new Dictionary<DayOfWeek, List<string>>
                 {
