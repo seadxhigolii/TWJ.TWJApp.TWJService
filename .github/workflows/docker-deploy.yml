@@ -14,10 +14,10 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v2
 
-    # Step 2: Clear all local Docker images (optional, for clean builds)
-    - name: Clear all local Docker images
+    # Step 2: Clear local Docker images related to 'twjapp' (optional, for clean builds)
+    - name: Clear local Docker images related to twjapp
       run: |
-        docker image prune -af
+        docker image prune -af --filter="label=name=twjapp"
 
     # Step 3: Build Docker image (using Docker Hub username from GitHub Secrets)
     - name: Build Docker image
@@ -53,19 +53,19 @@ jobs:
           echo "Checking for existing Docker containers"
           docker ps -a
 
-          # Stop and remove all running Docker containers
-          echo "Stopping and removing containers"
-          docker stop $(docker ps -a -q) || true
-          docker rm $(docker ps -a -q) || true
+          # Stop and remove only the 'twjapp-container'
+          echo "Stopping and removing twjapp-container"
+          docker stop twjapp-container || true
+          docker rm twjapp-container || true
 
-          # Remove old Docker images
-          echo "Removing old Docker images"
-          docker rmi -f $(docker images -q) || true
+          # Remove only the 'twjapp' Docker image
+          echo "Removing old twjapp image"
+          docker rmi -f ${{ secrets.DOCKER_USERNAME }}/twjapp:latest || true
 
-          # Pull the new Docker image from Docker Hub
-          echo "Pulling new Docker image"
+          # Pull the new 'twjapp' Docker image from Docker Hub
+          echo "Pulling new twjapp Docker image"
           docker pull ${{ secrets.DOCKER_USERNAME }}/twjapp:latest
 
-          # Start the new Docker container
-          echo "Starting the new container"
+          # Start the new 'twjapp-container'
+          echo "Starting the new twjapp container"
           docker run -d -p 5000:5000 --name twjapp-container ${{ secrets.DOCKER_USERNAME }}/twjapp:latest
