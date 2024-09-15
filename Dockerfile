@@ -5,7 +5,9 @@ EXPOSE 80
 EXPOSE 443
 
 # Install libgdiplus for GDI+ support
-RUN apt-get update && apt-get install -y libgdiplus libc6-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y libgdiplus libc6-dev ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
 
 # Build image
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
