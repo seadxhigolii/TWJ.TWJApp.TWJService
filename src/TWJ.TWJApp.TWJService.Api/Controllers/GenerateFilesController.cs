@@ -9,13 +9,13 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
     [Authorize]
     public class GenerateFilesController : BaseController
     {
-        #region Login
+        #region Gnerate
         [HttpPost("Generate/{entityName}")]
         public async void Generate(string entityName)
         {
             GenerateFilesForEntity(entityName);
         }
-        #endregion
+        #endregion Gnerate
 
         static void GenerateFilesForEntity(string entityName)
         {

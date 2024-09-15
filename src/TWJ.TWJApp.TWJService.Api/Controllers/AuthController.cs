@@ -16,18 +16,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
     [Authorize]
     public class AuthController : BaseController
     {
-        private readonly IConfiguration _configuration;
-        private readonly AddInstagramPostCommandHandler _addInstagramPostCommandHandler;
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<AuthController> _logger;
-        public AuthController(IConfiguration configuration, AddInstagramPostCommandHandler addInstagramPostCommandHandler, IHttpClientFactory httpClientFactory, ILogger<AuthController> logger)
-        {
-            _httpClientFactory = httpClientFactory;
-            _configuration = configuration;
-            _addInstagramPostCommandHandler = addInstagramPostCommandHandler;
-            _logger = logger;
-        }
-
         #region Login
         [HttpPost("Login")]
         [AllowAnonymous]

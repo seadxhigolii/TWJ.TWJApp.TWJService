@@ -175,9 +175,6 @@ namespace TWJ.TWJApp.TWJService.Api.Controllers
             return Ok(tokenResponse);
         }
 
-
-
-
         [HttpPost("get-token")]
         public async Task<IActionResult> GetToken([FromBody] string authCode)
         {
