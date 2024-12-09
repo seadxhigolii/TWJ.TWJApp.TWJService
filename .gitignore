@@ -32,7 +32,12 @@ msbuild.wrn
 .vs/
 
 # Appsettings
-*.appsettings*.json
+appsettings.json
+appsettings.Development.json
+appsettings.Staging.json
+
+#ffmpeg
+src/TWJ.TWJApp.TWJService.Api/ffmpeg/
 
 # Ignore publish folder
 /bin/Release/net6.0/publish/
