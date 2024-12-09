@@ -330,8 +330,6 @@ namespace TWJ.TWJApp.TWJService.Application.Services.Video
 
         private async Task LogInfo(string message)
         {
-            // Implement your logging mechanism here
-            // Example:
             await Task.Run(() => Console.WriteLine(message));
         }
 
