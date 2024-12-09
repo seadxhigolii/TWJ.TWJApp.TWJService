@@ -1,15 +1,13 @@
 #!/bin/bash
 
-# Define variables
 SERVER_USER=ec2-user
 SERVER_IP=44.212.18.216
-PEM_FILE="$HOME/.ssh/aws-key.pem"  # Path where the PEM file will be saved from GitHub secrets
+PEM_FILE="$HOME/.ssh/aws-key.pem"
 REMOTE_PATH=/var/www/twjapp
 LOCAL_PUBLISH_PATH="./downloaded-artifacts/publish-folder"
 
 echo "Starting deployment..."
 
-# Ensure the publish directory exists and has files
 if [ ! -d "$LOCAL_PUBLISH_PATH" ]; then
   echo "Error: The publish directory does not exist."
   exit 1
@@ -20,20 +18,15 @@ if [ -z "$(ls -A $LOCAL_PUBLISH_PATH)" ]; then
   exit 1
 fi
 
-# Debugging: List files to be transferred
 echo "Listing files in $LOCAL_PUBLISH_PATH:"
 ls -l $LOCAL_PUBLISH_PATH
 
-# Add the server's SSH key to known_hosts
 ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
 
-# Transfer the files from the publish directory
 scp -i "$PEM_FILE" -r $LOCAL_PUBLISH_PATH/* $SERVER_USER@$SERVER_IP:$REMOTE_PATH/
 
-# Debugging: Verify transfer by listing files on the server
 ssh -i "$PEM_FILE" $SERVER_USER@$SERVER_IP "ls -l $REMOTE_PATH"
 
-# SSH into the server to stop the running process and restart the app
 ssh -i "$PEM_FILE" $SERVER_USER@$SERVER_IP << EOF
    # Find the process ID and kill it
    PID=\$(ps aux | grep 'dotnet TWJ.TWJApp.TWJService.Api.dll' | grep -v grep | awk '{print \$2}')
