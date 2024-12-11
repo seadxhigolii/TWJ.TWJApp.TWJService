@@ -32,9 +32,9 @@ msbuild.wrn
 .vs/
 
 # Appsettings
-appsettings.json
-appsettings.Development.json
-appsettings.Staging.json
+src/TWJ.TWJApp.TWJService.Api/appsettings.json
+src/TWJ.TWJApp.TWJService.Api/appsettings.Development.json
+src/TWJ.TWJApp.TWJService.Api/appsettings.Staging.json
 
 #ffmpeg
 src/TWJ.TWJApp.TWJService.Api/ffmpeg/
